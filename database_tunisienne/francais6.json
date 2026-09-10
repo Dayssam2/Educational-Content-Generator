@@ -1,0 +1,745 @@
+{
+  "niveau": "6ème année de l'enseignement de base - Tunisie",
+  "matiere": "Français",
+  "chapitres": [
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à utiliser les déterminants, les noms et les pronoms personnels",
+      "notions": [
+        "Classer des mots selon leur nature (déterminant, nom commun, nom propre, pronom personnel)",
+        "Utiliser des pronoms personnels pour compléter un dialogue et éviter les répétitions"
+      ],
+      "page": 4
+    },
+    {
+      "type": "Lecture",
+      "titre": "Apprentie comédienne",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte : substituts du nom (reprises pronominales et nominales)",
+        "Relever la chronologie des événements d'un récit (début, suite des événements, fin)"
+      ],
+      "page": 6
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à utiliser des verbes conjugués et des verbes à l'infinitif",
+      "notions": [
+        "Distinguer un verbe conjugué d'un verbe à l'infinitif",
+        "Relier un verbe à l'infinitif à sa forme conjuguée correspondante"
+      ],
+      "page": 7
+    },
+    {
+      "type": "Projet d'écriture",
+      "titre": "J'évite les répétitions dans un récit",
+      "notions": [
+        "Remplacer un nom répété par un pronom ou un groupe nominal équivalent",
+        "Remettre en ordre les étapes d'un récit (début, suite, fin) et le compléter"
+      ],
+      "page": 9
+    },
+    {
+      "type": "Lecture",
+      "titre": "Une parfumeuse en herbe",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte et répondre à des questions de compréhension",
+        "Identifier le métier évoqué dans le texte et les étapes du récit"
+      ],
+      "page": 11
+    },
+    {
+      "type": "Projet d'écriture",
+      "titre": "J'évite les contradictions dans un récit",
+      "notions": [
+        "Repérer et corriger les incohérences (contradictions) dans un texte narratif",
+        "Produire une suite de récit cohérente avec ce qui précède"
+      ],
+      "page": 12
+    },
+    {
+      "type": "Grammaire/Conjugaison",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir les déterminants, les noms et les pronoms personnels",
+        "Réinvestir la distinction entre verbes conjugués et verbes à l'infinitif"
+      ],
+      "page": 14
+    },
+    {
+      "type": "Lecture",
+      "titre": "Témoignages",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte à partir de témoignages sur des métiers"
+      ],
+      "page": 16
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à utiliser l'infinitif après : à, de, par, pour, sans",
+      "notions": [
+        "Reconnaître les prépositions qui sont suivies d'un verbe à l'infinitif",
+        "Ecrire correctement la terminaison des verbes à l'infinitif après ces prépositions"
+      ],
+      "page": 17
+    },
+    {
+      "type": "Dictées",
+      "titre": "Le rêve de Sylvie",
+      "notions": [
+        "Ecrire sous la dictée un texte réinvestissant les acquis du module 1 (déterminants, pronoms, infinitif)"
+      ],
+      "page": 29
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à utiliser les déterminants démonstratifs et possessifs",
+      "notions": [
+        "Identifier les déterminants démonstratifs et possessifs dans une phrase",
+        "Employer le déterminant démonstratif ou possessif adapté au contexte"
+      ],
+      "page": 19
+    },
+    {
+      "type": "Lecture",
+      "titre": "Le vieux robot",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte : relever les mots substituts utilisés par l'auteur"
+      ],
+      "page": 20
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer des verbes à l'impératif",
+      "notions": [
+        "Reconnaître la conjugaison des verbes à l'impératif présent",
+        "Employer l'impératif pour donner un ordre, un conseil ou une consigne"
+      ],
+      "page": 21
+    },
+    {
+      "type": "Lecture",
+      "titre": "Une télé pas comme les autres",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte et rédiger une phrase à partir d'une image"
+      ],
+      "page": 22
+    },
+    {
+      "type": "Grammaire/Conjugaison",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir les déterminants possessifs et démonstratifs dans une notice de fabrication",
+        "Réinvestir la reconnaissance des verbes à l'infinitif"
+      ],
+      "page": 23
+    },
+    {
+      "type": "Lecture",
+      "titre": "Le monde du journalisme",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte autour du thème du journalisme"
+      ],
+      "page": 24
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à écrire a et à",
+      "notions": [
+        "Distinguer le verbe avoir conjugué (a) de la préposition (à)",
+        "Appliquer la règle de substitution par « avait » pour ne pas confondre les homophones"
+      ],
+      "page": 25
+    },
+    {
+      "type": "Lecture-action",
+      "titre": "Confectionner la « Une » d'un journal pour enfants",
+      "notions": [
+        "Lire pour agir : comprendre la structure de la une d'un journal",
+        "Réaliser la maquette de la première page d'un journal pour enfants"
+      ],
+      "page": 27
+    },
+    {
+      "type": "Dictées",
+      "titre": "Un nouveau fonctionnaire",
+      "notions": [
+        "Ecrire sous la dictée un texte réinvestissant les acquis du module 2 (déterminants démonstratifs/possessifs, impératif, homophone a/à)"
+      ],
+      "page": 29
+    },
+    {
+      "type": "Auto-évaluation",
+      "titre": "Fiche d'auto-évaluation n° 1 (modules 1 et 2)",
+      "notions": [
+        "Faire le bilan des textes lus et des poèmes récités des modules 1 et 2",
+        "Evaluer sa maîtrise des déterminants, des pronoms, des verbes conjugués/infinitif et de l'impératif",
+        "Evaluer sa capacité à produire un récit sans répétitions ni contradictions"
+      ],
+      "page": 30
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à utiliser l'adjectif épithète et l'adjectif attribut",
+      "notions": [
+        "Distinguer la fonction épithète de la fonction attribut de l'adjectif qualificatif",
+        "Repérer la place de l'adjectif dans le groupe nominal ou après le verbe d'état"
+      ],
+      "page": 32
+    },
+    {
+      "type": "Lecture",
+      "titre": "Le petit lapin tout blanc",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte narratif et ses personnages"
+      ],
+      "page": 33
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes être et avoir au passé composé et au futur",
+      "notions": [
+        "Conjuguer être et avoir au passé composé",
+        "Conjuguer être et avoir au futur simple"
+      ],
+      "page": 34
+    },
+    {
+      "type": "Projet d'écriture",
+      "titre": "J'intègre un dialogue dans un récit",
+      "notions": [
+        "Compléter un récit par des répliques de dialogue adaptées à la situation",
+        "Respecter la ponctuation du dialogue (tirets, guillemets)"
+      ],
+      "page": 36
+    },
+    {
+      "type": "Lecture",
+      "titre": "Le nouveau costume",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte et sur les sentiments des personnages"
+      ],
+      "page": 37
+    },
+    {
+      "type": "Projet d'écriture",
+      "titre": "J'intègre un passage dialogué dans un récit",
+      "notions": [
+        "Compléter un dialogue inséré dans un récit à partir d'une situation donnée",
+        "Poursuivre un récit en insérant un passage dialogué cohérent"
+      ],
+      "page": 38
+    },
+    {
+      "type": "Grammaire/Conjugaison",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir l'adjectif épithète et attribut",
+        "Réinvestir la conjugaison des verbes être et avoir au passé composé et au futur"
+      ],
+      "page": 39
+    },
+    {
+      "type": "Lecture",
+      "titre": "L'Indien qui ne savait pas courir",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte à partir d'un récit à visée culturelle"
+      ],
+      "page": 40
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à écrire son et sont",
+      "notions": [
+        "Distinguer le déterminant possessif (son) du verbe être conjugué (sont)",
+        "Appliquer un test de substitution pour ne pas confondre ces homophones"
+      ],
+      "page": 41
+    },
+    {
+      "type": "Expression orale",
+      "titre": "J'apprends à me connaître - Test : « Es-tu un bon voisin ? »",
+      "notions": [
+        "S'exprimer oralement sur des situations de voisinage et de vivre-ensemble",
+        "Réfléchir sur son propre comportement à travers un test ludique"
+      ],
+      "page": 43
+    },
+    {
+      "type": "Dictées",
+      "titre": "Le ballon dégonflé",
+      "notions": [
+        "Ecrire sous la dictée un texte réinvestissant les acquis du module 3 (adjectif épithète/attribut, être et avoir, son/sont)"
+      ],
+      "page": 55
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à utiliser la forme négative avec ne ... plus / ne ... jamais",
+      "notions": [
+        "Reconnaître la forme négative construite avec ne...plus et ne...jamais",
+        "Transformer une phrase affirmative en phrase négative avec ces tournures"
+      ],
+      "page": 45
+    },
+    {
+      "type": "Lecture",
+      "titre": "Un bon compagnon",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte autour du thème de l'entraide"
+      ],
+      "page": 46
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes du type finir",
+      "notions": [
+        "Conjuguer les verbes du 2e groupe (type finir) aux temps étudiés",
+        "Reconnaître les terminaisons caractéristiques des verbes du type finir"
+      ],
+      "page": 47
+    },
+    {
+      "type": "Lecture",
+      "titre": "L'écureuil et l'escargot",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte à partir d'un récit mettant en scène des animaux"
+      ],
+      "page": 48
+    },
+    {
+      "type": "Grammaire/Conjugaison",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir la forme négative avec ne...plus/ne...jamais",
+        "Réinvestir la conjugaison des verbes du type finir"
+      ],
+      "page": 49
+    },
+    {
+      "type": "Lecture",
+      "titre": "Le courage d'un jeune apprenti",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte à partir d'un récit valorisant le courage"
+      ],
+      "page": 50
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à écrire et ou est",
+      "notions": [
+        "Distinguer la conjonction de coordination (et) du verbe être conjugué (est)",
+        "Appliquer un test de substitution (et...et lui / il était) pour lever l'ambiguïté"
+      ],
+      "page": 51
+    },
+    {
+      "type": "Expression orale",
+      "titre": "J'apprends à me connaître - Test : « As-tu bon cœur ? »",
+      "notions": [
+        "S'exprimer oralement sur des situations de solidarité et d'entraide",
+        "Justifier oralement ses choix de réponse dans un test de comportement"
+      ],
+      "page": 53
+    },
+    {
+      "type": "Expression orale",
+      "titre": "J'observe et je dis ce que je pense - Collaboration",
+      "notions": [
+        "Observer une bande dessinée illustrant la collaboration",
+        "Exprimer oralement son point de vue sur les images observées"
+      ],
+      "page": 54
+    },
+    {
+      "type": "Dictées",
+      "titre": "Une fille imprudente",
+      "notions": [
+        "Ecrire sous la dictée un texte réinvestissant les acquis du module 4 (négation, verbes du type finir, et/est)"
+      ],
+      "page": 55
+    },
+    {
+      "type": "Auto-évaluation",
+      "titre": "Fiche d'auto-évaluation n° 2 (modules 3 et 4)",
+      "notions": [
+        "Faire le bilan des textes lus et des poèmes récités des modules 3 et 4",
+        "Evaluer sa maîtrise de l'adjectif épithète/attribut, de la négation et des conjugaisons étudiées",
+        "Evaluer sa capacité à intégrer un dialogue ou une description dans un récit"
+      ],
+      "page": 56
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à utiliser les compléments essentiels et non essentiels",
+      "notions": [
+        "Distinguer un complément essentiel (non déplaçable, non supprimable) d'un complément non essentiel",
+        "Manipuler une phrase pour identifier la nature essentielle ou non d'un complément"
+      ],
+      "page": 58
+    },
+    {
+      "type": "Lecture",
+      "titre": "Sauvez Keiko !",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte autour du thème de la protection animale"
+      ],
+      "page": 60
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes du type prendre et mettre au passé composé et au futur",
+      "notions": [
+        "Conjuguer prendre et mettre (et verbes de la même famille) au passé composé",
+        "Conjuguer ces mêmes verbes au futur simple"
+      ],
+      "page": 61
+    },
+    {
+      "type": "Projet d'écriture",
+      "titre": "Je décris un animal",
+      "notions": [
+        "Relever dans un texte les passages qui décrivent un animal",
+        "Produire une description d'un animal en utilisant un vocabulaire précis"
+      ],
+      "page": 62
+    },
+    {
+      "type": "Lecture",
+      "titre": "La ménagère de la mer",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte autour du thème de la protection de la nature"
+      ],
+      "page": 64
+    },
+    {
+      "type": "Grammaire/Conjugaison",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir les compléments essentiels et non essentiels",
+        "Réinvestir la conjugaison des verbes du type prendre et mettre au passé composé et au futur"
+      ],
+      "page": 65
+    },
+    {
+      "type": "Lecture",
+      "titre": "Les parapluies",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte à partir d'un récit à caractère descriptif"
+      ],
+      "page": 66
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à accorder le verbe avec le sujet",
+      "notions": [
+        "Identifier le sujet du verbe, y compris lorsqu'il est éloigné ou inversé",
+        "Accorder correctement le verbe en nombre et en personne avec son sujet"
+      ],
+      "page": 67
+    },
+    {
+      "type": "Expression orale",
+      "titre": "J'apprends à me connaître - Test : « Sais-tu aider les oiseaux ? »",
+      "notions": [
+        "S'exprimer oralement sur des comportements respectueux de la nature et des animaux",
+        "Justifier ses réponses à un test sur la protection des oiseaux"
+      ],
+      "page": 68
+    },
+    {
+      "type": "Dictées",
+      "titre": "Josette et ses deux chiens",
+      "notions": [
+        "Ecrire sous la dictée un texte réinvestissant les acquis du module 5 (compléments essentiels/non essentiels, accord sujet-verbe)"
+      ],
+      "page": 82
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à utiliser le complément de lieu",
+      "notions": [
+        "Identifier le complément circonstanciel de lieu dans une phrase",
+        "Employer des compléments de lieu variés pour situer une action"
+      ],
+      "page": 70
+    },
+    {
+      "type": "Lecture",
+      "titre": "La jeune acrobate",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte autour du thème du sport"
+      ],
+      "page": 71
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes aller et faire au passé composé et au futur",
+      "notions": [
+        "Conjuguer aller au passé composé et au futur simple",
+        "Conjuguer faire au passé composé et au futur simple"
+      ],
+      "page": 72
+    },
+    {
+      "type": "Projet d'écriture",
+      "titre": "J'écris un récit intégrant un passage descriptif et des répliques",
+      "notions": [
+        "Repérer un passage descriptif et des répliques dans un récit modèle",
+        "Produire un récit combinant narration, description et dialogue"
+      ],
+      "page": 74
+    },
+    {
+      "type": "Lecture",
+      "titre": "Des vignettes ... pour un ballon",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte à partir d'un support proche de la bande dessinée"
+      ],
+      "page": 76
+    },
+    {
+      "type": "Grammaire/Conjugaison",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir le complément de lieu",
+        "Réinvestir la conjugaison des verbes aller et faire au passé composé et au futur"
+      ],
+      "page": 77
+    },
+    {
+      "type": "Lecture",
+      "titre": "La lettre de Jean",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte épistolaire (la lettre)"
+      ],
+      "page": 78
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à accorder l'adjectif avec le nom (1)",
+      "notions": [
+        "Accorder l'adjectif qualificatif en genre et en nombre avec le nom qu'il qualifie",
+        "Repérer le nom noyau du groupe nominal pour réaliser l'accord"
+      ],
+      "page": 79
+    },
+    {
+      "type": "Expression orale",
+      "titre": "J'apprends à me connaître - Test : « Manges-tu équilibré ? »",
+      "notions": [
+        "S'exprimer oralement sur ses habitudes alimentaires",
+        "Réfléchir sur l'équilibre alimentaire à travers un test personnel"
+      ],
+      "page": 80
+    },
+    {
+      "type": "Expression orale",
+      "titre": "J'observe et je dis ce que je pense - Boule et Bill",
+      "notions": [
+        "Observer une planche de bande dessinée (Boule et Bill)",
+        "Exprimer oralement sa compréhension et son avis sur la situation représentée"
+      ],
+      "page": 81
+    },
+    {
+      "type": "Dictées",
+      "titre": "Josette et ses deux chiens (suite Module 6)",
+      "notions": [
+        "Ecrire sous la dictée un texte réinvestissant les acquis du module 6 (complément de lieu, aller/faire, accord de l'adjectif)"
+      ],
+      "page": 82
+    },
+    {
+      "type": "Auto-évaluation",
+      "titre": "Fiche d'auto-évaluation n° 3 (modules 5 et 6)",
+      "notions": [
+        "Faire le bilan des textes lus et des poèmes récités des modules 5 et 6",
+        "Evaluer sa maîtrise des compléments essentiels/non essentiels, du complément de lieu et des conjugaisons étudiées",
+        "Evaluer sa capacité à décrire un animal et à produire un récit descriptif et dialogué"
+      ],
+      "page": 83
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à utiliser le complément de temps",
+      "notions": [
+        "Identifier le complément circonstanciel de temps dans une phrase",
+        "Employer des compléments de temps variés pour situer une action dans le temps"
+      ],
+      "page": 85
+    },
+    {
+      "type": "Lecture",
+      "titre": "La lettre de Paul",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte épistolaire et sur la situation de communication"
+      ],
+      "page": 86
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes dire, lire, écrire au passé composé, au futur et à l'impératif",
+      "notions": [
+        "Conjuguer dire, lire et écrire au passé composé",
+        "Conjuguer ces verbes au futur simple et à l'impératif"
+      ],
+      "page": 87
+    },
+    {
+      "type": "Projet d'écriture",
+      "titre": "J'écris une lettre",
+      "notions": [
+        "Repérer les caractéristiques d'une lettre (formule d'appel, corps, formule de politesse, signature)",
+        "Rédiger une lettre respectant ces caractéristiques"
+      ],
+      "page": 88
+    },
+    {
+      "type": "Lecture",
+      "titre": "La lettre de Daniel",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte épistolaire à partir d'une deuxième lettre"
+      ],
+      "page": 90
+    },
+    {
+      "type": "Grammaire/Conjugaison",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir le complément de temps",
+        "Réinvestir la conjugaison des verbes dire, lire, écrire au passé composé, au futur et à l'impératif"
+      ],
+      "page": 91
+    },
+    {
+      "type": "Lecture",
+      "titre": "La lettre de Monsieur Crêpe",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte épistolaire à partir d'une lettre humoristique"
+      ],
+      "page": 92
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à accorder l'adjectif avec le nom (2)",
+      "notions": [
+        "Consolider l'accord de l'adjectif qualificatif en genre et en nombre",
+        "Traiter des cas particuliers d'accord de l'adjectif"
+      ],
+      "page": 93
+    },
+    {
+      "type": "Expression orale",
+      "titre": "J'apprends à me connaître - Test : « Les vacances, c'est quoi pour toi ? »",
+      "notions": [
+        "S'exprimer oralement sur sa conception des vacances et des loisirs",
+        "Justifier ses réponses à un test sur ses préférences personnelles"
+      ],
+      "page": 95
+    },
+    {
+      "type": "Dictées",
+      "titre": "Un joli cadeau",
+      "notions": [
+        "Ecrire sous la dictée un texte réinvestissant les acquis du module 7 (complément de temps, dire/lire/écrire, accord de l'adjectif)"
+      ],
+      "page": 111
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à utiliser le complément de manière",
+      "notions": [
+        "Identifier le complément circonstanciel de manière dans une phrase",
+        "Employer des compléments de manière variés pour préciser une action"
+      ],
+      "page": 97
+    },
+    {
+      "type": "Lecture",
+      "titre": "Le grand voyage",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte autour du thème du voyage et de la découverte"
+      ],
+      "page": 98
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes pouvoir et vouloir au présent",
+      "notions": [
+        "Conjuguer pouvoir au présent de l'indicatif",
+        "Conjuguer vouloir au présent de l'indicatif"
+      ],
+      "page": 99
+    },
+    {
+      "type": "Projet d'écriture",
+      "titre": "J'intègre une description dans un récit",
+      "notions": [
+        "Repérer un passage descriptif inséré dans une lettre ou un récit",
+        "Produire un récit intégrant une description à visée informative"
+      ],
+      "page": 101
+    },
+    {
+      "type": "Lecture",
+      "titre": "Une sortie de classe au Canada",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte à partir du récit d'une sortie scolaire à l'étranger"
+      ],
+      "page": 103
+    },
+    {
+      "type": "Grammaire/Conjugaison",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir le complément de manière",
+        "Réinvestir la conjugaison des verbes pouvoir et vouloir au présent"
+      ],
+      "page": 105
+    },
+    {
+      "type": "Lecture",
+      "titre": "L'île au trésor",
+      "notions": [
+        "Réfléchir sur le fonctionnement du texte à partir d'un extrait de roman d'aventures"
+      ],
+      "page": 106
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à accorder le participe passé",
+      "notions": [
+        "Accorder le participe passé employé avec être",
+        "Reconnaître les cas où le participe passé employé avec avoir ne s'accorde pas avec le sujet"
+      ],
+      "page": 108
+    },
+    {
+      "type": "Lecture-action",
+      "titre": "Je lis pour agir - La Tour Eiffel",
+      "notions": [
+        "Lire pour agir : suivre une fiche technique illustrée",
+        "Réaliser une maquette miniature de la Tour Eiffel à partir des instructions lues"
+      ],
+      "page": 109
+    },
+    {
+      "type": "Dictées",
+      "titre": "Une invitation à Nice",
+      "notions": [
+        "Ecrire sous la dictée un texte réinvestissant les acquis du module 8 (complément de manière, pouvoir/vouloir, participe passé)"
+      ],
+      "page": 111
+    },
+    {
+      "type": "Auto-évaluation",
+      "titre": "Fiche d'auto-évaluation n° 4 (modules 7 et 8)",
+      "notions": [
+        "Faire le bilan des textes lus et des poèmes récités des modules 7 et 8",
+        "Evaluer sa maîtrise du complément de temps/manière et des conjugaisons étudiées",
+        "Evaluer sa capacité à écrire une lettre et à produire un récit intégrant une description"
+      ],
+      "page": 112
+    }
+  ]
+}

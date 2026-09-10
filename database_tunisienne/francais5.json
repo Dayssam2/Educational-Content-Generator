@@ -1,0 +1,576 @@
+{
+  "niveau": "5ème année de l'enseignement de base",
+  "matiere": "Français",
+  "chapitres": [
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à écrire des phrases déclaratives, interrogatives et exclamatives",
+      "notions": [
+        "Reconnaître une phrase déclarative, interrogative et exclamative",
+        "Identifier et utiliser la ponctuation correspondante (point, point d'interrogation, point d'exclamation)",
+        "Classer des phrases selon leur type",
+        "Produire de courts dialogues en respectant le type de phrase"
+      ],
+      "page": 3
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "Une leçon mouvementée",
+      "notions": [
+        "Compréhension globale d'un récit (début, suite, fin)",
+        "Remise en ordre chronologique des événements",
+        "Identification des personnages"
+      ],
+      "page": 5
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Distinguer le début, la suite et la fin d'un récit",
+        "Associer des phrases à la partie du récit correspondante"
+      ],
+      "page": 6
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à reconnaître les trois temps : présent, passé composé et futur",
+      "notions": [
+        "Reconnaissance du présent, du passé composé et du futur",
+        "Association verbe/temps dans une phrase",
+        "Emploi correct du temps selon le contexte"
+      ],
+      "page": 7
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "Le respect des arbres",
+      "notions": [
+        "Compréhension d'un texte informatif/narratif à visée civique (protection de l'environnement)",
+        "Repérage d'informations explicites",
+        "Production de réponses à partir du texte"
+      ],
+      "page": 9
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Remettre des événements dans l'ordre chronologique",
+        "Rédiger le début, la suite et la fin d'un récit"
+      ],
+      "page": 10
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à écrire des mots qui se terminent par é - er - et - ez - es",
+      "notions": [
+        "Distinction des homophonies verbales et nominales en fin de mot (é / er / et / ez / es)",
+        "Complétion de mots selon le contexte grammatical",
+        "Application de la règle dans des phrases dictées"
+      ],
+      "page": 11
+    },
+    {
+      "type": "Évaluation",
+      "titre": "Fiche d'auto-évaluation n°1",
+      "notions": [
+        "Auto-évaluation des acquis du module 1 (grammaire, conjugaison, orthographe, lecture, récitation)"
+      ],
+      "page": 13
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à écrire des phrases affirmatives et des phrases négatives",
+      "notions": [
+        "Reconnaissance de la forme affirmative et de la forme négative",
+        "Emploi des marques de négation (ne...pas, ne...plus, ne...jamais, etc.)",
+        "Transformation d'une phrase affirmative en phrase négative et inversement"
+      ],
+      "page": 14
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "Violetta",
+      "notions": [
+        "Compréhension d'un récit centré sur un personnage",
+        "Repérage des sentiments et des actions des personnages"
+      ],
+      "page": 15
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Compléter un récit à partir d'une situation donnée",
+        "Rédiger une phrase pour raconter une histoire à partir d'un dessin"
+      ],
+      "page": 16
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes « être » et « avoir » au présent et au futur",
+      "notions": [
+        "Conjugaison de « être » et « avoir » au présent de l'indicatif",
+        "Conjugaison de « être » et « avoir » au futur simple",
+        "Emploi de ces auxiliaires dans des phrases"
+      ],
+      "page": 17
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "L'habit d'Arlequin",
+      "notions": [
+        "Compréhension d'un conte/récit",
+        "Repérage des étapes du récit"
+      ],
+      "page": 18
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à écrire des mots avec « g = gu » et « g = j »",
+      "notions": [
+        "Valeurs phonétiques de la lettre g selon la voyelle qui suit",
+        "Classement de mots contenant « gu » et « g = j »",
+        "Application dans des phrases et dictées"
+      ],
+      "page": 19
+    },
+    {
+      "type": "Évaluation",
+      "titre": "Fiche d'auto-évaluation n°2",
+      "notions": [
+        "Auto-évaluation des acquis du module 2"
+      ],
+      "page": 21
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à reconnaître et à utiliser le G.N.S et le G.V. dans des phrases",
+      "notions": [
+        "Identification du Groupe Nominal Sujet (G.N.S.)",
+        "Identification du Groupe Verbal (G.V.)",
+        "Association du G.N.S. au G.V. qui convient dans une phrase"
+      ],
+      "page": 22
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "La collection de Nicolas",
+      "notions": [
+        "Compréhension d'un récit du quotidien",
+        "Repérage d'informations et de personnages"
+      ],
+      "page": 23
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Distinguer le récit du dialogue",
+        "Transformer un passage narratif en dialogue"
+      ],
+      "page": 24
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes en « er » au présent, au passé composé et au futur",
+      "notions": [
+        "Conjugaison régulière des verbes du 1er groupe (en -er)",
+        "Emploi au présent, au passé composé et au futur",
+        "Accord du verbe avec le sujet"
+      ],
+      "page": 25
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "Interdit aux brutes",
+      "notions": [
+        "Compréhension d'un récit portant sur les relations entre enfants",
+        "Repérage chronologique des événements"
+      ],
+      "page": 26
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Associer des phrases au récit ou au dialogue",
+        "Rédiger un dialogue à partir d'une situation"
+      ],
+      "page": 27
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à écrire des noms féminins qui se terminent par « ie », « ue » ou « ée »",
+      "notions": [
+        "Reconnaissance des noms féminins en -ie, -ue, -ée",
+        "Classement et complétion de mots selon la terminaison",
+        "Application dans des phrases"
+      ],
+      "page": 28
+    },
+    {
+      "type": "Évaluation",
+      "titre": "Fiche d'auto-évaluation n°3",
+      "notions": [
+        "Auto-évaluation des acquis du module 3"
+      ],
+      "page": 29
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à accorder le verbe avec son sujet",
+      "notions": [
+        "Règle générale de l'accord sujet-verbe",
+        "Repérage du sujet (nom ou pronom)",
+        "Application de l'accord en nombre et en personne"
+      ],
+      "page": 30
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "Mamie",
+      "notions": [
+        "Compréhension d'un récit à caractère familial",
+        "Repérage des sentiments exprimés"
+      ],
+      "page": 31
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Remettre en ordre les répliques d'un dialogue",
+        "Compléter un dialogue en respectant sa présentation"
+      ],
+      "page": 32
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer des verbes en « ir » comme finir au présent",
+      "notions": [
+        "Conjugaison des verbes du 2e groupe (type finir) au présent",
+        "Reconnaissance de l'infinitif à partir d'une forme conjuguée",
+        "Emploi correct dans des phrases"
+      ],
+      "page": 33
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "L'angine de Riquet",
+      "notions": [
+        "Compréhension d'un récit lié à la santé/maladie",
+        "Repérage des étapes du récit"
+      ],
+      "page": 35
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à accorder le verbe avec son sujet",
+      "notions": [
+        "Application orthographique de l'accord sujet-verbe",
+        "Repérage des sujets multiples ou éloignés du verbe",
+        "Exercices de liaison sujet/verbe"
+      ],
+      "page": 36
+    },
+    {
+      "type": "Évaluation",
+      "titre": "Fiche d'auto-évaluation n°4",
+      "notions": [
+        "Auto-évaluation des acquis du module 4"
+      ],
+      "page": 37
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à reconnaître et à utiliser des déterminants",
+      "notions": [
+        "Identification des déterminants (articles définis, indéfinis, possessifs, démonstratifs)",
+        "Encadrement des déterminants dans une phrase",
+        "Emploi du déterminant adapté au nom"
+      ],
+      "page": 38
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "Quand je serai grand",
+      "notions": [
+        "Compréhension d'un texte évoquant les projets d'avenir",
+        "Repérage d'idées et d'informations explicites"
+      ],
+      "page": 40
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Relever les mots et expressions qui décrivent une personne",
+        "Rédiger un portrait (physique et caractère)"
+      ],
+      "page": 41
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes « aller » et « faire » au présent",
+      "notions": [
+        "Conjugaison irrégulière de « aller » au présent",
+        "Conjugaison irrégulière de « faire » au présent",
+        "Emploi dans des phrases"
+      ],
+      "page": 42
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "On se déguise",
+      "notions": [
+        "Compréhension d'un récit à caractère festif",
+        "Repérage des personnages et de leurs actions"
+      ],
+      "page": 44
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Relever les mots et expressions qui décrivent un animal",
+        "Rédiger la description d'un animal"
+      ],
+      "page": 45
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à écrire des noms au pluriel avec « s » ou « x »",
+      "notions": [
+        "Formation du pluriel régulier en « s »",
+        "Cas particuliers de pluriel en « x »",
+        "Passage du singulier au pluriel et inversement"
+      ],
+      "page": 46
+    },
+    {
+      "type": "Évaluation",
+      "titre": "Fiche d'auto-évaluation n°5",
+      "notions": [
+        "Auto-évaluation des acquis du module 5"
+      ],
+      "page": 47
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à reconnaître et à utiliser l'adjectif qualificatif",
+      "notions": [
+        "Identification de l'adjectif qualificatif dans une phrase",
+        "Relation entre le nom et l'adjectif qualificatif",
+        "Enrichissement d'une phrase par l'ajout d'adjectifs"
+      ],
+      "page": 48
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "Le tour du monde de Dagobert",
+      "notions": [
+        "Compréhension d'un récit d'aventure/voyage",
+        "Repérage des lieux et des événements"
+      ],
+      "page": 49
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Compléter un outil d'aide à la description (physique / actions)",
+        "Rédiger la description d'un animal à partir d'un modèle"
+      ],
+      "page": 50
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes « lire », « écrire » et « dire » au présent",
+      "notions": [
+        "Conjugaison irrégulière de « lire », « écrire » et « dire » au présent",
+        "Distinction des formes conjuguées correctes des formes fautives",
+        "Emploi dans des phrases"
+      ],
+      "page": 51
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "La lettre de Lucie",
+      "notions": [
+        "Compréhension d'un texte de type épistolaire (lettre)",
+        "Repérage de la structure et des informations du texte"
+      ],
+      "page": 53
+    },
+    {
+      "type": "Orthographe",
+      "titre": "J'apprends à accorder l'adjectif qualificatif avec le nom",
+      "notions": [
+        "Accord en genre et en nombre de l'adjectif qualificatif",
+        "Choix de l'adjectif correctement accordé",
+        "Application dans des phrases"
+      ],
+      "page": 54
+    },
+    {
+      "type": "Évaluation",
+      "titre": "Fiche d'auto-évaluation n°6",
+      "notions": [
+        "Auto-évaluation des acquis du module 6"
+      ],
+      "page": 56
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à reconnaître et à utiliser les compléments essentiels",
+      "notions": [
+        "Identification du complément essentiel (COD/COI) du verbe",
+        "Distinction entre complément essentiel et complément non essentiel",
+        "Association verbe-complément dans une phrase"
+      ],
+      "page": 57
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "La marchande de silence",
+      "notions": [
+        "Compréhension d'un conte",
+        "Repérage des personnages et de la trame narrative"
+      ],
+      "page": 59
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Observer un texte narratif contenant un dialogue",
+        "Rédiger un dialogue à partir d'une situation observée"
+      ],
+      "page": 60
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer les verbes « prendre », « apprendre » et « comprendre » au présent et au passé composé",
+      "notions": [
+        "Conjugaison irrégulière de « prendre » et de ses composés au présent",
+        "Conjugaison de ces verbes au passé composé",
+        "Emploi dans des phrases"
+      ],
+      "page": 61
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "L'école en fête",
+      "notions": [
+        "Compréhension d'un récit scolaire/festif",
+        "Repérage d'informations explicites"
+      ],
+      "page": 63
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Compléter un dialogue avec le verbe qui convient",
+        "Rédiger la fin d'un texte"
+      ],
+      "page": 64
+    },
+    {
+      "type": "Orthographe / Révision du vocabulaire",
+      "titre": "Je révise le vocabulaire que j'ai appris",
+      "notions": [
+        "Familles de mots",
+        "Formation de mots dérivés",
+        "Réemploi du vocabulaire des modules précédents"
+      ],
+      "page": 65
+    },
+    {
+      "type": "Lire, Comprendre, Agir",
+      "titre": "Activité de lecture d'image et de production à partir d'une situation illustrée",
+      "notions": [
+        "Observation et interprétation d'une image/situation",
+        "Formulation d'hypothèses et de réponses à partir du support visuel",
+        "Réinvestissement des acquis (grammaire, conjugaison, vocabulaire) en production"
+      ],
+      "page": 67
+    },
+    {
+      "type": "Évaluation",
+      "titre": "Fiche d'auto-évaluation n°7",
+      "notions": [
+        "Auto-évaluation des acquis du module 7",
+        "Récitation de poésie (ex. La bouteille d'encre, Mon théâtre)"
+      ],
+      "page": 75
+    },
+    {
+      "type": "Grammaire",
+      "titre": "J'apprends à reconnaître et à utiliser les compléments de phrase",
+      "notions": [
+        "Identification du complément de phrase (circonstanciel)",
+        "Distinction complément de phrase / complément essentiel",
+        "Déplacement et suppression du complément de phrase dans une phrase"
+      ],
+      "page": 76
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "Paulette est tombée malade",
+      "notions": [
+        "Compréhension d'un récit lié à la santé",
+        "Repérage chronologique des événements"
+      ],
+      "page": 78
+    },
+    {
+      "type": "Mon projet d'écriture",
+      "titre": "Mon projet d'écriture",
+      "notions": [
+        "Compléter un dialogue à partir de bulles de bande dessinée",
+        "Utiliser des verbes de parole variés (demande, répond, s'écrie...)"
+      ],
+      "page": 79
+    },
+    {
+      "type": "Conjugaison",
+      "titre": "J'apprends à conjuguer le verbe « mettre » au présent et au passé composé",
+      "notions": [
+        "Conjugaison irrégulière de « mettre » au présent",
+        "Conjugaison de « mettre » au passé composé",
+        "Emploi dans des phrases"
+      ],
+      "page": 80
+    },
+    {
+      "type": "Lecture / Texte",
+      "titre": "L'ordinateur de Didier",
+      "notions": [
+        "Compréhension d'un récit lié aux technologies",
+        "Repérage d'informations explicites"
+      ],
+      "page": 82
+    },
+    {
+      "type": "Orthographe / Révision du vocabulaire",
+      "titre": "Je révise le vocabulaire (les mots) que j'ai appris",
+      "notions": [
+        "Vocabulaire thématique (lieux, pays et habitants, moyens de transport)",
+        "Réemploi du vocabulaire dans des phrases à compléter",
+        "Bilan lexical de l'année"
+      ],
+      "page": 83
+    },
+    {
+      "type": "Évaluation",
+      "titre": "Fiche d'auto-évaluation n°8",
+      "notions": [
+        "Auto-évaluation finale des acquis du module 8 et bilan de l'année"
+      ],
+      "page": 85
+    }
+  ]
+}

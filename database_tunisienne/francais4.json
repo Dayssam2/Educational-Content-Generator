@@ -1,0 +1,1073 @@
+{
+  "niveau": "4",
+  "matiere": "Français",
+  "chapitres": [
+    {
+      "type": "graphie",
+      "titre": "La graphie s = [z]",
+      "notions": [
+        "Distinguer et écrire le son [z] transcrit par la lettre s, par opposition au son [s].",
+        "Exemples : un lézard, une valise"
+      ],
+      "page": 5
+    },
+    {
+      "type": "grammaire",
+      "titre": "La phrase",
+      "notions": [
+        "Reconnaître une phrase correcte, relier des groupes de mots pour former une phrase, remettre des mots dans l'ordre pour construire une phrase."
+      ],
+      "page": 6
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie k - qu",
+      "notions": [
+        "Reconnaître et écrire le son [k] transcrit par k ou qu.",
+        "Exemples : un kangourou, un masque"
+      ],
+      "page": 7
+    },
+    {
+      "type": "conjugaison",
+      "titre": "Le verbe « être » au présent",
+      "notions": [
+        "Conjuguer le verbe être au présent de l'indicatif (je suis, tu es, il/elle est, nous sommes, vous êtes, ils/elles sont) et l'employer dans des phrases."
+      ],
+      "page": 8,
+      "resume": "Les mots qui changent selon la personne qui parle pour dire son état ou son identité : je suis, tu es, il est, nous sommes."
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Identifier les personnages d'un texte narratif et l'action de chacun ; dégager le personnage principal.",
+        "Référence : Texte « La nouvelle élève » (Manuel p.13)"
+      ],
+      "page": 9
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°1 - Raconter une histoire",
+      "notions": [
+        "Apprendre à raconter une histoire : lire un texte, choisir le titre qui convient, repérer le début du récit et imaginer/écrire la fin à partir d'une image."
+      ],
+      "page": 10
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie g = [j] et g = [g] (gu)",
+      "notions": [
+        "Distinguer les deux valeurs de la lettre g : [j] (ex. pigeon) et [g] devant u (ex. guitare).",
+        "Exemples : un pigeon, une guitare"
+      ],
+      "page": 11
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir la construction de phrases et la conjugaison du verbe être au présent dans des productions personnelles (description d'images, texte à compléter, réponses à des questions pour raconter une mésaventure)."
+      ],
+      "page": 12
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Compléter un tableau pour rendre compte des actions de deux personnages dans un récit.",
+        "Référence : Texte « Les deux amies » (Manuel p.19)"
+      ],
+      "page": 13
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°1 - Raconter une histoire (suite)",
+      "notions": [
+        "Poursuivre l'apprentissage de la narration : lire un texte (Jean l'étourdi) et continuer/compléter le récit."
+      ],
+      "page": 14
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives A, M, N",
+      "notions": [
+        "Apprendre à tracer et écrire les majuscules cursives A, M et N.",
+        "Exemples : A, M, N"
+      ],
+      "page": 15
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie ette - elle - erre - esse",
+      "notions": [
+        "Écrire des mots contenant les graphies ette, elle, erre, esse.",
+        "Exemples : une bicyclette, une hirondelle, une équerre, une princesse"
+      ],
+      "page": 16
+    },
+    {
+      "type": "grammaire",
+      "titre": "Les types et les formes de phrases",
+      "notions": [
+        "Apprendre à employer les types de phrases (déclarative, interrogative, exclamative, impérative) et les formes (affirmative/négative)."
+      ],
+      "page": 17
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie ien - ienne",
+      "notions": [
+        "Écrire des mots contenant les graphies ien / ienne.",
+        "Exemples : un musicien, une pharmacienne"
+      ],
+      "page": 18
+    },
+    {
+      "type": "conjugaison",
+      "titre": "Le verbe « avoir » au présent",
+      "notions": [
+        "Conjuguer le verbe avoir au présent de l'indicatif (j'ai, tu as, il/elle a, nous avons, vous avez, ils/elles ont) et l'employer dans des phrases."
+      ],
+      "page": 19
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Classer les événements d'un récit selon qu'ils appartiennent au début, au milieu ou à la fin de l'histoire.",
+        "Référence : Texte « Jeannot et sa petite sœur Annie (1) » (Manuel p.27)"
+      ],
+      "page": 20
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°1 - Raconter une histoire (suite)",
+      "notions": [
+        "Observer des images et répondre à des questions pour construire progressivement le récit du mini-projet n°1."
+      ],
+      "page": 21
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie ill - eil - ail (et aill, eill)",
+      "notions": [
+        "Écrire des mots contenant les graphies ill, eil, ail (et leurs variantes aill, eill).",
+        "Exemples : une fille, un taille-crayon, un réveil"
+      ],
+      "page": 22
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir les types et formes de phrases dans des réponses personnelles à des questions (formes affirmative/négative)."
+      ],
+      "page": 23
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Remettre les phrases d'un récit dans l'ordre chronologique (numérotation 1 à 5).",
+        "Référence : Texte « Jeannot et sa petite sœur Annie (2) » (Manuel p.33)"
+      ],
+      "page": 24
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives O, Q, C",
+      "notions": [
+        "Apprendre à tracer et écrire les majuscules cursives O, Q et C.",
+        "Exemples : O, Q, C"
+      ],
+      "page": 25
+    },
+    {
+      "type": "auto_evaluation",
+      "titre": "Fiche d'auto-évaluation N°1 — Pour réaliser le 1er mini-projet d'écriture (modules 1 et 2)",
+      "notions": [
+        "Réciter les poèmes des modules 1 et 2",
+        "Écrire des mots contenant les graphies : z / k / g ; ette-elle-erre-esse ; ien-ienne ; ill-eil-ail",
+        "Écrire les majuscules A, M, N, O, Q, C",
+        "Lire les textes : La nouvelle élève, Les deux amies, Jeannot et sa petite sœur (1 et 2)",
+        "Construire des phrases",
+        "Conjuguer au présent les verbes être et avoir",
+        "Écrire sans faute deux autodictées",
+        "Reconnaître dans un récit les personnages, les lieux, le moment",
+        "Organiser les événements dans un récit",
+        "Reconnaître ses droits et ses devoirs à la maison et à l'école",
+        "Parler des fêtes de famille",
+        "Fabriquer la ronde des enfants et une carte amusante",
+        "Employer le vocabulaire en rapport avec les sous-thèmes des modules 1 et 2"
+      ],
+      "page": 26
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie ouil - ouill - euil - euille",
+      "notions": [
+        "Écrire des mots contenant les graphies ouil, ouill, euil, euille.",
+        "Exemples : un écureuil, une feuille, un fenouil, une grenouille"
+      ],
+      "page": 27
+    },
+    {
+      "type": "grammaire",
+      "titre": "Les deux groupes de la phrase (groupe sujet / groupe verbal)",
+      "notions": [
+        "Identifier et employer les deux groupes constitutifs de la phrase : le groupe sujet et le groupe verbal."
+      ],
+      "page": 28,
+      "resume": "Une phrase se découpe toujours en deux blocs : celui qui désigne le personnage ou la chose concernée, et celui qui raconte ce qui se passe."
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie gn",
+      "notions": [
+        "Écrire des mots contenant la graphie gn.",
+        "Exemples : une baignoire, un peignoir"
+      ],
+      "page": 29
+    },
+    {
+      "type": "conjugaison",
+      "titre": "Le verbe « aller » au présent",
+      "notions": [
+        "Conjuguer le verbe aller au présent de l'indicatif (je vais, tu vas, il/elle va, nous allons, vous allez, ils/elles vont) et l'employer dans des phrases."
+      ],
+      "page": 30
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Relier chaque personnage aux paroles qu'il prononce dans un dialogue.",
+        "Référence : Texte « Les lunettes » (Manuel p.42)"
+      ],
+      "page": 31
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°2 - Je fais parler des personnages",
+      "notions": [
+        "Apprendre à insérer et remettre en ordre les paroles d'un personnage dans un récit (dialogue rapporté)."
+      ],
+      "page": 32
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie ph",
+      "notions": [
+        "Écrire des mots où le son [f] s'écrit ph.",
+        "Exemples : un taxiphone, une pharmacie"
+      ],
+      "page": 33
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir la conjugaison du verbe aller au présent dans une production d'étiquettes/phrases."
+      ],
+      "page": 34
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Identifier qui parle dans un dialogue et compléter avec le nom du personnage.",
+        "Référence : Texte « Un petit écureuil » (Manuel p.48)"
+      ],
+      "page": 35
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°2 - Je fais parler des personnages (suite)",
+      "notions": [
+        "Compléter un texte narratif en insérant les paroles des personnages à partir d'indications imagées."
+      ],
+      "page": 36
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives (suite)",
+      "notions": [
+        "Poursuivre l'apprentissage du tracé des majuscules cursives."
+      ],
+      "page": 37
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie x",
+      "notions": [
+        "Écrire des mots contenant la lettre x et reconnaître ses différentes prononciations ([ks], [gz], [s]).",
+        "Exemples : un boxeur, un taxiphone"
+      ],
+      "page": 38
+    },
+    {
+      "type": "grammaire",
+      "titre": "Le nom et le déterminant",
+      "notions": [
+        "Reconnaître et classer les noms selon leur genre/nombre, et les associer à leur déterminant."
+      ],
+      "page": 39
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie oin - ion - tion",
+      "notions": [
+        "Écrire des mots contenant les graphies oin, ion, tion."
+      ],
+      "page": 40
+    },
+    {
+      "type": "conjugaison",
+      "titre": "Les verbes du 1er groupe (en « er ») au présent",
+      "notions": [
+        "Conjuguer au présent de l'indicatif les verbes du premier groupe (terminaison -er) et les employer dans des phrases."
+      ],
+      "page": 41
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Répondre à des questions de compréhension sur les personnages d'une scène.",
+        "Référence : Texte « Les grenouilles » (Manuel p.57)"
+      ],
+      "page": 42
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°2 - Je fais parler des personnages (suite)",
+      "notions": [
+        "Comparer deux versions d'un même texte (avec/sans dialogue rapporté) pour consolider l'insertion des paroles de personnages."
+      ],
+      "page": 43
+    },
+    {
+      "type": "graphie",
+      "titre": "La graphie y",
+      "notions": [
+        "Écrire des mots contenant la lettre y.",
+        "Exemples : un tuyau, un pyjama"
+      ],
+      "page": 44
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir la construction de phrases (avec étiquettes) et l'identification des déterminants."
+      ],
+      "page": 45
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Relier les paroles des personnages aux dessins correspondants.",
+        "Référence : Texte « Le tailleur fou » (Manuel p.63)"
+      ],
+      "page": 46
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives G, K, Y, E, L, D",
+      "notions": [
+        "Apprendre à tracer et écrire les majuscules cursives G, K, Y, E, L, D.",
+        "Exemples : G, K, Y, E, L, D"
+      ],
+      "page": 47
+    },
+    {
+      "type": "auto_evaluation",
+      "titre": "Fiche d'auto-évaluation N°2 — Pour réaliser le 2ème mini-projet d'écriture (modules 3 et 4)",
+      "notions": [
+        "Réciter les poèmes des modules 3 et 4",
+        "Écrire des mots contenant les graphies : euil, ouil ; gn, ph ; x ; oin, ion, tion ; y",
+        "Écrire les majuscules G, K, Y, E, L, D",
+        "Lire les textes : Les lunettes, Un petit écureuil, Les grenouilles, Un tailleur fou",
+        "Reconnaître des paroles dans un texte",
+        "Faire parler un personnage",
+        "Conjuguer au présent le verbe aller et les verbes en er",
+        "Écrire sans faute deux autodictées",
+        "Lire des documents sur : nos amies les bêtes ; les commerçants de mon quartier",
+        "Fabriquer un chien en carton",
+        "Tracer un chemin sur un plan",
+        "Employer le vocabulaire en rapport avec les sous-thèmes : Vive l'école ! / Bienvenue chez les Duval"
+      ],
+      "page": 48
+    },
+    {
+      "type": "grammaire",
+      "titre": "Les déterminants possessifs",
+      "notions": [
+        "Apprendre à employer les déterminants possessifs (mon, ma, mes, ton, ta, tes, son, sa, ses...)."
+      ],
+      "page": 49
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Repérer dans un texte les phrases qui expriment un ordre.",
+        "Référence : Texte « La petite malade » (Manuel p.70)"
+      ],
+      "page": 50
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : c = s = ç",
+      "notions": [
+        "Écrire correctement les mots où le son [s] s'écrit c, s ou ç.",
+        "Exemples : une ordonnance, une leçon, un pharmacien, une balançoire, un médicament, un reçu"
+      ],
+      "page": 51
+    },
+    {
+      "type": "conjugaison",
+      "titre": "Les verbes en « ir » au présent",
+      "notions": [
+        "Conjuguer au présent de l'indicatif les verbes du deuxième groupe (terminaison -ir) et les employer dans des phrases."
+      ],
+      "page": 52
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Relier des éléments d'un récit pour comprendre l'enchaînement des faits (maladie d'un enfant).",
+        "Référence : Texte « La punition » (Manuel p.74)"
+      ],
+      "page": 53
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : m devant m, p, b",
+      "notions": [
+        "Apprendre à écrire correctement m à la place de n devant les lettres m, p, b.",
+        "Exemples : la campagne, une lampe, un dindon, un nombre, une infirmière"
+      ],
+      "page": 54
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°4 - Donner des ordres et des conseils",
+      "notions": [
+        "Apprendre à reformuler un ordre/conseil de deux manières différentes (impératif / « tu dois + infinitif »)."
+      ],
+      "page": 55
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir les notions de la première moitié du module (déterminants, phrase, orthographe) dans une production de phrases à partir d'un récit sur la maladie de Cordélia."
+      ],
+      "page": 56
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Associer chaque étape de préparation d'une tisane au dessin correspondant (texte injonctif/mode d'emploi).",
+        "Référence : Texte « Comment préparer une tisane » (Manuel p.79)"
+      ],
+      "page": 57
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°3 - Présenter un mode d'emploi",
+      "notions": [
+        "Observer des images (objets/étapes) et rédiger un mode d'emploi."
+      ],
+      "page": 58
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives (suite)",
+      "notions": [
+        "Poursuivre l'apprentissage du tracé des majuscules cursives."
+      ],
+      "page": 59
+    },
+    {
+      "type": "grammaire",
+      "titre": "La phrase minimale et la phrase enrichie",
+      "notions": [
+        "Distinguer la phrase minimale (sujet + verbe) de la phrase enrichie (avec compléments), et classer des phrases selon leur type."
+      ],
+      "page": 60
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Distinguer le matériel des ingrédients dans un texte de recette (code couleur).",
+        "Référence : Texte « La galette du Petit Chaperon Rouge » (Manuel p.86)"
+      ],
+      "page": 61
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : L'accord sujet-verbe",
+      "notions": [
+        "Apprendre à écrire correctement en accordant le verbe avec son sujet (singulier/pluriel)."
+      ],
+      "page": 62
+    },
+    {
+      "type": "conjugaison",
+      "titre": "Le verbe « faire » au présent",
+      "notions": [
+        "Conjuguer le verbe faire au présent de l'indicatif (je fais, tu fais, il/elle fait, nous faisons, vous faites, ils/elles font) et l'employer dans des phrases."
+      ],
+      "page": 63
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Compléter un menu (entrée, plat, dessert) à partir d'éléments donnés.",
+        "Référence : Texte « Un repas à l'école » (Manuel p.90)"
+      ],
+      "page": 64
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : L'accord sujet-verbe",
+      "notions": [
+        "Consolider l'accord du verbe avec son sujet dans un texte à compléter."
+      ],
+      "page": 65
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°3 - Écrire une recette",
+      "notions": [
+        "Lire une recette modèle (« Le gâteau aux pommes ») et s'en inspirer pour apprendre à rédiger une recette de cuisine (ingrédients + étapes à l'impératif)."
+      ],
+      "page": 66
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir la conjugaison du verbe faire au présent dans une production de phrases à partir de dessins."
+      ],
+      "page": 67
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Compléter un tableau distinguant les ingrédients du matériel nécessaire à une recette.",
+        "Référence : Texte « La salade de fruits » (Manuel p.94)"
+      ],
+      "page": 68
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives S, L, J, F",
+      "notions": [
+        "Apprendre à tracer et écrire les majuscules cursives S, L, J, F.",
+        "Exemples : S, L, J, F"
+      ],
+      "page": 69
+    },
+    {
+      "type": "auto_evaluation",
+      "titre": "Fiche d'auto-évaluation N°3 — Pour réaliser le 3ème mini-projet d'écriture (modules 5 et 6)",
+      "notions": [
+        "Réciter les poèmes des modules 5 et 6",
+        "Écrire les majuscules S, L, J et F",
+        "Lire les textes : La petite malade, La punition, Comment préparer une tisane, La galette du Petit Chaperon Rouge, Un repas à l'école, La salade de fruits",
+        "Utiliser des déterminants",
+        "Enrichir une phrase",
+        "Conjuguer au présent les verbes en ir et le verbe faire",
+        "Écrire des mots contenant c = s = ç",
+        "Écrire m devant m, b et p",
+        "Accorder le verbe avec le sujet",
+        "Écrire sans fautes deux autodictées",
+        "Savoir comment on grandit",
+        "Appliquer des conseils pour cuisiner",
+        "Appliquer quelques règles d'hygiène",
+        "Préparer du pop-corn",
+        "Donner des ordres, des conseils",
+        "Formuler quelques interdictions",
+        "Écrire quelques recettes de cuisine",
+        "Employer le vocabulaire en rapport avec les sous-thèmes : Un cœur qui bat / Bon appétit"
+      ],
+      "page": 70
+    },
+    {
+      "type": "grammaire",
+      "titre": "L'adjectif qualificatif",
+      "notions": [
+        "Repérer les adjectifs qualificatifs dans une phrase et comprendre leur rôle (caractériser un nom).",
+        "Exemples : un beau livre, une jolie fillette blonde, un vieux cheval maigre"
+      ],
+      "page": 71
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Vérifier des informations vraies/fausses sur un personnage à partir d'un texte descriptif.",
+        "Référence : Texte « Josette et ses poupées » (Manuel p.101)"
+      ],
+      "page": 72
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : L'accord de l'adjectif qualificatif",
+      "notions": [
+        "Apprendre à écrire correctement en accordant l'adjectif qualificatif en genre et en nombre avec le nom."
+      ],
+      "page": 73
+    },
+    {
+      "type": "conjugaison",
+      "titre": "Le verbe « mettre » au présent",
+      "notions": [
+        "Conjuguer le verbe mettre au présent de l'indicatif et l'employer dans des phrases."
+      ],
+      "page": 74
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Repérer les phrases décrivant les vêtements d'un personnage.",
+        "Référence : Texte « Au parc d'attractions » (Manuel p.105)"
+      ],
+      "page": 75
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : L'accord de l'adjectif qualificatif",
+      "notions": [
+        "Consolider l'accord de l'adjectif qualificatif (transformation masculin/féminin)."
+      ],
+      "page": 76
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir la conjugaison (verbe remettre/poser) et l'emploi des adjectifs qualificatifs dans une production de phrases."
+      ],
+      "page": 77
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°4 - Décrire un animal",
+      "notions": [
+        "Lire des textes courts décrivant trois animaux (par leurs caractéristiques physiques) pour apprendre à décrire un animal."
+      ],
+      "page": 78
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Repérer les phrases qui annoncent le début et la suite d'un spectacle.",
+        "Référence : Texte « Sur la piste du cirque » (Manuel p.109)"
+      ],
+      "page": 79
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°4 - Décrire un personnage",
+      "notions": [
+        "Décrire un personnage (Charlot) en plaçant le vocabulaire vestimentaire donné aux bons endroits sur le dessin.",
+        "Exemples : un chapeau noir, une canne, une cravate, une longue veste, un pantalon large, de grosses chaussures"
+      ],
+      "page": 80
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives (suite)",
+      "notions": [
+        "Poursuivre l'apprentissage du tracé des majuscules cursives."
+      ],
+      "page": 81
+    },
+    {
+      "type": "grammaire",
+      "titre": "Le groupe du nom simple et le groupe du nom enrichi",
+      "notions": [
+        "Distinguer le groupe du nom simple du groupe du nom enrichi (nom + expansions)."
+      ],
+      "page": 82
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Répondre par une phrase copiée du texte à une question de compréhension.",
+        "Référence : Texte « Stéphane et la télévision » (Manuel p.116)"
+      ],
+      "page": 83
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : La marque du pluriel (s / x)",
+      "notions": [
+        "Apprendre à écrire correctement le pluriel des noms, en s ou en x selon les cas.",
+        "Exemples : des yeux, des spectateurs, des ordinateurs"
+      ],
+      "page": 84
+    },
+    {
+      "type": "conjugaison",
+      "titre": "Le verbe « prendre » au présent",
+      "notions": [
+        "Conjuguer le verbe prendre au présent de l'indicatif et l'employer dans des phrases."
+      ],
+      "page": 85
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Relier chaque personnage à l'action qu'il fait dans le texte.",
+        "Référence : Texte « La parabole » (Manuel p.120)"
+      ],
+      "page": 86
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : La marque du pluriel (s / x)",
+      "notions": [
+        "Consolider la marque du pluriel des noms en contexte (programme, émission, film)."
+      ],
+      "page": 87
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°4 - Décrire une fête",
+      "notions": [
+        "Compléter un texte décrivant une fête (la fête des mères) en éliminant les intrus, pour apprendre à décrire une fête."
+      ],
+      "page": 88
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir la conjugaison des verbes aller, prendre et être au présent dans un texte à trous décrivant une sortie au cinéma."
+      ],
+      "page": 89
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un texte",
+      "notions": [
+        "Recopier des phrases du texte présentant un personnage.",
+        "Référence : Texte « Questions pour un jeune champion » (Manuel p.124)"
+      ],
+      "page": 90
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives B, P, R, X",
+      "notions": [
+        "Apprendre à tracer et écrire les majuscules cursives B, P, R, X.",
+        "Exemples : B, P, R, X"
+      ],
+      "page": 91
+    },
+    {
+      "type": "auto_evaluation",
+      "titre": "Fiche d'auto-évaluation N°4 — Pour réaliser le 4ème mini-projet d'écriture (modules 7 et 8)",
+      "notions": [
+        "Réciter les poèmes des modules 7 et 8",
+        "Écrire les majuscules B, P, R et X",
+        "Lire les textes : Josette et ses poupées, Au parc d'attractions, Sur la piste du cirque, Stéphane et la télévision, La parabole, Questions pour un jeune champion",
+        "Employer des adjectifs dans des phrases",
+        "Accorder les adjectifs",
+        "Enrichir le groupe nominal",
+        "Conjuguer au présent les verbes mettre et prendre",
+        "Écrire sans faute deux autodictées",
+        "Reconnaître des clowns",
+        "Lire des informations sur la télévision",
+        "Fabriquer un instrument de musique (les maracas) et un téléviseur en carton pour la classe",
+        "Donner et demander des informations",
+        "Décrire une personne, un animal, un jeu, un objet, une fête",
+        "Employer le vocabulaire en rapport avec les sous-thèmes : Amusons-nous ! / Quoi de neuf à la télé ?"
+      ],
+      "page": 92
+    },
+    {
+      "type": "lecture",
+      "titre": "Pinocchio - 1er épisode",
+      "notions": [
+        "Identifier les personnages d'un conte et l'action de chacun.",
+        "Référence : Manuel p.132"
+      ],
+      "page": 93
+    },
+    {
+      "type": "revision",
+      "titre": "Révision : Les types et les formes de phrases",
+      "notions": [
+        "Réviser les types et formes de phrases (notamment la phrase interrogative) en répondant à des questions sur un conte."
+      ],
+      "page": 94
+    },
+    {
+      "type": "lecture",
+      "titre": "Pinocchio - 2ème épisode",
+      "notions": [
+        "Identifier les personnages et leurs actions dans la suite du conte.",
+        "Référence : Manuel p.133"
+      ],
+      "page": 95
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : Le féminin des noms",
+      "notions": [
+        "Apprendre à écrire correctement le féminin des noms (classement masculin/féminin avec déterminant).",
+        "Exemples : Française, cousine, invitée, éléphante"
+      ],
+      "page": 96
+    },
+    {
+      "type": "lecture",
+      "titre": "Pinocchio - 3ème épisode",
+      "notions": [
+        "Suivre les péripéties du conte et relier les personnages à leurs actions.",
+        "Référence : Manuel p.134"
+      ],
+      "page": 97
+    },
+    {
+      "type": "conjugaison",
+      "titre": "Le verbe « partir » au présent",
+      "notions": [
+        "Conjuguer le verbe partir au présent de l'indicatif et transformer des phrases au pluriel."
+      ],
+      "page": 98
+    },
+    {
+      "type": "lecture",
+      "titre": "Pinocchio - 4ème épisode",
+      "notions": [
+        "Relier chaque personnage à l'action qu'il accomplit.",
+        "Référence : Manuel p.135"
+      ],
+      "page": 99
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : Le féminin des noms",
+      "notions": [
+        "Produire des phrases en utilisant correctement le féminin des noms, à partir d'étiquettes."
+      ],
+      "page": 100
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°5 - Raconter une histoire",
+      "notions": [
+        "Identifier les trois grandes parties d'un récit (le début, les aventures, la fin) à partir d'un texte donné dans le désordre."
+      ],
+      "page": 101
+    },
+    {
+      "type": "lecture",
+      "titre": "Pinocchio - 5ème épisode",
+      "notions": [
+        "Numéroter les événements du conte dans l'ordre chronologique.",
+        "Référence : Manuel p.136"
+      ],
+      "page": 102
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir la construction de phrases à partir d'étiquettes autour du conte de la petite poule rouge."
+      ],
+      "page": 103
+    },
+    {
+      "type": "lecture",
+      "titre": "Pinocchio - 6ème épisode",
+      "notions": [
+        "Associer les phrases du texte aux dessins correspondants.",
+        "Référence : Manuel p.137"
+      ],
+      "page": 104
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un conte",
+      "notions": [
+        "Reconstruire l'ensemble du conte Pinocchio (début, péripéties, lieux, fin) après en avoir lu tous les épisodes.",
+        "Référence : Manuel p.132 à 137"
+      ],
+      "page": 105
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°5 - Raconter une histoire (suite)",
+      "notions": [
+        "Lire le début d'une histoire (Ourson) et numéroter les aventures pour poursuivre l'apprentissage de la narration."
+      ],
+      "page": 107
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives (suite)",
+      "notions": [
+        "Poursuivre l'apprentissage du tracé des majuscules cursives."
+      ],
+      "page": 108
+    },
+    {
+      "type": "lecture",
+      "titre": "Le Chat Botté - 1er épisode",
+      "notions": [
+        "Identifier ce que reçoit chacun des trois fils au début du conte.",
+        "Référence : Manuel p.147"
+      ],
+      "page": 109
+    },
+    {
+      "type": "revision",
+      "titre": "Révision : Les déterminants",
+      "notions": [
+        "Réviser l'emploi des déterminants possessifs et articles dans un texte à choix multiple/à compléter."
+      ],
+      "page": 110
+    },
+    {
+      "type": "lecture",
+      "titre": "Le Chat Botté - 2ème épisode",
+      "notions": [
+        "Identifier le nouveau personnage de l'épisode et répondre par vrai/faux à des affirmations.",
+        "Référence : Manuel p.148"
+      ],
+      "page": 111
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : Le féminin des noms",
+      "notions": [
+        "Consolider l'écriture du féminin des noms (choix de déterminant le/la, transformation masculin/féminin)."
+      ],
+      "page": 112
+    },
+    {
+      "type": "lecture",
+      "titre": "Le Chat Botté - 3ème épisode",
+      "notions": [
+        "Identifier le nouveau personnage et distinguer le vrai du faux dans le récit.",
+        "Référence : Manuel p.149"
+      ],
+      "page": 113
+    },
+    {
+      "type": "revision",
+      "titre": "Révision : Les verbes « être », « avoir », « aller » au présent",
+      "notions": [
+        "Réviser la conjugaison au présent des verbes être, avoir et aller dans un dialogue à trous."
+      ],
+      "page": 114
+    },
+    {
+      "type": "lecture",
+      "titre": "Le Chat Botté - 4ème épisode",
+      "notions": [
+        "Comprendre les raisons de la satisfaction d'un personnage.",
+        "Référence : Manuel p.150"
+      ],
+      "page": 115
+    },
+    {
+      "type": "orthographe",
+      "titre": "Orthographe : Le féminin des noms",
+      "notions": [
+        "Produire des phrases utilisant le vocabulaire des métiers au féminin/masculin."
+      ],
+      "page": 116
+    },
+    {
+      "type": "mini_projet_ecriture",
+      "titre": "Mini-projet d'écriture n°5 - Raconter une histoire (suite)",
+      "notions": [
+        "Observer une série de six images et rédiger le début d'un conte à partir de la première image."
+      ],
+      "page": 117
+    },
+    {
+      "type": "lecture",
+      "titre": "Le Chat Botté - 5ème épisode",
+      "notions": [
+        "Identifier le nouveau personnage et localiser où se trouve le chat.",
+        "Référence : Manuel p.151"
+      ],
+      "page": 118
+    },
+    {
+      "type": "integration",
+      "titre": "J'intègre ce que j'ai appris",
+      "notions": [
+        "Réinvestir la conjugaison des verbes aller, avoir et être au présent dans la formation de phrases à partir d'étiquettes."
+      ],
+      "page": 119
+    },
+    {
+      "type": "lecture",
+      "titre": "Le Chat Botté - 6ème épisode",
+      "notions": [
+        "Reconnaître les personnages présents ou absents de l'épisode.",
+        "Référence : Manuel p.152"
+      ],
+      "page": 120
+    },
+    {
+      "type": "lecture_texte",
+      "titre": "Comment se construit un conte",
+      "notions": [
+        "Reconstruire l'ensemble du conte Le Chat Botté (ordre des dessins, résumé en remettant les phrases dans l'ordre) après en avoir lu tous les épisodes.",
+        "Référence : Manuel p.147 à 152"
+      ],
+      "page": 121
+    },
+    {
+      "type": "ecriture_majuscules",
+      "titre": "Majuscules cursives H, T, U, V, Z",
+      "notions": [
+        "Apprendre à tracer et écrire les majuscules cursives H, T, U, V, Z.",
+        "Exemples : H, T, U, V, Z"
+      ],
+      "page": 124
+    },
+    {
+      "type": "auto_evaluation",
+      "titre": "Fiche d'auto-évaluation N°5 — Pour réaliser le 5ème mini-projet d'écriture (modules 9 et 10)",
+      "notions": [
+        "Réciter les poèmes des modules 9 et 10",
+        "Écrire les majuscules H, T et U, V, Z",
+        "Lire les contes « Pinocchio » et « Le Chat Botté »",
+        "Construire des phrases de formes et de types différents",
+        "Employer les déterminants",
+        "Conjuguer au présent les verbes partir et sortir, ainsi que être, avoir et aller",
+        "Écrire le féminin des noms (noms masculins + e ; noms se terminant par ien/ion/on/eur/teur/e)",
+        "Employer le vocabulaire en rapport avec le thème des modules 9 et 10 : « Conte-nous une histoire, dis ! »",
+        "Écrire sans faute deux autodictées",
+        "Lire les deux documents sur la préparation du recueil des cinq mini-projets",
+        "Fabriquer un pantin et un dépliant",
+        "Écrire une histoire et un conte"
+      ],
+      "page": 123
+    }
+  ]
+}

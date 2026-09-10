@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz interactif — Base Tunisienne</title>
+<style>
+  :root{
+    --ink:#1a1f2e;
+    --paper:#f4f6fb;
+    --card:#ffffff;
+    --line:#e3e7f0;
+    --line-soft:#eef1f8;
+    --ok:#1a9d63;
+    --ok-bg:#e8f9f0;
+    --ko:#e0483e;
+    --ko-bg:#fdecea;
+    --accent:#4d5bf9;
+    --accent-dark:#3843d6;
+    --accent-soft:#eef0ff;
+    --muted:#6b7280;
+    --radius-lg:18px;
+    --radius-md:12px;
+    --radius-sm:8px;
+    --shadow-sm:0 1px 2px rgba(16,24,40,.04);
+    --shadow-md:0 8px 24px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 400px at 50% -10%, #eef0ff 0%, transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:48px 24px 96px;}
+
+  header.top{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-sm), var(--shadow-md);
+    padding:28px 32px;
+    margin-bottom:32px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  header.top .eyebrow{
+    display:inline-block;
+    font-size:.72rem;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:4px 10px;
+    border-radius:999px;
+    margin-bottom:10px;
+  }
+  header.top h1{font-size:1.7rem;margin:0 0 6px;letter-spacing:-0.02em;font-weight:800;}
+  header.top p{margin:0;color:var(--muted);font-size:.92rem;}
+  .stamp{font-size:.78rem;color:var(--muted);text-align:right;white-space:nowrap;}
+
+  .scenario{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-sm);
+    margin-bottom:20px;
+    overflow:hidden;
+    transition:box-shadow .15s ease;
+  }
+  .scenario.open{box-shadow:var(--shadow-sm), var(--shadow-md);}
+  .scenario-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:20px 24px;cursor:pointer;user-select:none;
+    transition:background .12s ease;
+  }
+  .scenario-head:hover{background:var(--line-soft);}
+  .scenario-head .titles h2{margin:0 0 4px;font-size:1.12rem;font-weight:700;letter-spacing:-0.01em;}
+  .scenario-head .titles .sub{font-size:.84rem;color:var(--muted);}
+  .badge{
+    font-size:.72rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    padding:5px 12px;border-radius:999px;white-space:nowrap;
+  }
+  .badge.ok{background:var(--ok-bg);color:var(--ok);}
+  .badge.ko{background:var(--ko-bg);color:var(--ko);}
+  .chevron{font-size:.85rem;color:var(--muted);transition:transform .18s ease;margin-inline-start:4px;}
+  .scenario.open .chevron{transform:rotate(90deg);}
+  .scenario-body{display:none;padding:0 24px 26px;}
+  .scenario.open .scenario-body{display:block;}
+
+  .meta-row{
+    display:flex;gap:10px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);
+    padding:16px 0 20px;margin-bottom:6px;border-bottom:1px solid var(--line-soft);
+  }
+  .meta-row span{
+    background:var(--paper);border:1px solid var(--line-soft);
+    padding:5px 12px;border-radius:999px;
+  }
+  .meta-row strong{color:var(--ink);font-weight:600;}
+
+  .errors{
+    background:var(--ko-bg);border-inline-start:3px solid var(--ko);
+    border-radius:var(--radius-sm);
+    padding:14px 16px;margin:16px 0;font-size:.9rem;
+  }
+  .errors ul{margin:6px 0 0;padding-inline-start:18px;}
+
+  .qlist{list-style:none;margin:0;padding:0;counter-reset:q;}
+  .qcard{
+    counter-increment:q;
+    border:1px solid var(--line);
+    border-radius:var(--radius-md);
+    background:var(--card);
+    padding:20px 20px 20px 44px;
+    margin-top:16px;
+    position:relative;
+    transition:border-color .12s ease;
+  }
+  [dir="rtl"] .qcard{padding:20px 44px 20px 20px;}
+  .qcard::before{
+    content:"Q" counter(q);
+    position:absolute;top:20px;inset-inline-start:16px;
+    background:var(--accent-soft);color:var(--accent);
+    font-weight:700;font-size:.72rem;
+    padding:3px 0;width:22px;text-align:center;border-radius:999px;
+  }
+  .qtype{
+    display:inline-block;font-size:.68rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.06em;color:var(--accent);
+    background:var(--accent-soft);padding:3px 9px;border-radius:999px;margin-bottom:10px;
+  }
+  .qtext{font-size:1rem;margin:0 0 14px;font-weight:500;color:var(--ink);}
+
+  .options{list-style:none;margin:0 0 4px;padding:0;display:grid;gap:8px;}
+  .opt-btn{
+    width:100%;text-align:start;padding:11px 14px;background:var(--paper);
+    border:1px solid var(--line);border-radius:var(--radius-sm);font-size:.94rem;
+    font-family:inherit;color:var(--ink);cursor:pointer;transition:all .12s ease;
+  }
+  .opt-btn:hover:not(:disabled){background:var(--accent-soft);border-color:var(--accent);}
+  .opt-btn:disabled{cursor:default;}
+  .opt-btn.correct{background:var(--ok-bg);border-color:var(--ok);font-weight:600;color:var(--ok);}
+  .opt-btn.correct::after{content:" ✓";}
+  .opt-btn.wrong{background:var(--ko-bg);border-color:var(--ko);color:var(--ko);}
+  .opt-btn.wrong::after{content:" ✗";}
+
+  .vf-row{display:flex;gap:10px;margin-bottom:6px;}
+  .vf-btn{
+    flex:1;padding:11px 14px;background:var(--paper);border:1px solid var(--line);
+    border-radius:var(--radius-sm);font-family:inherit;font-size:.94rem;font-weight:600;
+    cursor:pointer;color:var(--ink);transition:all .12s ease;
+  }
+  .vf-btn:hover:not(:disabled){background:var(--accent-soft);border-color:var(--accent);}
+  .vf-btn:disabled{cursor:default;}
+  .vf-btn.correct{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);}
+  .vf-btn.wrong{background:var(--ko-bg);border-color:var(--ko);color:var(--ko);}
+
+  .verify-btn{
+    margin-top:10px;padding:9px 20px;background:var(--accent);color:#fff;
+    border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:.85rem;
+    font-weight:600;cursor:pointer;transition:background .12s ease;
+  }
+  .verify-btn:hover:not(:disabled){background:var(--accent-dark);}
+  .verify-btn:disabled{opacity:.4;cursor:default;}
+
+  .ouverte-box{
+    width:100%;min-height:78px;padding:10px 12px;border:1px solid var(--line);
+    border-radius:var(--radius-sm);font-family:inherit;font-size:.92rem;resize:vertical;margin-bottom:4px;
+  }
+  .ouverte-box:focus{outline:none;border-color:var(--accent);}
+  .ouverte-box:disabled{background:var(--paper);}
+
+  .explication, .reponse-attendue, .correction-container{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px dashed var(--line);
+    font-size:.88rem;
+    color:var(--muted);
+    display:none;
+  }
+  .explication.visible, .reponse-attendue.visible, .correction-container.visible{
+    display:block;
+  }
+  .explication strong, .reponse-attendue strong, .correction-container strong{
+    color:var(--ink);
+  }
+  .correction-container.correct{border-top-color:var(--ok);}
+  .correction-container.wrong{border-top-color:var(--ko);}
+  .correction-container .correct-answer{color:var(--ok);font-weight:700;}
+  .correction-container .wrong-answer{color:var(--ko);font-weight:700;}
+
+  [dir="rtl"]{text-align:right;}
+  footer{text-align:center;font-size:.82rem;color:var(--muted);margin-top:40px;}
+
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-thumb{background:#c7cee0;border-radius:999px;}
+
+  @media (max-width:600px){
+    .wrap{padding:28px 16px 72px;}
+    header.top{flex-direction:column;align-items:flex-start;padding:22px 20px;}
+    .stamp{text-align:left;}
+    .qcard{padding:18px 16px 18px 40px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <span class="eyebrow">Base Tunisienne</span>
+      <h1>Quiz interactif — 18 quiz disponibles</h1>
+      <p>Réponds d'abord, puis vérifie ta correction pour chaque question.</p>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </header>
+  <div id="scenarios"></div>
+  <footer>Clique sur un scénario pour ouvrir l'examen, réponds aux questions puis vérifie tes réponses.</footer>
+</div>
+
+<script>
+const DATA = [
+  {
+    "scenario": 1,
+    "matiere": "arabe",
+    "niveau": "1",
+    "lecon": "ARABE 1 - Apprentissage lettres",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "arabe",
+      "niveau": "1",
+      "chapitre": "ARABE 1 - Apprentissage lettres",
+      "lecon": "ARABE 1 - Apprentissage lettres",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "أَيْنَ يَقَعُ حَرْفُ الْبَاءِ فِي كَلِمَةِ «بَقَرَةٌ»؟",
+          "explication": "يَقَعُ حَرْفُ الْبَاءِ فِي أَوَّلِ كَلِمَةِ «بَقَرَةٌ» وَيُكْتَبُ (بـ).",
+          "options": [
+            "أ) فِي بِدَايَةِ الْكَلِمَةِ",
+            "ب) فِي وَسَطِ الْكَلِمَةِ",
+            "ج) فِي نِهَايَةِ الْكَلِمَةِ مُتَّصِلاً",
+            "د) فِي نِهَايَةِ الْكَلِمَةِ مُنْفَصِلاً"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "حَرْفُ الْبَاءِ فِي كَلِمَةِ «مَكْتَبٌ» يَأْتِي فِي وَسَطِ الْكَلِمَةِ.",
+          "explication": "خَطَأٌ، حَرْفُ الْبَاءِ فِي كَلِمَةِ «مَكْتَبٌ» يَأْتِي فِي نِهَايَةِ الْكَلِمَةِ مُتَّصِلاً (ـبٌ).",
+          "reponse_correcte": true
+        },
+        {
+          "type": "qcm",
+          "question": "أَيُّ كَلِمَةٍ مِنَ الْكَلِمَاتِ التَّالِيَةِ حَرْفُ الْبَاءِ فِيهَا فِي وَسَطِ الْكَلِمَةِ؟",
+          "explication": "فِي كَلِمَةِ «حَبْلٌ»، يَأْتِي حَرْفُ الْبَاءِ فِي وَسَطِ الْكَلِمَةِ مُتَّصِلاً بِمَا قَبْلَهُ وَبِمَا بَعْدَهُ (ـبـ).",
+          "options": [
+            "أ) بَيْتٌ",
+            "ب) حَبْلٌ",
+            "ج) كِتَابٌ",
+            "د) بَابٌ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "qcm",
+          "question": "مَا هُوَ الشَّكْلُ الصَّحِيحُ لِحَرْفِ الْبَاءِ فِي بِدَايَةِ الْكَلِمَةِ؟",
+          "explication": "يُكْتَبُ حَرْفُ الْبَاءِ فِي بِدَايَةِ الْكَلِمَةِ مَفْتُوحاً لِيَتَّصِلَ بِالْحَرْفِ الَّذِي بَعْدَهُ (بـ).",
+          "options": [
+            "أ) ـبـ",
+            "ب) ـب",
+            "ج) بـ",
+            "د) ب"
+          ],
+          "reponse_correcte": 2
+        },
+        {
+          "type": "ouverte",
+          "question": "أَكْمِلْ كَلِمَةَ «عِنَـ...» بِحَرْفِ الْبَاءِ فِي مَوْضِعِهِ الصَّحِيحِ لِتَصْبَحَ كَلِمَةً كَامِلَةً.",
+          "explication": "تُكْتَبُ الْبَاءُ فِي نِهَايَةِ كَلِمَةِ «عِنَبٌ» مُتَّصِلَةً بِالْحَرْفِ الَّذِي قَبْلَهَا (ـبٌ).",
+          "reponse_correcte": "ـبٌ"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 2,
+    "matiere": "arabe",
+    "niveau": "1",
+    "lecon": "ARABE 1 - Apprentissage lettres",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "arabe",
+      "niveau": "1",
+      "chapitre": "ARABE 1 - Apprentissage lettres",
+      "lecon": "ARABE 1 - Apprentissage lettres",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "أَيْنَ يَقَعُ حَرْفُ الْبَاءِ فِي كَلِمَةِ \"بَيْتٌ\"؟",
+          "explication": "يَبْدَأُ اسْمُ \"بَيْتٌ\" بِحَرْفِ الْبَاءِ فِي أَوَّلِ الْكَلِمَةِ (بـ).",
+          "options": [
+            "أ) فِي بِدَايَةِ الْكَلِمَةِ",
+            "ب) فِي وَسَطِ الْكَلِمَةِ",
+            "ج) فِي نِهَايَةِ الْكَلِمَةِ (مُتَّصِل)",
+            "د) فِي نِهَايَةِ الْكَلِمَةِ (مُنْفَصِل)"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "فِي كَلِمَةِ \"كِتَابٌ\"، يَقَعُ حَرْفُ الْبَاءِ فِي بِدَايَةِ الْكَلِمَةِ.",
+          "explication": "خَطَأ، يَقَعُ حَرْفُ الْبَاءِ فِي نِهَايَةِ كَلِمَةِ \"كِتَابٌ\" مُنْفَصِلاً (بٌ).",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "أَيُّ كَلِمَةٍ مِنَ الْكَلِمَاتِ التَّالِيَةِ تَحْتَوِي عَلَى حَرْفِ الْبَاءِ (ب)؟",
+          "explication": "كَلِمَةُ \"مَكْتَبٌ\" تَحْتَوِي عَلَى حَرْفِ الْبَاءِ فِي آخِرِ الْكَلِمَةِ (ـبٌ).",
+          "options": [
+            "أ) قَلَمٌ",
+            "ب) جَمَلٌ",
+            "ج) مَكْتَبٌ",
+            "د) شَمْسٌ"
+          ],
+          "reponse_correcte": 2
+        },
+        {
+          "type": "vrai_faux",
+          "question": "الشَّكْلُ \"ـبـ\" يُمَثِّلُ حَرْفَ الْبَاءِ فِي وَسَطِ الْكَلِمَةِ.",
+          "explication": "صَحِيحٌ، الشَّكْلُ \"ـبـ\" يَتَّصِلُ بِمَا قَبْلَهُ وَبِمَا بَعْدَهُ فِي وَسَطِ الْكَلِمَةِ.",
+          "reponse_correcte": true
+        },
+        {
+          "type": "ouverte",
+          "question": "اُكْتُبْ كَلِمَةً بَسِيطَةً تَبْدَأُ بِحَرْفِ الْبَاءِ (بـ).",
+          "explication": "أَيُّ كَلِمَةٍ تَبْدَأُ بِحَرْفِ الْبَاءِ تُعْتَبَرُ إِجَابَةً صَحِيحَةً، مِثْلُ: بَابٌ، بَيْتٌ، بَقَرَةٌ.",
+          "reponse_correcte": "بَابٌ (أَوْ بَيْتٌ / بَقَرَةٌ)"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 3,
+    "matiere": "arabe",
+    "niveau": "1",
+    "lecon": "ARABE 1 - Apprentissage lettres",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "arabe",
+      "niveau": "1",
+      "chapitre": "ARABE 1 - Apprentissage lettres",
+      "lecon": "ARABE 1 - Apprentissage lettres",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "مَا هُوَ الشَّكْلُ الصَّحِيحُ لِحَرْفِ الْبَاءِ فِي بِدَايَةِ الْكَلِمَةِ؟",
+          "explication": "يُكْتَبُ حَرْفُ الْبَاءِ فِي بِدَايَةِ الْكَلِمَةِ هَكَذَا (بـ) لِيَتَّصِلَ بِالْحَرْفِ الَّذِي يَلِيهِ.",
+          "options": [
+            "أ) بـ",
+            "ب) ـبـ",
+            "ج) ـب",
+            "د) ب"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "حَرْفُ الْبَاءِ فِي كَلِمَةِ «كِتَابٌ» يَأْتِي فِي بِدَايَةِ الْكَلِمَةِ.",
+          "explication": "خطأ، حَرْفُ الْبَاءِ فِي كَلِمَةِ «كِتَابٌ» يَأْتِي فِي آخِرِ الْكَلِمَةِ مُنْفَصِلًا.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "أَيُّ كَلِمَةٍ مِنَ الْكَلِمَاتِ التَّالِيَةِ تَحْتَوِي عَلَى حَرْفِ الْبَاءِ فِي الْوَسَطِ (ـبـ)؟",
+          "explication": "فِي كَلِمَةِ «مَكْتَبَةٌ»، يَأْتِي حَرْفُ الْبَاءِ فِي الْوَسَطِ مُتَّصِلًا بِمَا قَبْلَهُ وَبِمَا بَعْدَهُ (ـبـ).",
+          "options": [
+            "أ) بَقَرَةٌ",
+            "ب) مَكْتَبَةٌ",
+            "ج) كِتَابٌ",
+            "د) بَابٌ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "ouverte",
+          "question": "أَكْمِلِ الْكَلِمَةَ التَّالِيَةَ بِكِتَابَةِ حَرْفِ الْبَاءِ فِي شَكْلِهِ الْمُنَاسِبِ فِي أَوَّلِ الْكَلِمَةِ: «...ـَيْتٌ»",
+          "explication": "الْكَلِمَةُ هِيَ «بَيْتٌ»، وَيُكْتَبُ حَرْفُ الْبَاءِ فِي أَوَّلِهَا هَكَذَا (بـ).",
+          "reponse_correcte": "بـ"
+        },
+        {
+          "type": "ouverte",
+          "question": "اُكْتُبْ كَلِمَةً وَاحِدَةً تَبْدَأُ بِحَرْفِ الْبَاءِ.",
+          "explication": "أَيُّ كَلِمَةٍ صَحِيحَةٍ تَبْدَأُ بِحَرْفِ الْبَاءِ تُعْتَبَرُ إِجَابَةً صَحِيحَةً.",
+          "reponse_correcte": "بَابٌ (أَوْ بَيْتٌ، بَقَرَةٌ، بُرْتُقَالٌ...)"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 4,
+    "matiere": "arabe",
+    "niveau": "1",
+    "lecon": "ARABE 1 - Lecture textes",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "arabe",
+      "niveau": "1",
+      "chapitre": "ARABE 1 - Lecture textes",
+      "lecon": "ARABE 1 - Lecture textes",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "أَيْنَ تَتَنَقَّلُ الْفَرَاشَةُ فِي الصَّبَاحِ الْجَمِيلِ؟",
+          "explication": "تَتَنَقَّلُ الفَرَاشَةُ بَيْنَ الأَزْهَارِ المُلَوَّنَةِ لِتَلْعَبَ وَتَسْتَمْتِعَ بِبَهَاءِ الطَّبِيعَةِ.",
+          "options": [
+            "أ) بَيْنَ الأَزْهَارِ المُلَوَّنَةِ",
+            "ب) دَاخِلَ خَلِيَّةِ النَّحْلِ",
+            "ج) تَحْتَ الأَرْضِ فِي الجُحْرِ",
+            "د) فَوْقَ الأَغْصَانِ الجَافَةِ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "قَالَتِ النَّحْلَةُ لِلْفَرَاشَةِ: \"أَنَا أَعْمَلُ بِجِدٍّ لِأَجْمَعَ الرَّحِيقَ وَأَصْنَعَ العَسَلَ\".",
+          "explication": "النَّحْلَةُ تَعْمَلُ دَائِمًا بِجِدٍّ وَنَشَاطٍ لِجَمْعِ الرَّحِيقِ وَصُنْعِ العَسَلِ.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "مَنْ هِيَ الشَّخْصِيَّةُ الَّتِي تَصْنَعُ العَسَلَ اللَّذِيذَ فِي القِصَّةِ؟",
+          "explication": "النَّحْلَةُ هِيَ الَّتِي تَجْمَعُ الرَّحِيقَ وَتَصْنَعُ العَسَلَ.",
+          "options": [
+            "أ) الفَرَاشَةُ",
+            "ب) النَّحْلَةُ",
+            "ج) النَّمْلَةُ",
+            "د) السُّلَحْفَاةُ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "الْفَرَاشَةُ هِيَ الَّتِي تَعِيشُ دَاخِلَ الْخَلِيَّةِ وَتَقُومُ بِبِنَائِهَا.",
+          "explication": "النَّحْلَةُ هِيَ الَّتِي تَعِيشُ فِي الخَلِيَّةِ وَتَبْنِيهَا، أَمَّا الفَرَاشَةُ فَتَطِيرُ بَيْنَ الأَزْهَارِ.",
+          "reponse_correcte": true
+        },
+        {
+          "type": "ouverte",
+          "question": "مَاذَا تَنْصَحُ الْفَرَاشَةَ الَّتِي تَقْضِي كُلَّ وَقْتِهَا فِي اللَّعِبِ دُونَ عَمَلٍ؟",
+          "explication": "يَجِبُ التَّوْفِيقُ بَيْنَ اللَّعِبِ وَالاجْتِهَادِ فِي الْعَمَلِ لِتَكُونَ مُفِيدَةً كَالنَّحْلَةِ.",
+          "reponse_correcte": "أَنْصَحُهَا بِأَنْ تَعْمَلَ وَتَجْتَهِدَ مِثْلَ النَّحْلَةِ وَلاَ تُضَيِّعَ كُلَّ وَقْتِهَا فِي اللَّعِبِ."
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 5,
+    "matiere": "arabe",
+    "niveau": "1",
+    "lecon": "ARABE 1 - Révision lettres",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "arabe",
+      "niveau": "1",
+      "chapitre": "ARABE 1 - Révision lettres",
+      "lecon": "ARABE 1 - Révision lettres",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "أَيُّ كَلِمَةٍ مِنَ الْكَلِمَاتِ التَّالِيَةِ تَبْدَأُ بِحَرْفِ «الْبَاءِ» (ب)؟",
+          "explication": "كَلِمَةُ «بَابٌ» تَبْدَأُ بِحَرْفِ الْبَاءِ (بَـ).",
+          "options": [
+            "أ) بَابٌ",
+            "ب) لَهَبٌ",
+            "ج) مَلِكٌ",
+            "د) رَسَمَ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "كَلِمَةُ «تِمْسَاحٌ» تَحْتَوِي عَلَى حَرْفِ «التَّاءِ» (ت). هَلْ هَذِهِ الْعِبَارَةُ صَحِيحَةٌ أَمْ خَاطِئَةٌ؟",
+          "explication": "صَحِيحٌ، كَلِمَةُ «تِمْسَاحٌ» تَبْدَأُ بِحَرْفِ التَّاءِ (تِـ).",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "مَا هُوَ الْحَرْفُ الأَوَّلُ فِي كَلِمَةِ «قَمَرٌ»؟",
+          "explication": "تَبْدَأُ كَلِمَةُ «قَمَرٌ» بِحَرْفِ الْقَافِ (قَـ).",
+          "options": [
+            "أ) حَرْفُ الْقَافِ (ق)",
+            "ب) حَرْفُ الْكَاَفِ (ك)",
+            "ج) حَرْفُ الْفَاءِ (ف)",
+            "د) حَرْفُ النُّونِ (ن)"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "qcm",
+          "question": "اخْتَرِ الْكَلِمَةَ الَّتِي فِي آخِرِهَا حَرْفُ «النُّونِ» (ن):",
+          "explication": "كَلِمَةُ «سَكَنَ» تَنْتَهِي بِحَرْفِ النُّونِ (ن).",
+          "options": [
+            "أ) سَكَنَ",
+            "ب) كَتَبَ",
+            "ج) حَمَلَ",
+            "د) رَسَمَ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "ouverte",
+          "question": "أَكْمِلِ الْكَلِمَةَ بِالْحَرْفِ النَّاقِصِ لِتَحْصُلَ عَلَى كَلِمَةِ «سَمَكَةٌ»: سَـ ___ َكَةٌ",
+          "explication": "الْحَرْفُ النَّاقِصُ هُوَ حَرْفُ الْمِيمِ (م) لِتُصْبِحَ الْكَلِمَةُ «سَمَكَةٌ».",
+          "reponse_correcte": "م"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 6,
+    "matiere": "arabe",
+    "niveau": "1",
+    "lecon": "ARABE 1 - Recherche générale lettres",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "arabe",
+      "niveau": "1",
+      "chapitre": "ARABE 1 - Recherche générale lettres",
+      "lecon": "ARABE 1 - Recherche générale lettres",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "مَا هُوَ الحَرْفُ النَّاقِصُ لِتَكْمِيلِ كَلِمَةِ «قَـ...ـمٌ»؟",
+          "explication": "الحَرْفُ المُنَاسِبُ لِإِتْمَامِ كَلِمَةِ «قَلَمٌ» هُوَ حَرْفُ اللَّامِ (لَـ).",
+          "options": [
+            "أ) لَـ",
+            "ب) بَـ",
+            "ج) رَ",
+            "د) حَـ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "تَبْدَأُ كَلِمَةُ «بَابٌ» بِحَرْفِ البَاءِ (ب).",
+          "explication": "نَعَمْ، كَلِمَةُ «بَابٌ» تَبْدَأُ بِحَرْفِ البَاءِ (ب).",
+          "reponse_correcte": true
+        },
+        {
+          "type": "qcm",
+          "question": "أَيُّ كَلِمَةٍ مِنَ الكَلِمَاتِ التَّالِيَةِ تَحْتَوِي عَلَى حَرْفِ «الرَّاءِ» (ر)؟",
+          "explication": "كَلِمَةُ «رَسَمَ» تَبْدَأُ بِحَرْفِ الرَّاءِ (ر).",
+          "options": [
+            "أ) كِتَابٌ",
+            "ب) رَسَمَ",
+            "ج) قَلَمٌ",
+            "د) بَيْتٌ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "تَنْتَهِي كَلِمَةُ «تُفَّاحٌ» بِحَرْفِ «الحَاءِ» (ح).",
+          "explication": "صَحِيحٌ، كَلِمَةُ «تُفَّاحٌ» تَنْتَهِي بِحَرْفِ الحَاءِ (ح).",
+          "reponse_correcte": true
+        },
+        {
+          "type": "ouverte",
+          "question": "رَتِّبِ الحُرُوفَ التَّالِيَةَ لِتَكْوِينِ كَلِمَةٍ صَحِيحَةٍ: (حَ - فَ - رِ)",
+          "explication": "عِنْدَ تَرْتِيبِ الحُرُوفِ نَحْصُلُ عَلَى كَلِمَةِ «فَرِحَ».",
+          "reponse_correcte": "فَرِحَ"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 7,
+    "matiere": "arabe",
+    "niveau": "2",
+    "lecon": "ARABE 2 - Vivre ensemble",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "arabe",
+      "niveau": "2",
+      "chapitre": "ARABE 2 - Vivre ensemble",
+      "lecon": "ARABE 2 - Vivre ensemble",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "مَاذَا يَقُومُ بِهِ التِّلْمِيذُ الصَّالِحُ عِنْدَ الدُّخُولِ إِلَى قَاعَةِ الدَّرْسِ؟",
+          "explication": "إِقْرَاءُ السَّلاَمِ وَتَحِيَّةُ الْمُعَلِّمِ وَالزُّمَلاَءِ مِنْ آدَابِ السُّلُوكِ المَدْرَسِيِّ الصَّحِيحِ.",
+          "options": [
+            "أ) يُحَيِّي مُعَلِّمَهُ وَزُمَلاَءَهُ بِاحْتِرَامٍ",
+            "ب) يَدْخُلُ مُسْرِعًا وَيَصْرُخُ بصَوْتٍ عَالٍ",
+            "ج) يَلْعَبُ بِأَدَوَاتِ صَدِيقِهِ دُونَ إِذْنٍ",
+            "د) يَجْلِسُ عَلَى الطَّاوِلَةِ وَيَأْكُلُ طَعَامَهُ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "مِنْ وَاجِبِي المَوَاطَنِيِّ أَنْ أُحَافِظَ عَلَى نَظَافَةِ سَاحَةِ المَدْرَسَةِ وَلاَ أَرْمِيَ الفَضَلاَتِ عَلَى الأَرْضِ.",
+          "explication": "الحِفَاظُ عَلَى نَظَافَةِ المَحِيطِ المَدْرَسِيِّ يَعْكِسُ حُبَّ الوَطَنِ وَحُسْنَ المَوَاطَنَةِ.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "مَا المَعْنَى المُنَاسِبُ لِكَلِمَةِ «التَّعَايُشِ» بَيْنَ التَّلاَمِيذِ فِي المَدْرَسَةِ؟",
+          "explication": "التَّعَايُشُ يَعْنِي المَشَارَكَةَ وَالاحْتِرَامَ المُتَبَادَلَ وَالِاحْتِوَاءَ بَيْنَ الجَمِيعِ.",
+          "options": [
+            "أ) اللَّعِبُ بمُفْرَدِي وَعَدَمُ الكَلاَمِ مَعَ الآخَرِينَ",
+            "ب) العَيْشُ مَعًا فِي المَدْرَسَةِ بِمَحَبَّةٍ وَاحْتِرَامٍ",
+            "ج) الشِّجَارُ مَعَ الأَصْدِقَاءِ عِنْدَ الخَطَأِ",
+            "د) أَخْذُ أَدَوَاتِ الآخَرِينَ بالقُوَّةِ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "احْتِرَامُ الرَّأْيِ الآخَرِ يَعْنِي أَنْ أَقْطَعَ كَلاَمَ صَدِيقِي عِنْدَمَا يَتَحَدَّثُ.",
+          "explication": "مِنْ آدَابِ السُّلُوكِ وَاحْتِرَامِ الآخَرِينَ الِاسْتِمَاعُ إِلَيْهِمْ وَعَدَمُ قَطْعِ كَلاَمِهِمْ.",
+          "reponse_correcte": true
+        },
+        {
+          "type": "ouverte",
+          "question": "اذْكُرْ عَمَلاً وَاحِدًا تَقُومُ بِهِ داخِلَ المَدْرَسَةِ يُعَبِّرُ عَنْ حُبِّكَ لِوَطَنِكَ.",
+          "explication": "أَيُّ سُلُوكٍ إِيجَابِيٍّ يَدُلُّ عَلَى الِاحْتِرَامِ أَوِ الحِفَاطِ عَلَى المَكْسَبِ المَدْرَسِيِّ وَتَحِيَّةِ العَلَمِ يُعْتَبَرُ إِجَابَةً صَحِيحَةً.",
+          "reponse_correcte": "تحية العلم التونسي بنشاط / الحفاظ على أثاث الفصل ونظافة المدرسة / احترام المعلمين والزملاء."
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 8,
+    "matiere": "arabe",
+    "niveau": "2",
+    "lecon": "ARABE 2 - Projets",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "arabe",
+      "niveau": "2",
+      "chapitre": "ARABE 2 - Projets",
+      "lecon": "ARABE 2 - Projets",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "أَرَادَ أَمِينٌ وَأَصْدِقَاؤُهُ غَرْسَ شُجَيْرَاتٍ فِي حَدِيقَةِ المَدْرَسَةِ. مَا هِيَ الخَطْوَةُ الأُولَى لِنَجَاحِ هَذَا المَشْرُوعِ؟",
+          "explication": "التَّخْطِيطُ وَتَقْسِيمُ العَمَلِ بَيْنَ الأَصْدِقَاءِ هُوَ الخَطْوَةُ الأُولَى والأَسَاسِيَّةُ لِنَجَاحِ أَيِّ مَشْرُوعٍ.",
+          "options": [
+            "أ) التَّخْطِيطُ وَتَوْزِيعُ الأَدْوَارِ بَيْنَهُمْ",
+            "ب) البُكِاءُ وَالانْتِظَارُ حَتَّى يَفْعَلَ المُعَلِّمُ كُلَّ شَيْءٍ",
+            "ج) اللَّعِبُ بِالكُرَةِ فِي الحَدِيقَةِ",
+            "د) شِرَاءُ الأَلْعَابِ بَدَلًا مِنَ الشُّجَيْرَاتِ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "العِنَايَةُ بِالأَشْجَارِ وَالأَلْعَابِ فِي المَدْرَسَةِ هِيَ مَسْؤُولِيَّةُ المُمَرِّضِ وَحْدَهُ.",
+          "explication": "حِمَايَةُ المُمْتَلَكَاتِ المُشْتَرَكَةِ كَالأَشْجَارِ وَالأَلْعَابِ هِيَ مَسْؤُولِيَّةُ جَمِيعِ التَّلَامِيذِ وَالمُعَلِّمِينَ.",
+          "reponse_correcte": true
+        },
+        {
+          "type": "qcm",
+          "question": "مَا مَعْنَى كَلِمَةِ \"المُثَابَرَةُ\" فِي قَوْلِنَا: \"يَعْمَلُ أَمِينٌ بِمُثَابَرَةٍ لِيُنْجِحَ مَشْرُوعَهُ\"؟",
+          "explication": "المُثَابَرَةُ تَعْنِي العَمَلَ بِاجْتِهَادٍ وَمَوَاظَبَةٍ دُونَ اسْتِسْلَامٍ.",
+          "options": [
+            "أ) الكَسَلُ وَالتَّأَخُّرُ",
+            "ب) المَواظَبَةُ وَالاجْتِهَادُ المُسْتَمِرُّ",
+            "ج) التَّسَرُّعُ وَالغَضَبُ",
+            "د) اللَّعِبُ وَالتَّسْلِيَةُ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "qcm",
+          "question": "اخْتَرِ الكَلِمَةَ المُنَاسِبَةَ لِتَكْمِلَةِ الجُمْلَةِ: \"أَعْتَمِدُ عَلَى .......... فِي إِ نْجَازِ وَاجِبَاتِي وَتَنْظِيمِ أَدَوَاتِي.\"",
+          "explication": "الاعْتِمَادُ عَلَى النَّفْسِ مِنَ القِيَمِ الهَامَّةِ لِبَنَاءِ شَخْصِيَّةٍ مَسْؤُولَةٍ وَمُبَادِرَةٍ.",
+          "options": [
+            "أ) نَفْسِي",
+            "ب) إِهْمَالِي",
+            "ج) غَيْرِي",
+            "د) كَسَلِي"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "ouverte",
+          "question": "اُذْكُرْ عَمَلًا وَاحِدًا يُمْكِنُكَ القِيَامُ بِهِ مَعَ زُمَلَائِكَ لِتَجْمِيلِ قَاعَةِ الدَّرْسِ.",
+          "explication": "المُبَادَرَةُ فِي تَجْمِيلِ القَاعَةِ تَعْكِسُ رُوحَ التَّعَاوُنِ وَالحِفَاظِ عَلَى المَكَانِ المُشْتَرَكِ.",
+          "reponse_correcte": "نُصَمِّمُ مَجَلَّةً حَائِطِيَّةً / نُنَظِّمُ المَكْتَبَةَ / نُزَيِّنُ الجُدْرَانَ بِرُسُومَاتٍ جَمِيلَةٍ"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 9,
+    "matiere": "arabe",
+    "niveau": "2",
+    "lecon": "ARABE 2 - Santé",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "arabe",
+      "niveau": "2",
+      "chapitre": "ARABE 2 - Santé",
+      "lecon": "ARABE 2 - Santé",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "لِمَاذَا يَزُورُ الطِّفْلُ الطَّبِيبَ لِلْفَحْصِ الدَّوْرِيِّ؟",
+          "explication": "الْفَحْصُ الطِّبِّيُ الدَّوْرِيُ يُسَاعِدُ عَلَى الاِطْمِئْنَانِ عَلَى الصِّحَّةِ وَالْوِقَايَةِ مِنَ الأَمْرَاضِ قَبْلَ ظُهُورِهَا.",
+          "options": [
+            "أ) لِلإِطْمِئْنَانِ عَلَى صِحَّتِهِ وَالْوِقَايَةِ مِنَ الأَمْرَاضِ",
+            "ب) لِلَّعِبِ فِي قَاعَةِ الِانْتِظَارِ",
+            "ج) لِشِرَاءِ الأَدْوِيَةِ دُونَ حَاجَةٍ",
+            "د) لِقَضَاءِ الْوَقْتِ مَعَ الأَصْدِقَاءِ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "غَسْلُ الْيَدَيْنِ بِالْمَاءِ وَالصَّابُونِ قَبْلَ الأَكْلِ يَقِي الْجِسْمَ مِنَ الْجَرَاثِيمِ.",
+          "explication": "النَّظَافَةُ وَغَسْلُ الْيَدَيْنِ يَقِيَانِ مِنَ الْجَرَاثِيمِ وَالأَمْرَاضِ.",
+          "reponse_correcte": true
+        },
+        {
+          "type": "qcm",
+          "question": "أَيٌّ مِنَ الأَطْعِمَةِ التَّالِيَةِ يُعْتَبَرُ مِنْ التَّغْذِيَةِ السَّلِيمَةِ لِلْجِسْمِ؟",
+          "explication": "الْخُضْرَاوَاتُ وَالْفَوَاكِهُ غَنِيَّةٌ بِالْوِيتَامِينَاتِ وَتُعَدُّ غِذَاءً سَلِيماً وَمُفِيداً لِلْجِسْمِ.",
+          "options": [
+            "أ) الْحَلَوِيَّاتُ وَالمَشْرُوبَاتُ الْغَازِيَّةُ",
+            "ب) الْخُضْرَاوَاتُ وَالْفَوَاكِهُ الطَّازَجَةُ",
+            "ج) الْمَأْكُولَاتُ السَّرِيعَةُ وَالْمَقْلِيَّةُ",
+            "د) السَّكَاكِرُ وَالْمَلَابِسُ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "السَّهَرُ لِوَقْتٍ مُتَأَخِّرٍ مِنَ اللَّيْلِ يُسَاعِدُ عَلَى النُّمُوِّ السَّلِيمِ لِلْجِسْمِ.",
+          "explication": "النَّوْمُ المَبَكِّرُ وَالْكَافِي هُوَ الَّذِي يُسَاعِدُ الْجِسْمَ عَلَى النُّمُوِّ وَالنَّشَاطِ.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "ouverte",
+          "question": "اُذْكُرْ عَمَلاً وَاحِداً يَقُومُ بِهِ الطَّبِيبُ أَثْنَاءَ الْفَحْصِ الطِّبِّيِّ.",
+          "explication": "يَقُومُ الطَّبِيبُ بِأَعْمَالٍ مُتَعَدِّدَةٍ مِثْلِ قِيَاسِ دَقَّاتِ الْقَلْبِ أَوْ قِيَاسِ الْحَرَارَةِ أَوْ فَحْصِ الْحَلْقِ لِلإِطْمِئْنَانِ عَلَى صِحَّةِ الْمَرِيضِ.",
+          "reponse_correcte": "يَقِيسُ دَقَّاتِ الْقَلْبِ (أَوْ يَقِيسُ الدَّرَجَةَ الْحَرَارِيَّةَ / يَفْحَصُ الْحَلْقَ وَالأُذُنَيْنِ)"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 10,
+    "matiere": "mathematique",
+    "niveau": "1",
+    "lecon": "MATH 1 - Positions",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "mathematique",
+      "niveau": "1",
+      "chapitre": "MATH 1 - Positions",
+      "lecon": "MATH 1 - Positions",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "يَقِفُ أَمِينٌ أَمَامَ الشَّجَرَةِ. أَيْنَ تُوجَدُ الشَّجَرَةُ بِالنِّسْبَةِ لِأَمِينٍ؟",
+          "explication": "إِذَا كَانَ أَمِينٌ أَمَامَ الشَّجَرَةِ، فَإِنَّ الشَّجَرَةَ تُوجَدُ وَرَاءَ أَمِينٍ.",
+          "options": [
+            "أ) أَمَامَ أَمِينٍ",
+            "ب) وَرَاءَ أَمِينٍ",
+            "ج) بَجَانِبِ أَمِينٍ",
+            "د) فَوْقَ أَمِينٍ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "qcm",
+          "question": "تَكُونُ السَّبُّورَةُ فِي الفَصْلِ مُوَاجِهَةً لِلتَّلَامِيذِ، إِذَنْ تَكُونُ السَّبُّورَةُ ..... التَّلَامِيذِ.",
+          "explication": "تُوجَدُ السَّبُّورَةُ فِي الجِهَةِ الَّتِي يَنْظُرُ إِلَيْهَا التَّلَامِيذُ، أيْ أَمَامَهُمْ.",
+          "options": [
+            "أ) وَرَاءَ",
+            "ب) أَمَامَ",
+            "ج) تَحْتَ",
+            "د) فَوْقَ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "عِنْدَمَا تَسِيرُ السَّيَّارَةُ وَتَتْبَعُهَا الدَّرَّاجَةُ، تَكُونُ السَّيَّارَةُ وَرَاءَ الدَّرَّاجَةِ.",
+          "explication": "خَطَأ، السَّيَّارَةُ تَسِيرُ فِي المَقَدِّمَةِ إِذَنْ هِيَ أَمَامَ الدَّرَّاجَةِ، وَالدَّرَّاجَةُ وَرَاءَهَا.",
+          "reponse_correcte": true
+        },
+        {
+          "type": "vrai_faux",
+          "question": "يَجْلِسُ سَامِي فِي المَقْعَدِ الأَوَّلِ وَيَجْلِسُ كَرِيمٌ فِي المَقْعَدِ الثَّانِي خَلْفَهُ. إِذَنْ سَامِي يَجْلِسُ أَمَامَ كَرِيمٍ.",
+          "explication": "صَوَاب، بِمَا أَنَّ سَامِي فِي المَقْعَدِ الأَوَّلِ وَكَرِيمٌ وَرَاءَهُ، فَإِنَّ سَامِي يَجْلِسُ أَمَامَ كَرِيمٍ.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "ouverte",
+          "question": "فِي قَطَارِ الِلَّعْبِ، يَسِيرُ المَحَرِّكُ فِي المَقَدِّمَةِ وَتَتْبَعُهُ العَرَبَةُ. حَدِّدْ مَوْقِعَ العَرَبَةِ بِالنِّسْبَةِ لِلْمَحَرِّكِ (أَمَامَ أمْ وَرَاءَ)؟",
+          "explication": "العَرَبَةُ تَأْتِي بَعْدَ المَحَرِّكِ وتَتْبَعُهُ، إِذَنْ هِيَ تُوجَدُ وَرَاءَ المَحَرِّكِ.",
+          "reponse_correcte": "وَرَاءَ"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 11,
+    "matiere": "mathematique",
+    "niveau": "1",
+    "lecon": "MATH 1 - Ensembles",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "mathematique",
+      "niveau": "1",
+      "chapitre": "MATH 1 - Ensembles",
+      "lecon": "MATH 1 - Ensembles",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "مَا هُوَ الْعُنْصُرُ الَّذِي يُمْكِنُ إِضَافَتُهُ إِلَى مَجْمُوعَةِ الْفَوَاكِهِ الَّتِي تَحْتَوِي عَلَى (تُفَّاحَةٍ وَمَوْزَةٍ)؟",
+          "explication": "الإجاصة هي فاكهة، لذلك تنتمي إلى مجموعة الفواكه مع التفاحة والموزة.",
+          "options": [
+            "أ) كُرَةٌ",
+            "ب) إِجَّاصَةٌ",
+            "ج) قَلَمٌ",
+            "د) سَيَّارَةٌ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "المَجْمُوعَةُ الْفَارِغَةُ هِيَ مَجْمُوعَةٌ لاَ تَحْتَوِي عَلَى أَيِّ عُنْصُرٍ.",
+          "explication": "تعريف المجموعة الفارغة في الرياضيات هي المجموعة التي لا يوجد بها أي عنصر.",
+          "reponse_correcte": true
+        },
+        {
+          "type": "qcm",
+          "question": "أَيٌّ مِنَ المَجْمُوعَاتِ التَّالِيَةِ تُعْتَبَرُ مَجْمُوعَةً فَارِغَةً؟",
+          "explication": "الأسماك تعيش في الماء ولا تطير في الهواء، لذا لا يوجد أي عنصر في هذه المجموعة فتكون مجموعة فارغة.",
+          "options": [
+            "أ) مَجْمُوعَةٌ فِيهَا ثَلاَثَةُ أَقْلاَمٍ",
+            "ب) مَجْمُوعَةُ الأَسْمَاكِ الَّتِي تَطِيرُ فِي الهَوَاءِ",
+            "ج) مَجْمُوعَةُ الطُّيُورِ الَّتِي تَطِيرُ فِي السَّمَاءِ",
+            "د) مَجْمُوعَةٌ فِيهَا كُرَةٌ وَاحِدَةٌ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "ouverte",
+          "question": "كَمْ عَدَدُ الْعَنَاصِرِ المَوْجُودَةِ فِي المَجْمُوعَةِ الْفَارِغَةِ؟",
+          "explication": "المجموعة الفارغة خالية تماماً، وبالتالي فإن عدد عناصرها هو صفر.",
+          "reponse_correcte": "0 (صفر)"
+        },
+        {
+          "type": "ouverte",
+          "question": "إِذَا كُوِّنَتْ مَجْمُوعَةٌ لِلأَدَوَاتِ المَدْرَسِيَّةِ، فَهَلْ يُمْكِنُ وَضْعُ (تُفَّاحَةٍ) دَاخِلَهَا؟ وَلِمَاذَا؟",
+          "explication": "تجمع عناصر المجموعة الواحدة صفة مشتركة، والتفاحة تنتمي لمجموعة الفواكه وليس الأدوات المدرسية.",
+          "reponse_correcte": "لا، لأن التفاحة من الفواكه وليست من الأدوات المدرسية."
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 12,
+    "matiere": "mathematique",
+    "niveau": "1",
+    "lecon": "MATH 1 - Nombres 0-9",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "mathematique",
+      "niveau": "1",
+      "chapitre": "MATH 1 - Nombres 0-9",
+      "lecon": "MATH 1 - Nombres 0-9",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "كَيْفَ نَكْتُبُ الْعَدَدَ \"أَرْبَعَةٌ\" بِالأَرْقَامِ؟",
+          "explication": "الْكِتَابَةُ بِالأَرْقَامِ لِلْعَدَدِ \"أَرْبَعَةٌ\" هِيَ 4.",
+          "options": [
+            "أ) 2",
+            "ب) 4",
+            "ج) 5",
+            "د) 3"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "الْمُقَارَنَةُ التَّالِيَةُ صَحِيحَةٌ: 8 > 5",
+          "explication": "الْعَدَدُ 8 أَكْبَرُ مِنْ الْعَدَدِ 5، لِذَلِك العِبَارَةُ صَوَابٌ.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "مَا هُوَ نَاتِجُ جَمْعِ الْعَدَدَيْنِ: 3 + 5 ؟",
+          "explication": "عِنْدَ جَمْعِ 3 وَ 5 نَحْصُلُ عَلَى 8 (3 + 5 = 8).",
+          "options": [
+            "أ) 7",
+            "ب) 8",
+            "ج) 9",
+            "د) 6"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "الْمُسَاوَاةُ التَّالِيَةُ صَحِيحَةٌ: 2 + 4 = 7",
+          "explication": "مَجْمُوعُ 2 وَ 4 هُوَ 6 وَلَيْسَ 7، لِذَلِكَ العِبَارَةُ خَاطِئَةٌ.",
+          "reponse_correcte": true
+        },
+        {
+          "type": "ouverte",
+          "question": "عِنْدَ مَرْيَمَ 4 أَقْلاَمٍ، وَأَهْدَتْهَا أُمُّهَا 2 قَلَمَيْنِ آخَرَيْنِ. اكْتُبْ عَمَلِيَّةَ الْجَمْعِ المُنَاسِبَةَ وَاحْسُبْ مَجْمُوعَ الأَقْلاَمِ.",
+          "explication": "نَحْسُبُ مَجْمُوعَ الأَقْلاَمِ بِكِتَابَةِ عَمَلِيَّةِ الْجَمْعِ: 4 + 2 = 6 أَقْلاَمٍ.",
+          "reponse_correcte": "4 + 2 = 6"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 13,
+    "matiere": "mathematique",
+    "niveau": "1",
+    "lecon": "MATH 1 - Addition",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "mathematique",
+      "niveau": "1",
+      "chapitre": "MATH 1 - Addition",
+      "lecon": "MATH 1 - Addition",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "كَانَ مَعَ سَامِي 4 كُرَاتٍ، ثُمَّ أَعْطَاهُ صَدِيقُهُ 3 كُرَاتٍ أُخْرَى. كَمْ كُرَةً أَصْبَحَتْ مَعَ سَامِي؟",
+          "explication": "نَقُومُ بِبَحْثِ الْمَجْمُوعِ: 4 + 3 = 7 كُرَاتٍ.",
+          "options": [
+            "أ) 5 كُرَاتٍ",
+            "ب) 6 كُرَاتٍ",
+            "ج) 7 كُرَاتٍ",
+            "د) 8 كُرَاتٍ"
+          ],
+          "reponse_correcte": 2
+        },
+        {
+          "type": "vrai_faux",
+          "question": "هَلِ الْعِبَارَةُ التَّالِيَةُ صَحِيحَةٌ أَمْ خَاطِئَةٌ؟ «مَجْمُوعُ 5 وَ 4 هُوَ 9»",
+          "explication": "نَجْمَعُ الْعَدَدَيْنِ: 5 + 4 = 9، إِذَنْ الْعِبَارَةُ صَحِيحَةٌ.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "مَا هِيَ الْكِتَابَةُ الرَّقَمِيَّةُ الصَّحِيحَةُ لِـ «مَجْمُوعِ 2 وَ 6»؟",
+          "explication": "عِنْدَ جَمْعِ 2 وَ 6 نَحْصُلُ عَلَى 8، فَتَكُونُ الْكِتَابَةُ الْمُنَاسِبَةُ هِيَ: 2 + 6 = 8.",
+          "options": [
+            "أ) 2 + 6 = 8",
+            "ب) 2 + 6 = 9",
+            "ج) 2 + 5 = 7",
+            "د) 6 + 3 = 9"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "ouverte",
+          "question": "جَمَعَتْ مَرْيَمُ فِي السَّلَّةِ 2 زَهَرَاتٍ حَمْرَاءَ وَ 3 زَهَرَاتٍ صَفْرَاءَ وَ 1 زَهْرَةً بَيْضَاءَ. أُكْتُبْ عَمَلِيَّةَ الْجَمْعِ وَاحْسُبْ مَجْمُوعَ الزَّهَرَاتِ.",
+          "explication": "نَجْمَعُ الأَعْدَادَ الثَّلاَثَةَ: 2 + 3 = 5، ثُمَّ 5 + 1 = 6 زَهَرَاتٍ.",
+          "reponse_correcte": "2 + 3 + 1 = 6"
+        },
+        {
+          "type": "vrai_faux",
+          "question": "هَلِ الْعِبَارَةُ التَّالِيَةُ صَحِيحَةٌ أَمْ خَاطِئَةٌ؟ «3 + 3 + 2 = 7»",
+          "explication": "نَحْسُبُ الْمَجْمُوعَ: 3 + 3 = 6، ثُمَّ 6 + 2 = 8. إِذَنْ النَّتِيجَةُ 7 خَاطِئَةٌ.",
+          "reponse_correcte": true
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 14,
+    "matiere": "mathematique",
+    "niveau": "1",
+    "lecon": "MATH 1 - Recherche générale nombres",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "mathematique",
+      "niveau": "1",
+      "chapitre": "MATH 1 - Recherche générale nombres",
+      "lecon": "MATH 1 - Recherche générale nombres",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "مَا هُوَ العَدَدُ اللاحِقُ مُبَاشَرَةً لِلْعَدَدِ 6؟",
+          "explication": "العدد اللاحق للعدد 6 هو العدد الذي يأتي بعده مباشرة، وهو العدد 7.",
+          "options": [
+            "أ) 5",
+            "ب) 7",
+            "ج) 8",
+            "د) 4"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "الكِتَابَةُ بِالحُرُوفِ لِلْعَدَدِ 9 هِيَ \"سَبْعَةٌ\".",
+          "explication": "عبارة خاطئة، لأن الكتابة بالحروف للعدد 9 هي \"تِسْعَةٌ\".",
+          "reponse_correcte": true
+        },
+        {
+          "type": "qcm",
+          "question": "مَا هُوَ العَدَدُ الَّذِي يُمَثِّلُ الكِتَابَةَ بِالحُرُوفِ \"أَرْبَعَةٌ\"؟",
+          "explication": "الكلمة \"أَرْبَعَةٌ\" تُطَابِقُ الرَّقْمَ 4.",
+          "options": [
+            "أ) 2",
+            "ب) 4",
+            "ج) 5",
+            "د) 8"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "ouverte",
+          "question": "اكْتُبِ العَدَدَ السَّابِقَ مُبَاشَرَةً لِلْعَدَدِ 8.",
+          "explication": "العدد السابق مباشرة للعدد 8 هو العدد 7.",
+          "reponse_correcte": "7"
+        },
+        {
+          "type": "ouverte",
+          "question": "مَعَ أَحْمَدَ 5 كُرَاتٍ، أَرَادَ أَنْ يَصِيرَ لَدَيْهِ 9 كُرَاتٍ. كَمْ كُرَةً يَلْزَمُهُ أَنْ يُضِيفَ؟",
+          "explication": "يلزمه إضافة 4 كرات ليصبح المجموع 9 كرات (5 + 4 = 9).",
+          "reponse_correcte": "4"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 15,
+    "matiere": "mathematique",
+    "niveau": "2",
+    "lecon": "MATH 2 - Ensembles avancés",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "mathematique",
+      "niveau": "2",
+      "chapitre": "MATH 2 - Ensembles avancés",
+      "lecon": "MATH 2 - Ensembles avancés",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "لَدَيْنَا مَجْمُوعَةٌ تَحْتَوِي عَلَى 8 فَوَاكِهَ (4 تُفَّاحَاتٍ حَمْرَاء، 2 تُفَّاحَاتٍ خَضْرَاء، 2 مَوْزَاتٍ). مَا هُوَ عَدَدُ عَنَاصِرِ المَجْمُوعَةِ الجُزْئِيَّةِ لِلْتُفَّاحِ الأَحْمَرِ؟",
+          "explication": "المجموعة الجزئية المحددة بخاصية 'التفاح الأحمر' تحتوي على 4 عناصر فقط.",
+          "options": [
+            "أ) 4 عَنَاصِرَ",
+            "ب) 2 عَنَاصِرَ",
+            "ج) 6 عَنَاصِرَ",
+            "د) 8 عَنَاصِرَ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "عِنْدَ اتِّحَادِ مَجْمُوعَتَيْنِ لاَ تَحْتَوِيَانِ عَلَى عَنَاصِرَ مُشْتَرَكَةٍ، فَإِنَّ عَدَدَ عَنَاصِرِ المَجْمُوعَةِ الجَدِيدَةِ يُسَاوِي مَجْمُوعَ عَنَاصِرِ المَجْمُوعَتَيْنِ.",
+          "explication": "صواب، لأن اتحاد مجموعتين لا تشتركان في عناصر يجمع كل عناصر المجموعتين معاً.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "فِي مَجْمُوعَةِ أَدَوَاتٍ مَدْرَسِيَّةٍ تُوجَدُ 10 عَنَاصِرَ. إِذَا كَانَتِ المَجْمُوعَةُ الجُزْئِيَّةُ لِلأَقْلاَمِ تَحْتَوِي عَلَى 6 عَنَاصِرَ، فَمَا هُوَ عَدَدُ عَنَاصِرِ مُمَتِّمِ مَجْمُوعَةِ الأَقْلاَمِ فِي هَذِهِ المَجْمُوعَةِ؟",
+          "explication": "متمم مجموعة الأقلام هو بقية العناصر في المجموعة الكلية: 10 - 6 = 4 عناصر.",
+          "options": [
+            "أ) 10 عَنَاصِرَ",
+            "ب) 6 عَنَاصِرَ",
+            "ج) 4 عَنَاصِرَ",
+            "د) 16 عُنْصُراً"
+          ],
+          "reponse_correcte": 2
+        },
+        {
+          "type": "qcm",
+          "question": "مَجْمُوعَةٌ كُلِّيَّةٌ فِيهَا 9 حَيَوَانَاتٍ (4 أَرَانِبَ، 3 خِرَافٍ، وَ2 بَقَرَاتٍ). مَا هِيَ الخَاصِّيَّةُ المُنَاسِبَةُ لِتَكْوِينِ مَجْمُوعَةٍ جُزْئِيَّةٍ فِيهَا 3 عَنَاصِرَ؟",
+          "explication": "خاصية 'الخراف' تعطينا مجموعة جزئية تحتوي على 3 عناصر.",
+          "options": [
+            "أ) الأَرَانِبُ",
+            "ب) الخِرَافُ",
+            "ج) البَقَرَاتُ",
+            "د) الحَيَوَانَاتُ كُلُّهَا"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "ouverte",
+          "question": "مَجْمُوعَةٌ (أ) فِيهَا 5 زُهُورٍ حَمْرَاءَ، وَمَجْمُوعَةٌ (ب) فِيهَا 3 زُهُورٍ صَفْرَاءَ. احْسُبْ عَدَدَ عَنَاصِرِ المَجْمُوعَةِ الحَاصِلَةِ عَنْ اتِّحَادِ المَجْمُوعَتَيْنِ (أ) وَ (ب).",
+          "explication": "اتحاد المجموعتين يعني جمع عناصر المجموعة الأولى مع عناصر المجموعة الثانية: 5 + 3 = 8 زهور.",
+          "reponse_correcte": "8 زهور (5 + 3 = 8)"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 16,
+    "matiere": "mathematique",
+    "niveau": "2",
+    "lecon": "MATH 2 - Addition avec retenue",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "mathematique",
+      "niveau": "2",
+      "chapitre": "MATH 2 - Addition avec retenue",
+      "lecon": "MATH 2 - Addition avec retenue",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "أَبْحَثُ عَنْ نَتِيجَةِ عَمَلِيَّةِ الْجَمْعِ التَّالِيَةِ: 86 + 47 =",
+          "explication": "نَجْمَعُ الآحَادَ: 6 + 7 = 13 (نَكْتُبُ 3 فِي مَنْزِلَةِ الآحَادِ وَنَحْتَفِظُ بـ 1 فِي مَنْزِلَةِ العَشَرَاتِ). ثُمَّ نَجْمَعُ العَشَرَاتِ: 8 + 4 + 1 = 13. النَّتِيجَةُ هِيَ 133.",
+          "options": [
+            "أ) 123",
+            "ب) 133",
+            "ج) 124",
+            "د) 130"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "عِنْدَمَا أَجْمَعُ العَدَدَيْنِ 54 وَ 38، فَإِنَّنِي أَحْتَاجُ إِلَى نَقْلِ الٱحْتِفَاظِ مِنْ مَنْزِلَةِ الْآحَادِ إِلَى مَنْزِلَةِ الْعَشَرَاتِ.",
+          "explication": "صَوَابٌ، لِأَنَّ مَجْمُوعَ الآحَادِ (4 + 8 = 12) أَكْبَرُ مِنْ 9، مِمَّا يَتَطَلَّبُ احْتِفَاظًا يُنْقَلُ إِلَى مَنْزِلَةِ العَشَرَاتِ.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "اشْتَرَى أَمِينٌ كِتَابًا بِـ 75 مِلِيمًا وَكُرَّاسًا بِـ 68 مِلِيمًا. المَبْلَغُ الْجُمْلِيُّ الَّذِي دَفَعَهُ أَمِينٌ هُوَ:",
+          "explication": "نَجْمَعُ ثَمَنَ الكِتَابِ وَثَمَنَ الكُرَّاسِ: 75 + 68 = 143 مِلِيمًا (5 + 8 = 13؛ نَكْتُبُ 3 وَنَحْتَفِظُ بـ 1، ثُمَّ 7 + 6 + 1 = 14).",
+          "options": [
+            "أ) 133 مِلِيمًا",
+            "ب) 143 مِلِيمًا",
+            "ج) 138 مِلِيمًا",
+            "د) 141 مِلِيمًا"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "vrai_faux",
+          "question": "مَجْمُوعُ الْعَدَدَيْنِ 95 + 18 هُوَ 103.",
+          "explication": "خَطَأٌ، لِأَنَّ 95 + 18 = 113 وليس 103 (5 + 8 = 13، نَكْتُبُ 3 وَنَحْتَفِظُ بـ 1، ثُمَّ 9 + 1 + 1 = 11).",
+          "reponse_correcte": true
+        },
+        {
+          "type": "ouverte",
+          "question": "فِي مَكْتَبَةِ الْمَدْرَسَةِ 89 كِتَابَ قِصَصٍ وَ 56 كِتَابَ عُلُومٍ. أَحْسُبُ الْعَدَدَ الْجُمْلِيَّ لِلْكُتُبِ فِي المَكْتَبَةِ مَعَ كِتَابَةِ عَمَلِيَّةِ الْجَمْعِ.",
+          "explication": "لِحِسَابِ العَدَدِ الجُمْلِيِّ لِلْكُتُبِ نَنْجِزُ العَمَلِيَّةَ: 89 + 56. نَجْمَعُ الآحَادَ أولاً: 9 + 6 = 15 (نَكْتُبُ 5 وَنَحْتَفِظُ بـ 1)، ثُمَّ نَجْمَعُ العَشَرَاتِ: 8 + 5 + 1 = 14. الْمَجْمُوعُ هُوَ 145 كِتَابًا.",
+          "reponse_correcte": "89 + 56 = 145 كِتَابًا"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 17,
+    "matiere": "mathematique",
+    "niveau": "2",
+    "lecon": "MATH 2 - Nombres 0-199",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "mathematique",
+      "niveau": "2",
+      "chapitre": "MATH 2 - Nombres 0-199",
+      "lecon": "MATH 2 - Nombres 0-199",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "ما هو العدد الذي يتكوّن من 1 مئات و4 عشرات و7 آحاد؟",
+          "explication": "1 مئات تساوي 100، 4 عشرات تساوي 40، و7 آحاد تساوي 7، فيكون العدد 147.",
+          "options": [
+            "أ) 147",
+            "ب) 174",
+            "ج) 417",
+            "د) 741"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "العبارة التالية: «التفكيك الجمعي الصحيح للعدد 183 هو: 100 + 30 + 8»",
+          "explication": "العبارة خاطئة لأن التفكيك الصحيح للعدد 183 هو: 100 + 80 + 3 (1 مئات، 8 عشرات، 3 آحاد).",
+          "reponse_correcte": true
+        },
+        {
+          "type": "qcm",
+          "question": "أي من العبارات التالية تمثل مقارنة صحيحة بين العددين 139 و151؟",
+          "explication": "نقارن رقم العشرات لأن رقم المئات متساوٍ (1). بما أن 3 عشرات أصغر من 5 عشرات، فإن 139 أصغر من 151 (139 < 151).",
+          "options": [
+            "أ) 139 > 151",
+            "ب) 139 = 151",
+            "ج) 139 < 151",
+            "د) 151 < 139"
+          ],
+          "reponse_correcte": 2
+        },
+        {
+          "type": "ouverte",
+          "question": "رتب الأعداد التالية ترتيبًا تصاعديًّا (من الأصغر إلى الأكبر) مع استعمال العلامة المناسبة: 192، 109، 145، 128.",
+          "explication": "عند الترتيب التصاعدي من الأصغر إلى الأكبر ننظر إلى مرتبة المئات أولاً ثم العشرات: 109 هي الأصغر، يليها 128، ثم 145، وأخيرًا 192.",
+          "reponse_correcte": "109 < 128 < 145 < 192"
+        },
+        {
+          "type": "ouverte",
+          "question": "يملك مَديدٌ مَجموعةً مِن الكُريّاتِ تُساوِي 1 مِئَة وَ6 عَشَراتٍ وَ3 آحادٍ. اكْتُبْ عَدَدَ الكُرَيّاتِ بِالحُرُوفِ.",
+          "explication": "1 مئة و6 عشرات و3 آحاد تعطي العدد 163، ويكتب بالحروف: مائة وثلاثة وستون.",
+          "reponse_correcte": "مِائَةٌ وَثَلَاثَةٌ وَسِتُّونَ"
+        }
+      ]
+    }
+  },
+  {
+    "scenario": 18,
+    "matiere": "mathematique",
+    "niveau": "2",
+    "lecon": "MATH 2 - Polygones",
+    "tentatives": 1,
+    "succes": true,
+    "erreurs": [],
+    "examen": {
+      "matiere": "mathematique",
+      "niveau": "2",
+      "chapitre": "MATH 2 - Polygones",
+      "lecon": "MATH 2 - Polygones",
+      "langue": "ar",
+      "duree_estimee_minutes": 30,
+      "questions": [
+        {
+          "type": "qcm",
+          "question": "مُضَلَّعٌ لَهُ 3 أضْلاَعٍ وَ3 رُؤُوسٍ. مَا هُوَ هَذَا الشَّكْلُ؟",
+          "explication": "المُثَلَّثُ هُوَ المُضَلَّعُ الَّذِي يَتَكَوَّنُ مِنْ 3 أضْلاَعٍ وَ3 رُؤُوسٍ.",
+          "options": [
+            "أ) مُثَلَّثٌ",
+            "ب) رُبَاعِيُّ أضْلاَعٍ",
+            "ج) خُمَاسِيُّ أضْلاَعٍ",
+            "د) سُدَاسِيُّ أضْلاَعٍ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "vrai_faux",
+          "question": "فِي كُلِّ مُضَلَّعٍ، يَكُونُ عَدَدُ الرُّؤُوسِ مُسَاوِيًا لِعَدَدِ الأَضْلاَعِ.",
+          "explication": "صَحِيحٌ، عَدَدُ أضْلاَعِ أَيِّ مُضَلَّعٍ يُسَاوِي دَائِمًا عَدَدَ رُؤُوسِهِ.",
+          "reponse_correcte": false
+        },
+        {
+          "type": "qcm",
+          "question": "مَا هِيَ الأَدَاةُ الَّتِي نَسْتَعْمِلُهَا لِرَبْطِ الرُّؤُوسِ بِخُطُوطٍ مُسْتَقِيمَةٍ لِرَسْمِ مُضَلَّعٍ؟",
+          "explication": "نَسْتَعْمِلُ المِسْطَرَةَ لِرَبْطِ الرُّؤُوسِ بِخُطُوطٍ مُسْتَقِيمَةٍ وَرَسْمِ أضْلاَعِ المُضَلَّعِ.",
+          "options": [
+            "أ) المِسْطَرَةُ",
+            "ب) المِقَصُّ",
+            "ج) المِمْحَاةُ",
+            "د) أَلْوَانُ الزَّيْتِ"
+          ],
+          "reponse_correcte": 0
+        },
+        {
+          "type": "qcm",
+          "question": "يَمْتَلِكُ أَمِينٌ شَكْلًا هَنْدَسِيًّا لَهُ 4 أضْلاَعٍ وَ4 رُؤُوسٍ. كَيْفَ نُسَمِّي هَذَا الشَّكْلَ؟",
+          "explication": "الشَّكْلُ الَّذِي يَمْتَلِكُ 4 أضْلاَعٍ وَ4 رُؤُوسٍ يُسَمَّى رُبَاعِيَّ أضْلاَعٍ.",
+          "options": [
+            "أ) مُثَلَّثٌ",
+            "ب) رُبَاعِيُّ أضْلاَعٍ",
+            "ج) خُمَاسِيُّ أضْلاَعٍ",
+            "د) سُدَاسِيُّ أضْلاَعٍ"
+          ],
+          "reponse_correcte": 1
+        },
+        {
+          "type": "ouverte",
+          "question": "كَمْ عَدَدُ الأَضْلاَعِ وَعَدَدُ الرُّؤُوسِ فِي الشَّكْلِ الخُمَاسِيِّ؟",
+          "explication": "المُضَلَّعُ الخُمَاسِيُّ يَتَكَوَّنُ مِنْ 5 أضْلاَعٍ وَ5 رُؤُوسٍ.",
+          "reponse_correcte": "عدد الأضلاع: 5، وعدد الرؤوس: 5"
+        }
+      ]
+    }
+  }
+];
+
+const TYPE_LABELS = {
+  qcm: "QCM",
+  vrai_faux: "Vrai / Faux",
+  texte_a_trous: "Texte à trous",
+  ouverte: "Question ouverte"
+};
+
+function esc(s){
+  if (s === null || s === undefined) return "";
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+
+function renderQuestion(q, uid){
+  const type = q.type;
+  let html = `<li class="qcard"><span class="qtype">${TYPE_LABELS[type] || esc(type)}</span>`;
+
+  if (type === "qcm"){
+    html += `<p class="qtext">${esc(q.question)}</p><ul class="options">`;
+    (q.options || []).forEach((opt, i) => {
+      html += `<li><button type="button" class="opt-btn" id="${uid}-opt-${i}"
+        onclick="checkQCM('${uid}', ${i})">${esc(opt)}</button></li>`;
+    });
+    html += `</ul>`;
+    html += `<div class="correction-container" id="${uid}-correction"></div>`;
+    if (q.explication){
+      html += `<div class="explication" id="${uid}-expl"><strong>Explication — </strong>${esc(q.explication)}</div>`;
+    }
+  }
+
+  else if (type === "vrai_faux"){
+    html += `<p class="qtext">${esc(q.question)}</p>`;
+    html += `<div class="vf-row">
+      <button type="button" class="vf-btn" id="${uid}-vf-true" onclick="checkVF('${uid}', true)">Vrai</button>
+      <button type="button" class="vf-btn" id="${uid}-vf-false" onclick="checkVF('${uid}', false)">Faux</button>
+    </div>`;
+    html += `<div class="correction-container" id="${uid}-correction"></div>`;
+    if (q.explication){
+      html += `<div class="explication" id="${uid}-expl"><strong>Explication — </strong>${esc(q.explication)}</div>`;
+    }
+  }
+
+  else if (type === "ouverte"){
+    html += `<p class="qtext">${esc(q.question)}</p>`;
+    html += `<textarea class="ouverte-box" id="${uid}-answer" placeholder="Écris ta réponse ici..."></textarea>`;
+    html += `<br><button type="button" class="verify-btn" onclick="revealOuverte('${uid}')">Voir la correction</button>`;
+    html += `<div class="correction-container" id="${uid}-correction"></div>`;
+    if (q.explication){
+      html += `<div class="explication" id="${uid}-expl"><strong>Explication — </strong>${esc(q.explication)}</div>`;
+    }
+  }
+
+  else {
+    html += `<pre style="white-space:pre-wrap;font-size:.8rem;">${esc(JSON.stringify(q, null, 2))}</pre>`;
+  }
+
+  html += `</li>`;
+  return html;
+}
+
+function showCorrection(uid, isCorrect, message) {
+  const container = document.getElementById(`${uid}-correction`);
+  if (container) {
+    container.innerHTML = message;
+    container.classList.add("visible");
+    container.classList.remove("correct", "wrong");
+    container.classList.add(isCorrect ? "correct" : "wrong");
+  }
+}
+
+function checkQCM(uid, chosenIndex){
+  const q = window.__QDATA[uid];
+  const btns = q.options.map((_, i) => document.getElementById(`${uid}-opt-${i}`));
+  let isCorrect = false;
+
+  // Si reponse_correcte est un index numérique
+  let correctIndex = q.reponse_correcte;
+  if (typeof correctIndex === 'string') {
+    // Si c'est le texte de l'option, trouver l'index
+    correctIndex = q.options.findIndex(opt => opt.trim() === q.reponse_correcte.trim());
+  }
+
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correctIndex){
+      btn.classList.add("correct");
+      if (i === chosenIndex) isCorrect = true;
+    } else if (i === chosenIndex){
+      btn.classList.add("wrong");
+    }
+  });
+
+  const correctText = q.options[correctIndex] || q.reponse_correcte;
+  const message = isCorrect
+    ? `<strong>Correct !</strong> La bonne réponse était : <span class="correct-answer">${esc(correctText)}</span>`
+    : `<strong>Incorrect.</strong> La bonne réponse était : <span class="correct-answer">${esc(correctText)}</span>`;
+
+  showCorrection(uid, isCorrect, message);
+
+  const expl = document.getElementById(`${uid}-expl`);
+  if (expl) expl.classList.add("visible");
+}
+
+function checkVF(uid, chosen){
+  const q = window.__QDATA[uid];
+  const trueBtn = document.getElementById(`${uid}-vf-true`);
+  const falseBtn = document.getElementById(`${uid}-vf-false`);
+  trueBtn.disabled = true;
+  falseBtn.disabled = true;
+
+  const correctBtn = q.reponse_correcte === true ? trueBtn : falseBtn;
+  const chosenBtn = chosen === true ? trueBtn : falseBtn;
+  const isCorrect = chosen === q.reponse_correcte;
+
+  correctBtn.classList.add("correct");
+  if (!isCorrect) chosenBtn.classList.add("wrong");
+
+  const message = isCorrect
+    ? `<strong>Correct !</strong> L'affirmation est bien <span class="correct-answer">${q.reponse_correcte ? "VRAIE" : "FAUSSE"}</span>.`
+    : `<strong>Incorrect.</strong> L'affirmation est en réalité <span class="correct-answer">${q.reponse_correcte ? "VRAIE" : "FAUSSE"}</span>.`;
+
+  showCorrection(uid, isCorrect, message);
+
+  const expl = document.getElementById(`${uid}-expl`);
+  if (expl) expl.classList.add("visible");
+}
+
+function revealOuverte(uid){
+  const q = window.__QDATA[uid];
+  const box = document.getElementById(`${uid}-answer`);
+  if (box) box.disabled = true;
+
+  const btn = document.getElementById(`${uid}-verify`);
+  if (btn) btn.disabled = true;
+
+  const message = `<strong>Réponse attendue :</strong><br><span style="display:inline-block;margin-top:4px;color:var(--ink);">${esc(q.reponse_correcte)}</span>`;
+  showCorrection(uid, true, message);
+
+  const expl = document.getElementById(`${uid}-expl`);
+  if (expl) expl.classList.add("visible");
+}
+
+function renderScenario(s, idx){
+  const ok = s.succes;
+  const examen = s.examen;
+  const isRTL = examen && examen.langue === "ar";
+  let body = "";
+
+  if (examen){
+    const matiere_fr = examen.matiere === 'arabe' ? 'اللغة العربية' : 'الرياضيات';
+    body += `<div class="meta-row">
+      <span><strong>Matière:</strong> ${esc(matiere_fr)}</span>
+      <span><strong>Niveau:</strong> ${esc(examen.niveau)}</span>
+      <span><strong>Durée:</strong> ${examen.duree_estimee_minutes} min</span>
+      <span><strong>Questions:</strong> ${examen.questions ? examen.questions.length : 0}</span>
+    </div>`;
+  }
+  
+  if (!ok && s.erreurs && s.erreurs.length){
+    body += `<div class="errors"><strong>Erreurs de validation :</strong>
+      <ul>${s.erreurs.map(e => `<li>${esc(e)}</li>`).join("")}</ul>
+    </div>`;
+  }
+  
+  if (examen && examen.questions && examen.questions.length){
+    body += `<ul class="qlist" ${isRTL ? 'dir="rtl"' : ""}>`; 
+    examen.questions.forEach((q, qi) => {
+      const uid = `s${idx}-q${qi}`;
+      window.__QDATA[uid] = q;
+      body += renderQuestion(q, uid);
+    });
+    body += `</ul>`;
+  } else if (!examen) {
+    body += `<p style="color:var(--muted);">Aucun examen n'a pu être généré pour ce scénario.</p>`;
+  }
+  
+  return `
+  <section class="scenario" data-idx="${idx}">
+    <div class="scenario-head" onclick="this.closest('.scenario').classList.toggle('open')">
+      <div class="titles">
+        <h2>${esc(s.lecon || s.matiere)}</h2>
+        <div class="sub">${esc(s.matiere)} — Niveau ${s.niveau}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="badge ${ok ? "ok" : "ko"}">${ok ? "RÉUSSI" : "ÉCHEC"}</span>
+        <span class="chevron">▸</span>
+      </div>
+    </div>
+    <div class="scenario-body">${body}</div>
+  </section>`;
+}
+
+function render(){
+  window.__QDATA = {};
+  document.getElementById("scenarios").innerHTML = DATA.map((s, i) => renderScenario(s, i)).join("");
+  document.getElementById("stamp").textContent = "Généré le " + new Date().toLocaleString("fr-FR");
+  const first = document.querySelector(".scenario");
+  if (first) first.classList.add("open");
+}
+render();
+</script>
+</body>
+</html>
