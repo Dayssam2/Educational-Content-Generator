@@ -22,7 +22,7 @@
 - **Gemini 3.6 (Texte)** - Génération de questions et chat assistant
 - **Gemini 3.6 (Vision)** - Analyse d'images et génération de légendes  
 - **Gemini Image** - Création d'illustrations éducatives
-- **Embeddings multilingues** - Support français + arabe pour RAG
+- **Embeddings Qwen3** - Support français + arabe pour RAG
 
 #### Pipeline de Génération IA
 1. **Query Processing** - Analyse de la requête enseignant
@@ -34,7 +34,7 @@
 
 #### Système RAG (Retrieval-Augmented Generation)
 - **Index vectoriel** de 20+ fichiers JSON du programme tunisien
-- **Embeddings multilingues** avec sentence-transformers
+- **Embeddings Qwen3-0.6B** avec sentence-transformers
 - **Recherche sémantique** par similarité cosinus
 - **Filtrage contextuel** par matière/niveau/chapitre
 - **Mise à jour automatique** lors de modifications du programme
@@ -75,7 +75,7 @@
 
 #### Technologies IA Intégrées
 - **ChromaDB** - Base vectorielle pour stockage embeddings
-- **Sentence-Transformers** - Génération embeddings multilingues (français/arabe)
+- **Sentence-Transformers** - Génération embeddings avec Qwen3-Embedding-0.6B
 - **Gemini 3.6** - LLM principal pour génération texte et chat
 - **Gemini Vision** - Analyse et compréhension d'images uploadées
 - **Gemini Image** - Génération d'illustrations éducatives automatiques
@@ -146,7 +146,7 @@ DATABASE_URL=postgresql://username:password@localhost:5432/examai
 
 # Configuration RAG ChromaDB (optionnel, chemins par défaut)
 CHROMA_DB_PATH=./chroma_db
-EMBEDDINGS_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+EMBEDDINGS_MODEL=Qwen/Qwen3-Embedding-0.6B
 
 # Email (pour réinitialisation mot de passe)
 SMTP_SERVER=smtp.gmail.com
