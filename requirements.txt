@@ -1,20 +1,45 @@
-# Core AI/ML
+# ===== PROJET EDUCATIONAL CONTENT GENERATOR - REQUIREMENTS UNIFIÉES =====
+
+# Core Web Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+
+# Data Validation & Models
+pydantic==2.9.2
+
+# Configuration
+python-dotenv==1.0.1
+
+# AI/ML Core
 google-generativeai>=0.8.0
-sentence-transformers>=2.2.0
-chromadb>=0.4.0
-langchain>=0.1.0
-openai>=1.0.0
+sentence-transformers==3.2.1
+chromadb==0.5.20
 
-# Data Processing
-pydantic>=2.0.0
-python-dotenv>=1.0.0
+# HTTP Requests
+requests==2.33.1
 
-# PDF Processing
+# PDF Processing & Export
+reportlab==4.4.10
+arabic-reshaper==3.0.1
+python-bidi==0.6.11
 PyMuPDF>=1.23.0
-pytesseract>=0.3.10
+pdfplumber>=4.0.0
+pypdf>=4.0.0
+
+# Image Processing
 Pillow>=10.0.0
+pytesseract>=0.3.10
 
+# Database
+psycopg[binary,pool]==3.3.5
 
+# Security & Auth
+bcrypt>=4.0.0
+python-jose[cryptography]>=3.3.0
+
+# Email
+python-email-validator>=2.0.0
 
 # Utilities
 tenacity>=8.2.0

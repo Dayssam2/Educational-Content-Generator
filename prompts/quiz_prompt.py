@@ -56,6 +56,13 @@ Contraintes pédagogiques à respecter strictement :
 - Pour chaque question de type QCM : propose exactement 4 options, avec une
   seule bonne réponse. Les 3 mauvaises réponses doivent être plausibles et
   liées au sujet (pas absurdes ni évidentes à écarter).
+- Pour chaque question de type vrai/faux : rédige d'abord l'explication
+  qui justifie la réponse, puis vérifie que la valeur de reponse_correcte
+  (true ou false) correspond exactement à ce que cette explication démontre.
+  Si l'explication prouve que l'affirmation est exacte, reponse_correcte doit
+  valoir true ; si l'explication la contredit, reponse_correcte doit valoir
+  false. Ne génère jamais une question où l'affirmation, reponse_correcte et
+  l'explication ne sont pas tous les trois cohérents entre eux.
 - Pour chaque question de type texte à trous : utilise "___" pour marquer
   chaque blanc, et fournis les réponses attendues dans le même ordre que les
   blancs apparaissent dans le texte.

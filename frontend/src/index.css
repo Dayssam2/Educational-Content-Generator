@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-[#f6eeec] text-slate-800 antialiased;
+  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+}
+
+/* Custom toggle switch used on the Export screen */
+.switch {
+  @apply relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors;
+}
+.switch[data-on='true'] {
+  @apply bg-[#7a0008];
+}
+.switch[data-on='false'] {
+  @apply bg-slate-200;
+}
+.switch-knob {
+  @apply inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform;
+}
+.switch[data-on='true'] .switch-knob {
+  @apply translate-x-5;
+}
+.switch[data-on='false'] .switch-knob {
+  @apply translate-x-0.5;
+}

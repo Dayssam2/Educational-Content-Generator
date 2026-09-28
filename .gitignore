@@ -1,4 +1,5 @@
 
+# ===== SÉCURITÉ & CREDENTIALS =====
 .env
 .env.*
 *.key
@@ -10,7 +11,7 @@ secrets/
 credentials/
 api_keys.txt
 
-
+# ===== PYTHON & BACKEND =====
 venv/
 venv*/
 .venv/
@@ -21,26 +22,38 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-.Python
 pip-log.txt
 pip-delete-this-directory.txt
 .tox/
 .coverage
 .pytest_cache/
-
-
 *.db
 *.sqlite
 *.sqlite3
-rag_system/chroma_db/
-vector_store/
-embeddings/
 *.log
 logs/
 
+# ===== IA & RAG SYSTEM =====
+rag_system/chroma_db/
+chroma_db/
+vector_store/
+embeddings/
+*.faiss
+*.index
 
+# ===== FRONTEND REACT =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+frontend/build/
+frontend/dist/
+frontend/.next/
+frontend/.nuxt/
 
-
+# ===== DÉVELOPPEMENT =====
 .vscode/
 .idea/
 *.swp
@@ -50,7 +63,7 @@ logs/
 .sublime-workspace
 *.code-workspace
 
-
+# ===== SYSTÈME =====
 .DS_Store
 .DS_Store?
 ._*
@@ -60,22 +73,18 @@ ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# ═══════════════════════════════════════════════════════════════════
-# 🌐 NODE.JS / REACT (pour ton futur frontend)
-# ═══════════════════════════════════════════════════════════════════
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.npm
-.yarn-integrity
-build/
-dist/
+# ===== FICHIERS TEMPORAIRES =====
+*.tmp
+*.temp
+*.backup
+*.bak
+*~
+.cache/
 
-# ═══════════════════════════════════════════════════════════════════
-# 📦 PACKAGES & DISTRIBUTIONS
-# ═══════════════════════════════════════════════════════════════════
+# ===== PACKAGES & BUILD =====
 *.egg-info/
 dist/
 build/
 .eggs/
+*.tar.gz
+*.whl
