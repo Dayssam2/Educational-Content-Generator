@@ -8,7 +8,7 @@
 
 ## Description
 
-**ExamAI** est une plateforme complète de génération d'examens éducatifs pour le système scolaire tunisien. Elle utilise une architecture IA avancée combinant **Gemini 2.5 Flash**, **RAG (Retrieval-Augmented Generation)** avec **ChromaDB**, et **analyse multimodale** pour créer des examens personnalisés de haute qualité pédagogique.
+**ExamAI** est une plateforme complète de génération d'examens éducatifs pour le système scolaire tunisien. Elle utilise une architecture IA avancée combinant **Gemini 3.6**, **RAG (Retrieval-Augmented Generation)** avec **ChromaDB**, et **analyse multimodale** pour créer des examens personnalisés de haute qualité pédagogique.
 
 ### Architecture IA/LLM
 
@@ -19,8 +19,8 @@
 - **Sentence-transformers** pour embeddings de qualité
 
 #### Modèles IA Utilisés
-- **Gemini 2.5 Flash (Texte)** - Génération de questions et chat assistant
-- **Gemini 2.5 Flash (Vision)** - Analyse d'images et génération de légendes  
+- **Gemini 3.6 (Texte)** - Génération de questions et chat assistant
+- **Gemini 3.6 (Vision)** - Analyse d'images et génération de légendes  
 - **Gemini Image** - Création d'illustrations éducatives
 - **Embeddings multilingues** - Support français + arabe pour RAG
 
@@ -42,11 +42,11 @@
 - **Mise à jour automatique** lors de modifications du programme
 
 #### Modèles LLM Utilisés
-- **Gemini 2.5 Flash (Text)** - Génération principale de questions
+- **Gemini 3.6 (Text)** - Génération principale de questions
   - Prompt engineering spécialisé éducation tunisienne
   - Context window 32k tokens pour contexte RAG étendu
   - Support multilingue natif français/arabe
-- **Gemini 2.5 Flash (Vision)** - Analyse d'images uploadées
+- **Gemini 3.6 (Vision)** - Analyse d'images uploadées
   - OCR automatique pour documents scannés
   - Génération de questions de légende à partir d'images réelles
   - Extraction de contenu depuis PDF image
@@ -78,7 +78,7 @@
 #### Technologies IA Intégrées
 - **ChromaDB** - Base vectorielle pour stockage embeddings
 - **Sentence-Transformers** - Génération embeddings multilingues (français/arabe)
-- **Gemini 2.5 Flash** - LLM principal pour génération texte et chat
+- **Gemini 3.6** - LLM principal pour génération texte et chat
 - **Gemini Vision** - Analyse et compréhension d'images uploadées
 - **Gemini Image** - Génération d'illustrations éducatives automatiques
 - **Prompt Engineering** - Templates optimisés pour l'éducation tunisienne
