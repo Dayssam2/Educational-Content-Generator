@@ -35,15 +35,6 @@
 ### Architecture Technique IA/LLM Détaillée
 
 #### Système RAG (Retrieval-Augmented Generation)
-```python
-# Pipeline RAG simplifié
-rag_engine = SimpleRAG(lessons_dir="database_tunisienne")
-documents = rag_engine.search(query="الكسور", matiere="mathematique", niveau="5")
-context = rag_engine.build_context(documents, max_tokens=2000)
-questions = gemini_service.generate_content(prompt + context)
-```
-
-#### Base Vectorielle ChromaDB
 - **Index vectoriel** de 20+ fichiers JSON du programme tunisien
 - **Embeddings multilingues** avec sentence-transformers
 - **Recherche sémantique** par similarité cosinus
