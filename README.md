@@ -32,8 +32,6 @@
 5. **Validation** - Contrôle qualité automatique (règles + IA)
 6. **Post-processing** - Formatage et images automatiques
 
-### Architecture Technique IA/LLM Détaillée
-
 #### Système RAG (Retrieval-Augmented Generation)
 - **Index vectoriel** de 20+ fichiers JSON du programme tunisien
 - **Embeddings multilingues** avec sentence-transformers
@@ -64,7 +62,7 @@
 
 #### Intelligence Artificielle Avancée
 - **RAG System** - ChromaDB + sentence-transformers pour recherche sémantique
-- **LLM Generation** - Gemini 2.5 Flash avec prompt engineering spécialisé éducation
+- **LLM Generation** - Gemini 3.6 avec prompt engineering spécialisé éducation
 - **Multimodal AI** - Analyse d'images, génération d'illustrations, OCR automatique
 - **Validation IA** - Double contrôle : règles pédagogiques + recommandations LLM
 - **Context Awareness** - Génération adaptée au niveau scolaire et matière tunisienne
@@ -264,43 +262,3 @@ pytest
 cd frontend
 npm test
 ```
-
-## Déploiement
-
-### Docker (Recommandé)
-```bash
-# À venir
-docker-compose up -d
-```
-
-### Manuel
-1. **Frontend** : `npm run build` → servir les fichiers statiques
-2. **Backend** : `gunicorn main:app` avec reverse proxy
-3. **Base** : PostgreSQL externe (Supabase, Neon, Railway...)
-
-## Contribution
-
-1. Fork le projet
-2. Créer une branche feature (`git checkout -b feature/nouvelle-fonctionnalite`)
-3. Commit vos changements (`git commit -m 'Ajouter nouvelle fonctionnalité'`)
-4. Push vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
-5. Ouvrir une Pull Request
-
-## Licence
-
-Distribué sous licence MIT. Voir `LICENSE` pour plus d'informations.
-
-## Auteur
-
-**Votre Nom** - [@VotreUsername](https://github.com/VotreUsername)
-
-## Remerciements
-
-- Ministère de l'Éducation Tunisien - Programme officiel
-- Google Gemini AI - Génération intelligente
-- Communauté Open Source - Outils et bibliothèques
-- Enseignants tunisiens - Retours et tests
-
----
-
-N'oubliez pas de mettre une étoile si ce projet vous aide !
