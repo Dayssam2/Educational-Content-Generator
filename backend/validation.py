@@ -1,25 +1,3 @@
-"""
-Analyse d'un examen pour l'etape 3 du wizard (ecran Validation).
-
-Deux couches independantes, fusionnees dans une seule reponse :
-1. Regles deterministes (nombre de questions, bareme, variete des types,
-   niveau, questions vides, doublons) -- gratuit, instantane, aucun appel
-   reseau. C'est ce qui decide `score` et `peut_valider` : l'IA ne peut
-   PAS faire echouer une validation, elle ne fait qu'enrichir l'avis.
-2. Avis pedagogique via Gemini (avertissements/recommandations) -- relit
-   la QUALITE du contenu (formulation, difficulte adaptee au niveau,
-   coherence avec le chapitre...), des choses qu'une regle fixe ne peut
-   pas juger. Volontairement en meilleur effort : toute erreur (quota,
-   reseau, JSON invalide, module Gemini absent) est avalee et renvoie des
-   listes vides -- Gemini est un plus, jamais une dependance bloquante
-   pour /api/examens/{id}/valider. Desactivable sans toucher au code via
-   VALIDATION_IA=0 dans .env (cout/latence si besoin de la couper vite).
-
-La forme de la reponse (score, resume, checks, avertissements,
-recommandations, peut_valider) ne change pas, donc rien a modifier cote
-frontend.
-"""
-
 import json
 import os
 import sys
@@ -35,8 +13,6 @@ load_dotenv(_ROOT / ".env")
 
 POINTS_PAR_REGLE_ECHOUEE = 20
 
-# Permet de desactiver l'appel IA sans toucher au code (VALIDATION_IA=0
-# dans .env) -- active par defaut.
 _IA_ACTIVEE = os.environ.get("VALIDATION_IA", "1").strip() != "0"
 MAX_ELEMENTS_PAR_LISTE = 4
 
@@ -82,10 +58,6 @@ def _check_pas_vide(questions: List[Dict]) -> Dict:
             if not isinstance(idx, int) or not (0 <= idx < len(options)):
                 return False
         elif t == "association":
-            # NOUVEAU (voir models.py / quiz_engine.py) : colonnes trop
-            # courtes ou avec une entree vide -- avant, ce type n'existait
-            # pas encore et aurait ete traite comme "type inconnu"
-            # (ok=True par defaut), donc jamais repere.
             gauche = q.get("colonne_gauche") or []
             droite = q.get("colonne_droite") or []
             if len(gauche) < 2 or len(droite) < 2:
@@ -107,8 +79,6 @@ def _check_pas_vide(questions: List[Dict]) -> Dict:
             if q.get("reponseAttendue") in (None, ""):
                 return False
         elif t == "legende":
-            # Une image est obligatoire pour ce type (voir models.py) --
-            # url generee OU description en attente, l'une des deux.
             image = q.get("image") or {}
             if not (image.get("url") or image.get("description")):
                 return False
@@ -118,10 +88,6 @@ def _check_pas_vide(questions: List[Dict]) -> Dict:
         elif t == "dictee":
             if not str(q.get("texte_dictee", "")).strip():
                 return False
-        # "redaction" et "ouverte"/"texte_trous" : pas de structure propre
-        # a verifier ici au-dela du texte de la question (deja fait plus
-        # haut) -- leur reponse/correction est verifiee dans
-        # _check_corrections_completes ci-dessous.
         return True
 
     ok = all(question_valide(q) for q in questions)
@@ -135,16 +101,6 @@ def _check_doublons(questions: List[Dict]) -> Dict:
 
 
 def _check_corrections_completes(questions: List[Dict]) -> Dict:
-    """Verifie que CHAQUE question porte une correction exploitable, quel
-    que soit son type -- _check_pas_vide() ci-dessus ne verifie
-    reponseCorrecteIndex QUE pour les qcm. Sans ce check, une question
-    vrai_faux ou ouverte/texte_trous editee a la main (voir
-    modifier_questions_examen dans database.py) pouvait passer la
-    validation avec une reponseCorrecte/reponseAttendue vide ou absente,
-    et le corrige genere (voir pdf_export.generer_pdf_correction) affichait
-    alors un trou a la place de la reponse attendue. C'est ce check qui
-    fait que « la correction passe aussi par la validation », pas
-    seulement l'enonce des questions."""
     def correction_valide(q: Dict) -> bool:
         t = q.get("type")
         if t == "qcm":
@@ -156,8 +112,6 @@ def _check_corrections_completes(questions: List[Dict]) -> Dict:
         if t in ("ouverte", "texte_trous"):
             return bool(str(q.get("reponseAttendue", "")).strip())
         if t == "association":
-            # NOUVEAU : reponseCorrecte doit couvrir chaque element de
-            # colonne_gauche par un index valide dans colonne_droite.
             gauche = q.get("colonne_gauche") or []
             droite = q.get("colonne_droite") or []
             correspondance = q.get("reponseCorrecte")
@@ -184,10 +138,6 @@ def _check_corrections_completes(questions: List[Dict]) -> Dict:
             return len(reponses) >= 1 and all(str(r).strip() for r in reponses)
         if t == "dictee":
             return bool(str(q.get("texte_dictee", "")).strip())
-        # "redaction" : pas de reponse unique par nature (evaluee sur des
-        # criteres, voir models.QuestionRedaction) -- rien a verifier ici.
-        # Type inconnu restant : deja ignore ailleurs (voir quiz_engine.py),
-        # on ne bloque pas la validation dessus.
         return True
 
     ok = all(correction_valide(q) for q in questions)
@@ -207,8 +157,6 @@ def _regles(examen: Dict, nb_questions_attendu: int | None, niveau_attendu: str 
     ]
 
 
-# --- Avis pedagogique (Gemini) ---------------------------------------------
-
 _TYPE_LABEL = {
     "qcm": "QCM", "vrai_faux": "Vrai/Faux", "ouverte": "Question ouverte",
     "texte_trous": "Texte à trous", "association": "Association",
@@ -219,12 +167,6 @@ _TYPE_LABEL = {
 
 
 def _decrire_question(q: Dict, index: int) -> str:
-    """Description en langage naturel d'UNE question, pour le prompt de
-    l'avis pedagogique ci-dessous -- JAMAIS le JSON brut avec ses noms de
-    champs techniques (reponseAttendue, reponseCorrecteIndex, colonne_
-    gauche...). Voir la note dans _construire_prompt_ia : sans ca, le
-    modele reprenait parfois ces noms de champs mot pour mot dans ses
-    recommandations, incomprehensibles pour un enseignant."""
     t = q.get("type")
     label = _TYPE_LABEL.get(t, t or "?")
     morceaux = [f"Question {index + 1} ({label}, {q.get('points', '?')} pts) : {q.get('question') or '(énoncé vide)'}"]
@@ -252,20 +194,7 @@ def _decrire_question(q: Dict, index: int) -> str:
 
 
 def _construire_prompt_ia(examen: Dict, checks: List[Dict]) -> str:
-    """Prompt recentre sur ce que les regles deterministes ci-dessus NE
-    PEUVENT PAS juger (qualite du contenu, pas structure) -- MAIS reçoit
-    aussi la liste des regles echouees, pour que les recommandations
-    aident concretement a les corriger plutot que de rester generiques
-    et deconnectees de ce qui bloque reellement la validation."""
     questions = examen.get("questions", [])
-    # NOUVEAU -- description en LANGAGE NATUREL, plus un dump JSON brut.
-    # Avant, le JSON envoye au modele contenait litteralement des cles
-    # comme "reponseAttendue" -- et le modele les reprenait mot pour mot
-    # dans ses recommandations ("Renseignez le champ 'reponseAttendue'..."),
-    # incomprehensible pour un enseignant qui n'a jamais vu cette
-    # structure de donnees. En ne lui montrant plus AUCUN nom de champ
-    # technique, il ne peut plus les recopier -- ils ne sont simplement
-    # plus dans ce qu'il lit.
     description_questions = "\n".join(_decrire_question(q, i) for i, q in enumerate(questions))
 
     echecs = [c["label"] for c in checks if not c.get("ok")]
@@ -305,11 +234,6 @@ de la structure de donnees qui le contient."""
 
 
 def _avis_ia(examen: Dict, checks: List[Dict]) -> Dict:
-    """Suggestions pedagogiques via Gemini, en meilleur effort. Toute
-    erreur (module absent, quota, reseau, JSON invalide) est avalee et
-    renvoie des listes vides : un souci cote IA ne doit jamais faire
-    echouer POST /api/examens/{id}/valider, qui doit rester utilisable
-    meme sans Gemini (voir le score deterministe, calcule a part)."""
     vide = {"avertissements": [], "recommandations": []}
     if not _IA_ACTIVEE or not examen.get("questions"):
         return vide
@@ -336,15 +260,11 @@ def _avis_ia(examen: Dict, checks: List[Dict]) -> Dict:
             "recommandations": recommandations[:MAX_ELEMENTS_PAR_LISTE],
         }
     except Exception as e:
-        # Meme principe que dans quiz_engine.py : on log pour diagnostiquer
-        # (quota ? cle absente ? JSON malforme ?), mais on n'interrompt
-        # jamais la validation pour un probleme cote IA.
         print(f"[validation] Avis pedagogique IA indisponible : {e}")
         return vide
 
 
 def valider_examen(examen: Dict, nb_questions_attendu: int | None = None, niveau_attendu: str | None = None) -> Dict:
-    """Point d'entree appele par POST /api/examens/{id}/valider (main.py)."""
     checks = _regles(examen, nb_questions_attendu, niveau_attendu)
     regles_echouees = sum(1 for c in checks if not c["ok"])
     score = max(0, 100 - regles_echouees * POINTS_PAR_REGLE_ECHOUEE)

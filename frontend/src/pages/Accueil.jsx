@@ -198,7 +198,7 @@ export default function Home() {
         }
       `}</style>
 
-      {/* ===== Header ===== */}
+      {}
       <header className="relative z-50 shrink-0 backdrop-blur-xl bg-white/85 border-b border-[#0f172a]/10">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 h-[60px] flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-3 shrink-0 group">
@@ -295,7 +295,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ===== Main ===== */}
+      {}
       <main id="main-content" className="relative flex-1 flex flex-col min-h-0">
         <div className="absolute inset-0 examai-grid-bg opacity-[0.3] pointer-events-none" style={{ maskImage: 'radial-gradient(ellipse at center, black 0%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse at center, black 0%, transparent 75%)' }} />
         <div className="examai-blob absolute -top-32 -left-32 w-[480px] h-[480px] opacity-25 pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(15,23,42,0.14) 0%, transparent 65%)' }} />
@@ -304,7 +304,7 @@ export default function Home() {
         <div className="relative flex-1 flex flex-col min-h-0 px-6 sm:px-10 py-4 sm:py-6">
           <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col justify-center gap-4 sm:gap-6">
 
-            {/* ===== HERO ===== */}
+            {}
             <section className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="examai-anim-1">
                 <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white border border-[#0f172a]/40 shadow-[0_2px_10px_-2px_rgba(15,23,42,0.4)]">
@@ -342,7 +342,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Mockup */}
+              {}
               <div className="examai-anim-2 relative">
                 <div className="absolute -inset-8 rounded-[48px] bg-[#0f172a]/[0.06] blur-3xl -z-10" />
 
@@ -415,7 +415,7 @@ export default function Home() {
               </div>
             </section>
 
-            {/* ===== COMMENT ÇA MARCHE ===== */}
+            {}
             <section
               id="how"
               className="relative border-t border-[#0f172a]/8 pt-5 sm:pt-6"
@@ -467,7 +467,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* ===== Footer ===== */}
+      {}
       <footer className="relative z-10 shrink-0 border-t border-[#0f172a]/10 bg-white/40 px-6 sm:px-10 py-3">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5">
           <Link to="/" className="flex items-center gap-2 shrink-0">

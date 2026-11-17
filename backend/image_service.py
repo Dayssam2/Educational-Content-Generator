@@ -1,45 +1,9 @@
-"""
-Generation des images qui illustrent certaines questions (ex: "observe
-l'image et compte les pommes", un schema a legender), via le modele
-d'image de Gemini.
-
-Volontairement un module A PART de services/gemini_service.py (utilise par
-quiz_engine.py et assistant_engine.py pour le texte) : on ne connait pas le
-contenu de ce fichier (il n'a pas ete fourni), donc on evite d'y toucher ou
-d'en dependre -- aucun risque de casser le chat ou la generation de quiz
-existants. Ce module appelle directement l'API REST Gemini, avec la MEME
-cle GEMINI_API_KEY que le reste de l'app (voir .env) : pas de compte ni de
-cle supplementaire a creer.
-
-Comme le reste de l'IA dans cette app (voir validation.py, quiz_engine.py) :
-toute erreur (quota, reseau, cle absente, reponse inattendue) est avalee et
-loggee -- une image qui rate ne doit JAMAIS faire echouer la generation de
-l'examen. `generer_image()` renvoie simplement None dans ce cas.
-
-MISE A JOUR -- retry sur 429 : le niveau gratuit du modele d'IMAGE a une
-limite de requetes/minute beaucoup plus basse que le modele de texte (voir
-generate_content dans services/gemini_service.py) -- un run reel a montre
-que meme 4-5 appels en parallele suffisent a tous se faire rejeter en 429
-d'un coup. On respecte maintenant le delai que Google recommande lui-meme
-(header Retry-After, ou le champ retryDelay de l'erreur) et on reessaie
-2 fois avant d'abandonner, au lieu de renoncer au premier echec.
-
-MISE A JOUR 2 -- messages d'erreur enfin lisibles : `reponse.raise_for_status()`
-ne donnait QUE le code HTTP generique ("400 Client Error", "403 Client
-Error"...), jamais la VRAIE raison que Google renvoie dans le corps JSON
-de la reponse (cle API invalide, API pas activee sur le projet, modele
-pas accessible sur ce compte...). Meme chose quand la reponse est un 200
-mais sans image : Google renvoie souvent un `finishReason` (SAFETY,
-PROHIBITED_CONTENT...) qui explique pourquoi le modele a refuse de
-generer, et qu'on affichait pas avant. Les deux sont maintenant loggues.
-"""
-
 import re
 import time
 import os
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import requests
 from dotenv import load_dotenv
@@ -49,31 +13,49 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 load_dotenv(_ROOT / ".env")
 
-# Modele d'image de Gemini (nom de code "Nano Banana"). Un seul endroit a
-# changer si Google renomme/remplace le modele.
-MODELE_IMAGE = "gemini-2.5-flash-image"
+MODELE_IMAGE = os.environ.get("GEMINI_MODEL_IMAGE", "gemini-2.5-flash-image").strip() or "gemini-2.5-flash-image"
 _ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{MODELE_IMAGE}:generateContent"
-TIMEOUT_SECONDES = 30
+TIMEOUT_SECONDES = 60
 
-# Nombre de tentatives TOTAL (1 essai + ces retries) en cas de 429, et
-# delai par defaut si Google n'en suggere aucun (voir _delai_retry). Le
-# niveau gratuit de ce modele autorise tres peu de requetes par minute --
-# mieux vaut attendre et reessayer que d'abandonner tout de suite.
 MAX_TENTATIVES = 3
 DELAI_DEFAUT_SECONDES = 20
 
-# Cadre applique a CHAQUE image, en plus du contexte fourni par l'appelant
-# (voir _prompt_image_enrichi dans quiz_engine.py) : style adapte a un
-# cahier d'ecole primaire tunisien, et surtout AUCUN texte incruste dans
-# l'image -- les modeles d'image rendent tres mal l'arabe (lettres
-# deformees), mieux vaut ne jamais leur demander d'ecrire quoi que ce soit.
+VERIFICATION_ACTIVEE = os.environ.get("IMAGE_VERIFICATION", "1").strip() != "0"
+MAX_GENERATIONS = max(1, int(os.environ.get("IMAGE_MAX_GENERATIONS", "3") or 3))
+
+DERNIERE_GENERATION = {}
+
 STYLE_ENFANTS = (
     "Illustration simple et coloree, style dessin pour cahier d'ecole "
     "primaire, fond blanc ou uni, formes claires et nettes, adaptee a des "
     "enfants de 6 a 12 ans. N'ecris AUCUN texte, lettre, chiffre ou mot "
     "dans l'image elle-meme -- uniquement le dessin decrit ci-dessous, "
-    "rien d'autre."
+    "rien d'autre. Respecte EXACTEMENT le nombre d'objets demande : si la "
+    "description dit 3 pommes, dessine exactement 3 pommes, ni plus ni moins. "
+    "Les objets a compter doivent etre bien separes, entiers et faciles a "
+    "compter par un enfant. Dessine tous les elements cites dans la "
+    "description, et aucun element supplementaire qui pourrait l'induire en erreur. "
+    "Cadrage : fond uniforme sur toute l'image, sujet entier et centre, entierement "
+    "visible, sans bande grise ou coloree sur les bords, sans cadre, sans marge "
+    "parasite et sans element coupe par le bord de l'image."
 )
+
+PROMPT_VERIFICATION = """Tu controles une illustration destinee a un exercice d'ecole primaire.
+Voici ce que l'image devait representer :
+<<<
+{description}
+>>>
+
+Regarde l'image attentivement et verifie :
+1. Chaque objet ou element demande est-il present ?
+2. Les QUANTITES sont-elles exactes ? Compte les objets un par un.
+3. Les details importants pour l'exercice sont-ils corrects (ex. l'heure indiquee par une horloge) ?
+4. L'image contient-elle du texte, des lettres ou des chiffres ecrits ? (Les chiffres d'un cadran d'horloge, d'une regle ou d'un calendrier ne comptent pas s'ils sont demandes dans la description.)
+5. CADRAGE : le sujet est-il entier (rien de coupe par le bord de l'image), le fond est-il uniforme, et l'image est-elle SANS bande grise ou coloree parasite, sans cadre et sans grand vide inutile ?
+
+Reponds UNIQUEMENT avec UN objet JSON :
+{{"conforme": true ou false, "probleme": "description courte du defaut, vide si conforme"}}
+L'image est conforme seulement si les points 1, 2, 3 et 5 sont respectes et qu'il n'y a pas de texte (point 4)."""
 
 
 def _cle_api() -> Optional[str]:
@@ -82,13 +64,6 @@ def _cle_api() -> Optional[str]:
 
 
 def _message_erreur(reponse) -> str:
-    """Le VRAI message d'erreur de Google, cache dans le corps JSON de la
-    reponse (`reponse.raise_for_status()` ne donne que "400 Client Error",
-    jamais pourquoi). Ex: "API key not valid", "Generative Language API
-    has not been used in project ... before or it is disabled", "This
-    model is not enabled for your project"... Renvoie une chaine vide si
-    le corps n'est pas du JSON exploitable (reseau capricieux, page
-    d'erreur HTML d'un proxy, etc.)."""
     try:
         return (reponse.json().get("error", {}) or {}).get("message", "") or ""
     except Exception:
@@ -96,27 +71,16 @@ def _message_erreur(reponse) -> str:
 
 
 def _quota_est_nulle(message: str) -> bool:
-    """Vrai si Google annonce un quota gratuit LITTERALEMENT NUL pour ce
-    modele (le message contient "limit: 0") -- pas juste "quelques
-    requetes par minute". Cas reel observe : "gemini-2.5-flash-preview-
-    image" (une variante "preview", souvent exclue du tier gratuit) avec
-    "limit: 0, model: gemini-2.5-flash-preview-image" repete plusieurs
-    fois dans le message. Dans ce cas, AUCUN reessai, meme en attendant
-    une minute, ne peut jamais reussir -- ce n'est pas un quota bas qui
-    se recharge, c'est zero de maniere permanente pour ce modele sur ce
-    projet. Continuer a reessayer ne fait que gaspiller des minutes
-    (2 reessais x jusqu'a 59s chacun observes en pratique) pour un echec
-    garanti a l'avance."""
     return bool(re.search(r"limit:\s*0\b", message or ""))
 
 
+def _credits_epuises(message: str) -> bool:
+    """Credits prepayes epuises : aucun reessai ne peut reussir, il faut recharger sur https://ai.studio/projects."""
+    m = (message or "").lower()
+    return "prepayment" in m or "credits are depleted" in m or "depleted" in m
+
+
 def _delai_retry(reponse) -> float:
-    """Combien de temps attendre avant de reessayer, d'apres ce que
-    Google recommande lui-meme -- plutot que de deviner un chiffre fixe :
-    1) le header standard HTTP `Retry-After` (secondes) ;
-    2) le champ `retryDelay` (ex: "13s") que l'API Gemini renvoie dans le
-       detail de l'erreur RESOURCE_EXHAUSTED ;
-    3) sinon, DELAI_DEFAUT_SECONDES."""
     entete = reponse.headers.get("Retry-After") if reponse is not None else None
     if entete:
         try:
@@ -138,28 +102,7 @@ def _delai_retry(reponse) -> float:
     return DELAI_DEFAUT_SECONDES
 
 
-def generer_image(description: str) -> Optional[str]:
-    """Genere une image a partir d'une description (deja enrichie du
-    contexte matiere/niveau/chapitre/question par l'appelant -- voir
-    quiz_engine.py) et la renvoie en data URI base64
-    ("data:image/png;base64,...."), prete a etre posee dans ImageRef.url
-    (voir models.py) et utilisable telle quelle par un `<img src=...>`
-    cote frontend -- aucun serveur de fichiers statiques necessaire.
-
-    Renvoie None si l'IA echoue (apres MAX_TENTATIVES essais en cas de
-    429), si la cle API est absente, ou si aucune image n'est revenue. Ne
-    leve JAMAIS d'exception (voir docstring du module) : un souci
-    d'image ne doit jamais faire echouer tout l'examen."""
-    description = (description or "").strip()
-    if not description:
-        return None
-
-    cle = _cle_api()
-    if not cle:
-        print("[image_service] GEMINI_API_KEY absente : image ignoree.")
-        return None
-
-    prompt = f"{STYLE_ENFANTS}\n\nContexte et sujet de l'image :\n{description}"
+def _generer_une_image(prompt: str, cle: str) -> Optional[str]:
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"responseModalities": ["Image"]},
@@ -173,17 +116,23 @@ def generer_image(description: str) -> Optional[str]:
                 json=payload,
                 timeout=TIMEOUT_SECONDES,
             )
+        except requests.Timeout:
+            if tentative == MAX_TENTATIVES:
+                print(f"[image_service] Delai depasse ({TIMEOUT_SECONDES}s) apres {MAX_TENTATIVES} tentatives.")
+                return None
+            print(f"[image_service] Delai depasse -- nouvelle tentative ({tentative}/{MAX_TENTATIVES})...")
+            continue
         except Exception as e:
             print(f"[image_service] Erreur reseau (tentative {tentative}/{MAX_TENTATIVES}) : {e}")
-            return None  # panne reseau : reessayer immediatement n'aiderait pas
+            return None
 
         if reponse.status_code == 429:
             message_429 = _message_erreur(reponse)
+            if _credits_epuises(message_429 or reponse.text):
+                print("[image_service] Credits Gemini EPUISES (prepayment) -- aucun reessai ne peut reussir. "
+                      f"Rechargez sur https://ai.studio/projects. Detail : {message_429}")
+                return None
             if _quota_est_nulle(message_429):
-                # Inutile d'attendre ni de reessayer : "limit: 0" veut dire
-                # que ce modele n'a AUCUNE allocation gratuite sur ce
-                # projet -- la seule issue est d'activer la facturation
-                # (voir le message affiche), pas de patienter.
                 print(
                     "[image_service] Quota GRATUIT NUL (limit: 0) pour ce modele -- "
                     "aucun reessai ne peut reussir, la facturation doit etre activee "
@@ -200,16 +149,13 @@ def generer_image(description: str) -> Optional[str]:
             time.sleep(delai)
             continue
 
+        if reponse.status_code == 404:
+            print(f"[image_service] Erreur 404 : le modele '{MODELE_IMAGE}' n'est pas disponible pour cette "
+                  f"cle API. Changez GEMINI_MODEL_IMAGE dans le .env. Detail : "
+                  f"{_message_erreur(reponse) or reponse.text[:300]}")
+            return None
+
         if reponse.status_code != 200:
-            # NOUVEAU : avant, on ne voyait que "400 Client Error" /
-            # "403 Client Error" (message generique de `requests`) --
-            # jamais la vraie raison de Google. Les causes les plus
-            # frequentes derriere un 400/403 qui persiste MEME avec du
-            # quota disponible : cle API invalide/restreinte, l'API
-            # "Generative Language API" pas activee sur le projet Google
-            # Cloud, ou ce modele precis pas accessible sur ce compte/
-            # cette region -- le message ci-dessous dit exactement
-            # laquelle.
             print(f"[image_service] Erreur {reponse.status_code} : "
                   f"{_message_erreur(reponse) or reponse.text[:300]}")
             return None
@@ -226,18 +172,12 @@ def generer_image(description: str) -> Optional[str]:
             print(f"[image_service] Reponse Gemini inattendue : {e}")
             return None
 
-        for part in parts:
+        for part in parts or []:
             inline = part.get("inlineData") or part.get("inline_data")
             if inline and inline.get("data"):
                 mime = inline.get("mimeType") or inline.get("mime_type") or "image/png"
                 return f"data:{mime};base64,{inline['data']}"
 
-        # NOUVEAU : un 200 SANS image arrive souvent parce que le modele a
-        # refuse de generer (filtre de securite trop prudent, meme sur un
-        # contenu innocent pour enfants) -- `finishReason` dit pourquoi
-        # (SAFETY, PROHIBITED_CONTENT, IMAGE_SAFETY...). Avant, ce cas
-        # ressemblait exactement a un echec de quota, impossible a
-        # distinguer dans les logs.
         finish_reason = None
         try:
             finish_reason = data["candidates"][0].get("finishReason")
@@ -246,4 +186,108 @@ def generer_image(description: str) -> Optional[str]:
         print(f"[image_service] Aucune image dans la reponse (finishReason={finish_reason}).")
         return None
 
+    return None
+
+
+def verifier_image(image_data_uri: str, description: str) -> Tuple[Optional[bool], str]:
+    try:
+        import image_analysis_service as ias
+    except Exception as e:
+        print(f"[image_service] Verification impossible (image_analysis_service introuvable : {e}).")
+        return None, ""
+
+    cle = _cle_api()
+    decode = ias._decoder_data_uri(image_data_uri)
+    if not cle or decode is None:
+        return None, ""
+    mime_type, payload_b64 = decode
+    payload = {
+        "contents": [{"parts": [
+            {"text": PROMPT_VERIFICATION.format(description=description)},
+            {"inlineData": {"mimeType": mime_type, "data": payload_b64}},
+        ]}],
+        "generationConfig": {"responseMimeType": "application/json"},
+    }
+
+    for tentative in range(1, 3):
+        try:
+            reponse = requests.post(
+                ias._ENDPOINT,
+                headers={"x-goog-api-key": cle, "Content-Type": "application/json"},
+                json=payload,
+                timeout=ias.TIMEOUT_SECONDES,
+            )
+        except Exception as e:
+            print(f"[image_service] Verification : erreur reseau ({e}).")
+            return None, ""
+        if reponse.status_code == 429 and _credits_epuises(reponse.text):
+            print("[image_service] Verification : credits Gemini EPUISES (prepayment) -- verification ignoree.")
+            return None, ""
+        if reponse.status_code == 429 and tentative == 1:
+            time.sleep(ias._delai_retry(reponse))
+            continue
+        if reponse.status_code != 200:
+            print(f"[image_service] Verification : erreur {reponse.status_code} -- "
+                  f"{_message_erreur(reponse) or reponse.text[:200]}")
+            return None, ""
+        try:
+            texte = ias._texte_reponse(reponse.json())
+        except Exception:
+            texte = None
+        resultat = ias._extraire_json(texte) if texte else None
+        if resultat is None or "conforme" not in resultat:
+            print("[image_service] Verification : reponse illisible.")
+            return None, ""
+        conforme = resultat.get("conforme")
+        if isinstance(conforme, str):
+            conforme = conforme.strip().lower() in ("true", "oui", "1")
+        return bool(conforme), str(resultat.get("probleme") or "").strip()
+    return None, ""
+
+
+def generer_image(description: str) -> Optional[str]:
+    DERNIERE_GENERATION.clear()
+    description = (description or "").strip()
+    if not description:
+        return None
+
+    cle = _cle_api()
+    if not cle:
+        print("[image_service] GEMINI_API_KEY absente : image ignoree.")
+        return None
+
+    prompt_base = f"{STYLE_ENFANTS}\n\nContexte et sujet de l'image :\n{description}"
+    prompt = prompt_base
+    nb_generations = 1 if not VERIFICATION_ACTIVEE else MAX_GENERATIONS
+    problemes = []
+
+    for essai in range(1, nb_generations + 1):
+        uri = _generer_une_image(prompt, cle)
+        DERNIERE_GENERATION.update({"generations": essai, "problemes": list(problemes)})
+        if uri is None:
+            DERNIERE_GENERATION["statut"] = "echec_generation"
+            return None
+        if not VERIFICATION_ACTIVEE:
+            DERNIERE_GENERATION["statut"] = "non_verifiee"
+            return uri
+
+        conforme, probleme = verifier_image(uri, description)
+        if conforme is None:
+            DERNIERE_GENERATION["statut"] = "verification_indisponible"
+            return uri
+        if conforme:
+            DERNIERE_GENERATION["statut"] = "conforme" if essai == 1 else "conforme_apres_correction"
+            return uri
+
+        problemes.append(probleme or "image non conforme")
+        DERNIERE_GENERATION["problemes"] = list(problemes)
+        print(f"[image_service] Image non conforme (essai {essai}/{nb_generations}) : {probleme or '?'}")
+        prompt = (
+            f"{prompt_base}\n\nATTENTION : une version precedente etait fausse ({probleme or 'image non conforme'}). "
+            "Corrige ce defaut : respecte exactement chaque element et chaque quantite demandes, "
+            "avec un fond uniforme et un sujet entier, sans bande parasite."
+        )
+
+    DERNIERE_GENERATION["statut"] = "rejetee"
+    print(f"[image_service] Image rejetee apres {nb_generations} essais : aucune image plutot qu'une image fausse.")
     return None

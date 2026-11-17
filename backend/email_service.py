@@ -1,20 +1,3 @@
-"""
-Envoi d'emails -- pour l'instant uniquement le code de reinitialisation de
-mot de passe ("mot de passe oublie").
-
-Volontairement construit avec seulement smtplib (bibliotheque standard),
-meme philosophie que auth.py : pas de nouvelle dependance a installer (pas
-de sendgrid, pas de boto3/SES). Fonctionne avec n'importe quel fournisseur
-SMTP classique -- Gmail (avec un "mot de passe d'application", pas le mot
-de passe du compte), Mailtrap ou Brevo en developpement, Amazon SES/Postmark
-en production via leur interface SMTP. Il suffit de renseigner les
-variables SMTP_* dans .env (voir .env.example).
-
-Mode developpement sans SMTP configure : si SMTP_HOST est vide, l'email
-n'est pas envoye mais affiche dans les logs du serveur -- pratique pour
-tester le flux "mot de passe oublie" en local sans compte SMTP reel.
-"""
-
 import os
 import smtplib
 import ssl

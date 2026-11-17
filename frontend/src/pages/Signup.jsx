@@ -21,20 +21,13 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 let toastSeq = 0
 
-// Vite n'expose au navigateur que les variables prefixees VITE_ (voir
-// .env.example du backend pour la valeur GOOGLE_CLIENT_ID a mettre en
-// miroir, cote serveur cette fois, sous le meme nom de client OAuth).
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
-// Indicateur visuel de force du mot de passe (faible -> tres fort). Purement
-// indicatif cote client pour encourager un mot de passe solide -- la seule
-// regle bloquante reste les 8 caracteres minimum (alignes sur le backend,
-// voir validate() plus bas).
 const STRENGTH_COLORS = [
-  '#b91c1c', // faible -- rouge
-  '#d97706', // moyen -- ambre
-  '#2f855a', // fort -- vert (meme vert que les toasts de succes)
-  '#15803d', // tres fort -- vert plus soutenu
+  '#b91c1c',
+  '#d97706',
+  '#2f855a',
+  '#15803d',
 ]
 
 function getPasswordStrength(password) {
@@ -191,10 +184,6 @@ export default function Signup() {
   const toastTimers = useRef(new Map())
   const mounted = useRef(true)
 
-  // Le bouton "S'inscrire avec Google" garde son propre style (pas le
-  // bouton generique de Google) : on pilote Google Identity Services
-  // "a la main" via initTokenClient, concu justement pour etre declenche
-  // par un bouton personnalise -- voir handleGoogleClick plus bas.
   const googleTokenClientRef = useRef(null)
   const genreRef = useRef(genre)
   const handleGoogleResponseRef = useRef(() => {})
@@ -253,23 +242,12 @@ export default function Signup() {
     [dismissToast]
   )
 
-  // Le genre choisi (toggle Femme/Homme) doit rester accessible depuis le
-  // callback Google, enregistre une seule fois a l'initialisation du
-  // token client (voir plus bas) : sans cette ref, il verrait toujours
-  // la valeur de genre au moment du montage, jamais les changements
-  // suivants (probleme classique de "stale closure").
   useEffect(() => {
     genreRef.current = genre
   }, [genre])
 
-  // Meme raison : handleGoogleResponseRef.current est reaffecte a chaque
-  // rendu pour que le callback Google (fixe une fois pour toutes cote
-  // Google Identity Services) appelle toujours la version la plus
-  // recente de cette fonction, avec les bonnes valeurs de tr/pushToast/etc.
   useEffect(() => {
     handleGoogleResponseRef.current = async (response) => {
-      // L'utilisateur a ferme la popup ou refuse l'acces : ce n'est pas
-      // une erreur a signaler, juste une annulation volontaire.
       if (response.error) {
         setGoogleLoading(false)
         if (response.error !== 'popup_closed' && response.error !== 'access_denied') {
@@ -291,10 +269,6 @@ export default function Signup() {
     }
   })
 
-  // Chargement du script Google Identity Services + creation du "token
-  // client" OAuth2, une seule fois au montage. C'est ce client, pas un
-  // <script> ni le bouton Google par defaut, qui ouvre la popup de
-  // connexion quand on appelle requestAccessToken() (voir handleGoogleClick).
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) {
       console.warn('[Signup] VITE_GOOGLE_CLIENT_ID est manquant dans le .env du frontend.')
@@ -344,8 +318,6 @@ export default function Signup() {
       return
     }
     if (!googleTokenClientRef.current) {
-      // Le script Google se charge encore (connexion lente, etc.) : on
-      // laisse la personne reessayer plutot que de rester bloquee.
       pushToast('error', tr.googleNotReady)
       return
     }
@@ -364,10 +336,6 @@ export default function Signup() {
     if (!values.password) {
       next.password = tr.passwordRequired
     } else if (values.password.length < 8) {
-      // Aligne sur la regle du backend (voir main.py : 8 caracteres
-      // minimum) -- avant, ce champ acceptait 6 caracteres cote client
-      // et se faisait rejeter par le serveur juste apres, ce qui donnait
-      // une erreur confuse a la soumission.
       next.password = tr.passwordTooShort
     }
     if (!values.confirm) {
@@ -464,7 +432,7 @@ export default function Signup() {
         .examai-stamp { animation: examaiStampIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both; }
         .examai-lang-menu { animation: examaiLangMenuIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-        /* ✅ Petit fond bordeaux derrière une partie du titre (comme page d'accueil) */
+        
         .examai-underline-wave {
           background-color: rgba(122,0,8,0.12);
           background-repeat: no-repeat;
@@ -480,9 +448,7 @@ export default function Signup() {
           .examai-lang-menu { animation: none !important; }
         }
 
-        /* Barre de defilement du formulaire -- fine, en bleu nuit, TOUJOURS
-           collee a droite meme en arabe RTL (voir direction: ltr force sur
-           le <form>, decouple de la direction du contenu). */
+        
         .examai-scroll { scrollbar-width: thin; scrollbar-color: #0f172a transparent; }
         .examai-scroll::-webkit-scrollbar { width: 6px; }
         .examai-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -490,7 +456,7 @@ export default function Signup() {
         .examai-scroll::-webkit-scrollbar-thumb:hover { background: #0f172a; }
       `}</style>
 
-      {/* ===== Ambient background ===== */}
+      {}
       <div
         className="examai-blob absolute -top-40 -left-40 w-[620px] h-[620px] opacity-50 pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(15,23,42,0.16) 0%, transparent 65%)' }}
@@ -520,7 +486,7 @@ export default function Signup() {
       </div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full border border-[#0f172a]/[0.05] pointer-events-none" />
 
-      {/* ===== Toasts ===== */}
+      {}
       <div
         className="fixed bottom-6 left-6 z-[100] flex flex-col gap-3 w-[min(360px,90vw)]"
         role="region"
@@ -553,7 +519,7 @@ export default function Signup() {
         ))}
       </div>
 
-      {/* ===== Top bar ===== */}
+      {}
       <header dir="ltr" className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 sm:px-12 py-5">
         <div className="flex items-center gap-3.5 examai-anim-1">
           <div className="relative shrink-0">
@@ -656,10 +622,10 @@ export default function Signup() {
         </div>
       </header>
 
-      {/* ===== Main ===== */}
+      {}
       <main className="relative z-10 w-full h-full flex items-center justify-center px-6 py-5 sm:py-6">
 
-        {/* Floating decorative cards */}
+        {}
         <div className="hidden xl:block absolute pointer-events-none inset-0" aria-hidden="true">
           <div className="examai-card-a absolute left-[8%] top-[26%] w-[220px] rounded-[18px] bg-white shadow-[0_24px_48px_-16px_rgba(15,23,42,0.35)] border border-[#0f172a]/8 overflow-hidden">
             <div className="flex items-center gap-1.5 px-4 py-3 border-b border-[#0f172a]/8 bg-white">
@@ -702,11 +668,11 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* The card */}
+        {}
         <div className="examai-anim-2 relative w-full max-w-[650px]">
           <div className="absolute -inset-4 rounded-[40px] bg-[#0f172a]/[0.06] blur-2xl -z-10" />
 
-          {/* Stamp — rouge restauré */}
+          {}
           <div
             className="examai-stamp absolute -top-4 -right-3 sm:-top-5 sm:-right-5 z-20 pointer-events-none select-none"
             aria-hidden="true"
@@ -727,7 +693,7 @@ export default function Signup() {
 
             <div className="relative py-7 flex flex-col flex-1 min-h-0">
 
-              {/* ===== TITRE — style page d'accueil + fond bordeaux ===== */}
+              {}
               <div className="px-8 sm:px-10 text-center mb-6">
                 <h2 className="examai-serif text-[26px] sm:text-[32px] lg:text-[36px] font-semibold tracking-[-0.025em] text-[#0f172a] leading-[1.15]">
                   {tr.headingPart1}
@@ -748,12 +714,10 @@ export default function Signup() {
                 className="examai-scroll flex-1 min-h-0 overflow-y-auto"
                 style={{ direction: 'ltr' }}
               >
-                {/* dir re-applique ici : le <form> est force en LTR juste au-dessus
-                    (uniquement pour garder la scrollbar a droite en arabe), donc
-                    le contenu doit reprendre explicitement le bon sens de lecture. */}
+                {}
                 <div className="px-8 sm:px-10 space-y-3" dir={isRTL ? 'rtl' : 'ltr'}>
 
-                {/* Nom */}
+                {}
                 <div>
                   <label htmlFor="nom" className="block text-[11.5px] font-semibold text-[#4f0005]/70 mb-1.5">
                     {tr.nomLabel}
@@ -785,7 +749,7 @@ export default function Signup() {
                   </div>
                 </div>
 
-                {/* Email */}
+                {}
                 <div>
                   <label htmlFor="email" className="block text-[11.5px] font-semibold text-[#4f0005]/70 mb-1.5">
                     {tr.emailLabel}
@@ -816,7 +780,7 @@ export default function Signup() {
                   </div>
                 </div>
 
-                {/* Password + Confirm côte à côte */}
+                {}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="password" className="block text-[11.5px] font-semibold text-[#4f0005]/70 mb-1.5">
@@ -856,8 +820,7 @@ export default function Signup() {
                       </button>
                     </div>
 
-                    {/* Barre de force -- visible seulement une fois que la
-                        personne a commence a taper, jamais avant. */}
+                    {}
                     {form.password && (() => {
                       const strength = getPasswordStrength(form.password)
                       const color = STRENGTH_COLORS[strength.level]
@@ -876,9 +839,7 @@ export default function Signup() {
                             {tr.strengthLabels[strength.level]}
                           </p>
 
-                          {/* Conseils -- s'allument en vert au fur et a
-                              mesure que chaque critere est rempli. Purement
-                              indicatif, comme la barre ci-dessus. */}
+                          {}
                           <div className="mt-1.5 flex flex-wrap gap-x-2.5 gap-y-1">
                             {[
                               { met: form.password.length >= 8, label: tr.hintLength },
@@ -946,7 +907,7 @@ export default function Signup() {
                   </div>
                 </div>
 
-                {/* Genre */}
+                {}
                 <div>
                   <label className="block text-[11.5px] font-semibold text-[#4f0005]/70 mb-1.5">
                     {tr.genreLabel}
@@ -973,7 +934,7 @@ export default function Signup() {
                   </div>
                 </div>
 
-                {/* Accept */}
+                {}
                 <label className="flex items-start gap-2 text-[12px] text-[#4f0005]/75 cursor-pointer select-none pt-1.5 pb-1.5">
                   <span className="relative flex items-center justify-center mt-0.5">
                     <input
@@ -999,7 +960,7 @@ export default function Signup() {
                   </span>
                 </label>
 
-                {/* Submit + Google */}
+                {}
                 <div className="pt-3">
                   <button
                     type="submit"
@@ -1030,7 +991,7 @@ export default function Signup() {
                     </div>
                   </div>
 
-                  {/* ✅ Bouton Google — texte en ROUGE FONCÉ / NOIR NEUTRE, maintenant fonctionnel */}
+                  {}
                   <button
                     type="button"
                     onClick={handleGoogleClick}
@@ -1057,7 +1018,7 @@ export default function Signup() {
                   </button>
                 </div>
 
-                {/* Footer */}
+                {}
                 <p className="pt-2.5 text-center text-[12.5px] text-[#4f0005]/55">
                   {tr.haveAccount}{' '}
                   <Link

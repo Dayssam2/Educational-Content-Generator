@@ -65,21 +65,8 @@ export default function Selection() {
   const [difficulte, setDifficulte] = useState('Moyenne')
   const [duree, setDuree] = useState(60)
   const [typesQuestions, setTypesQuestions] = useState([])
-  // NOUVEAU -- repartition optionnelle du nombre de questions par type
-  // selectionne (ex: {qcm: 4, texte_trous: 4, ouverte: 2} pour 10
-  // questions au total -- voir main.py:ExamenCreateIn.repartition_types).
-  // Cle = id du type (voir TYPES_QUESTIONS), valeur = nombre voulu. Une
-  // cle absente ou a 0 veut dire "l'IA decide librement pour ce type".
   const [repartitionTypes, setRepartitionTypes] = useState({})
-  // NOUVEAU -- consignes libres transmises a l'IA en plus des parametres
-  // structures ci-dessus (voir handleGenerer et main.py/quiz_engine.py).
   const [notes, setNotes] = useState('')
-  // NOUVEAU -- image fournie par l'enseignant pour construire UNE question
-  // "legende" a partir d'une image REELLE (voir handleGenerer et
-  // main.py:_ajouter_question_legende_uploadee) plutot que de laisser
-  // l'IA imaginer sa propre description. `imageLegende` est la data URI
-  // base64 (ce que le backend attend, meme convention que ImageRef.url) ;
-  // `imageLegendeNom` est juste le nom du fichier, pour l'affichage.
   const [imageLegende, setImageLegende] = useState(null)
   const [imageLegendeNom, setImageLegendeNom] = useState('')
   const imageLegendeInputRef = useRef(null)
@@ -144,18 +131,10 @@ export default function Selection() {
   function toggleType(id) {
     setTypesQuestions((p) => {
       const estActif = p.includes(id)
-      // NOUVEAU -- decocher "legende" retire aussi l'image associee : sinon
-      // elle resterait en memoire et serait quand meme envoyee dans
-      // handleGenerer (voir image_legende plus bas) alors que le type
-      // n'est plus selectionne -- le bloc d'upload disparaissant en meme
-      // temps (voir plus bas, affichage conditionne sur typesQuestions).
       if (estActif && id === 'legende') {
         setImageLegende(null)
         setImageLegendeNom('')
       }
-      // NOUVEAU -- decocher un type retire aussi son chiffre de repartition
-      // (voir repartitionTypes) : un chiffre pour un type qui n'est plus
-      // demande n'aurait aucun sens a envoyer au backend.
       if (estActif) {
         setRepartitionTypes((r) => {
           const { [id]: _retire, ...reste } = r
@@ -191,9 +170,6 @@ export default function Selection() {
     setDuree(Number(v))
   }
 
-  // NOUVEAU -- conversion du fichier choisi en data URI base64 (meme
-  // fonction que celle deja ecrite dans Edition.jsx pour l'upload
-  // d'image apres generation -- ici c'est juste AVANT).
   function handleFichierImageLegende(e) {
     const fichier = e.target.files?.[0]
     e.target.value = ''
@@ -212,11 +188,6 @@ export default function Selection() {
     if (typesQuestions.length === 0) return setError('Choisis au moins un type de question.')
     if (!nbQuestions || Number(nbQuestions) < 1) return setError('Nombre de questions invalide.')
     if (!duree || Number(duree) < 5) return setError('Durée invalide.')
-    // NOUVEAU -- si l'enseignant a commence a remplir une repartition par
-    // type (totalRepartition > 0), elle doit correspondre EXACTEMENT au
-    // nombre de questions choisi -- meme verification refaite cote
-    // backend (voir main.py:creer_examen), mais autant le dire ici avant
-    // de lancer la generation.
     if (totalRepartition > 0 && totalRepartition !== Number(nbQuestions)) {
       return setError(
         `La répartition par type (${totalRepartition}) ne correspond pas au nombre de questions choisi (${nbQuestions}).`
@@ -241,11 +212,6 @@ export default function Selection() {
   const matiereLabel = matiere ? MATIERE_LABEL[matiere] || matiere : null
   const dureeLabel = duree ? `${duree} min` : ''
   const pretAGenerer = Boolean(niveau && matiere && chapitre && typesQuestions.length > 0 && nbQuestions && duree && !loading)
-  // NOUVEAU -- somme des chiffres de repartition par type (voir
-  // repartitionTypes) : 0 veut dire "personne n'a rien rempli, l'IA
-  // decide librement", sinon la somme doit correspondre a nbQuestions
-  // (verifie dans handleGenerer, et a nouveau cote backend dans
-  // creer_examen -- voir main.py).
   const totalRepartition = Object.values(repartitionTypes).reduce((s, n) => s + (Number(n) || 0), 0)
 
   const chapitresFiltres = (() => {
@@ -321,7 +287,7 @@ export default function Selection() {
           padding: 0 0.15em;
         }
 
-        /* ✅ Scrollbar bleu nuit PLEIN */
+        
         .examai-scroll-navy {
           scrollbar-width: thin;
           scrollbar-color: #0f172a rgba(15,23,42,0.12);
@@ -360,7 +326,7 @@ export default function Selection() {
       `}</style>
       <div className="w-full max-w-full overflow-x-hidden">
 
-        {/* ===== EN-TÊTE ===== */}
+        {}
         <div className="relative mb-6 w-full overflow-hidden rounded-[28px] border border-[#0f172a]/20 bg-white p-6 sm:p-8">
           <h1 className="examai-serif text-[30px] sm:text-[40px] lg:text-[42px] font-semibold tracking-[-0.025em] text-[#0f172a] leading-[1.15]">
             Créez votre{' '}
@@ -374,7 +340,7 @@ export default function Selection() {
           </p>
         </div>
 
-        {/* ===== ERREUR ===== */}
+        {}
         {error && (
           <div role="alert" className="examai-alert mb-5 flex items-start gap-3 rounded-[16px] border border-[#7a0008]/40 bg-[#0f172a]/[0.035] p-4 text-[13px] text-[#0f172a]">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#7a0008]/10">
@@ -384,7 +350,7 @@ export default function Selection() {
           </div>
         )}
 
-        {/* ===== Étapes du parcours ===== */}
+        {}
         <div className="mb-5 flex items-center rounded-[20px] border border-[#0f172a]/20 bg-white px-5 py-4" role="list" aria-label="Étapes de création de l'examen">
           {WIZARD_STEPS.map((s, i) => {
             const active = s.n === CURRENT_STEP
@@ -413,12 +379,12 @@ export default function Selection() {
           })}
         </div>
 
-        {/* ===== SÉLECTION DES PARAMÈTRES ===== */}
+        {}
         <div className="min-w-0 rounded-[24px] border border-[#0f172a]/20 bg-white p-6">
           <SectionHeader icon={SlidersHorizontal} title="Sélection des paramètres"
             subtitle="Choisissez le niveau, la matière et le chapitre" />
 
-          {/* ===== Niveau ===== */}
+          {}
           <div className="mt-6">
             <FieldLabel icon={GraduationCap} title="Niveau scolaire" />
             <div className="flex flex-wrap gap-2.5" role="group" aria-label="Niveau scolaire">
@@ -446,7 +412,7 @@ export default function Selection() {
             </div>
           </div>
 
-          {/* ===== Matière ===== */}
+          {}
           <div className="mt-6">
             <FieldLabel icon={BookOpen} title="Matière"
               hint={
@@ -500,7 +466,7 @@ export default function Selection() {
             )}
           </div>
 
-          {/* ===== Chapitre ===== */}
+          {}
           <div className="mt-6">
             <FieldLabel icon={Layers} title="Chapitre / Thème"
               hint={
@@ -525,7 +491,7 @@ export default function Selection() {
               />
             ) : (
               <>
-                {/* ✅ Barre de recherche — bordure bleu nuit PLEIN */}
+                {}
                 <div className="relative mb-3">
                   <Search
                     size={15}
@@ -552,7 +518,7 @@ export default function Selection() {
                   )}
                 </div>
 
-                {/* Résultats — scrollbar bleu nuit PLEIN */}
+                {}
                 {chapitresFiltres.length === 0 ? (
                   <EmptyState
                     tone="neutral"
@@ -595,7 +561,7 @@ export default function Selection() {
             )}
           </div>
 
-          {/* ===== Types de questions ===== */}
+          {}
           <div className="mt-6">
             <FieldLabel icon={ListChecks} title="Types de questions"
               hint={
@@ -626,12 +592,7 @@ export default function Selection() {
               })}
             </div>
 
-            {/* NOUVEAU -- repartition optionnelle du nombre de questions
-                par type (voir repartitionTypes, toggleType, et
-                main.py:ExamenCreateIn.repartition_types). N'apparait
-                qu'avec 2 types selectionnes ou plus : avec un seul type,
-                la "repartition" est evidente (100% de ce type), inutile
-                de le demander. */}
+            {}
             {typesQuestions.length >= 2 && (
               <div className="mt-3 rounded-[14px] border border-[#0f172a]/10 bg-[#0f172a]/[0.02] p-3.5">
                 <div className="mb-2.5 flex items-center justify-between gap-2">
@@ -674,7 +635,7 @@ export default function Selection() {
             )}
           </div>
 
-          {/* ===== Paramètres avancés ===== */}
+          {}
           <div className="mt-6">
             <FieldLabel icon={Hash} title="Paramètres avancés"
               hint="Ajustez le nombre de questions, la difficulté et la durée" />
@@ -713,11 +674,11 @@ export default function Selection() {
             </div>
           </div>
 
-          {/* ===== NOUVEAU : consignes libres pour l'IA ===== */}
+          {}
           <div className="mt-6">
             <FieldLabel icon={PenLine} title="Consignes pour l'IA (optionnel)"
               hint={notes.trim() ? 'Une consigne ajoutée' : 'Aucune consigne'} />
-            {/* ✅ Bordure bleu nuit PLEIN comme la barre de recherche */}
+            {}
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -728,14 +689,7 @@ export default function Selection() {
             />
           </div>
 
-          {/* ===== NOUVEAU : image pour une question "légende" construite
-              a partir d'une image REELLE (voir main.py:
-              _ajouter_question_legende_uploadee) -- l'IA LIT cette image
-              pour en deduire la reponse correcte, au lieu d'imaginer sa
-              propre description. N'apparait que si "Légende" est
-              selectionne dans "Types de questions" ci-dessus -- sinon ce
-              serait une image pour un type de question que l'enseignant
-              n'a pas demande. ===== */}
+          {}
           {typesQuestions.includes('legende') && (
             <div className="mt-6">
               <FieldLabel icon={ImagePlus} title="Question à légender à partir d'une image (optionnel)"
@@ -743,48 +697,7 @@ export default function Selection() {
               <input
                 ref={imageLegendeInputRef}
                 type="file"
-                accept="image/*"
-                onChange={handleFichierImageLegende}
-                className="hidden"
-                aria-label="Importer une image pour une question à légender"
-              />
-              {imageLegende ? (
-                <div className="flex items-center gap-3 rounded-[16px] border border-[#0f172a]/15 bg-white p-3">
-                  <img
-                    src={imageLegende}
-                    alt=""
-                    className="h-16 w-16 shrink-0 rounded-[10px] border border-[#0f172a]/10 object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[12.5px] font-semibold text-[#0f172a]">{imageLegendeNom}</p>
-                    <p className="text-[11px] text-[#0f172a]/50">
-                      L'IA lira cette image pour créer une question de type "Légende"
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => { setImageLegende(null); setImageLegendeNom('') }}
-                    aria-label="Retirer l'image"
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#0f172a]/50 transition-colors hover:bg-[#0f172a]/[0.08] hover:text-[#0f172a] ${FOCUS_RING}`}
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => imageLegendeInputRef.current?.click()}
-                  className={`flex w-full items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-[#7a0008]/35 bg-[#7a0008]/[0.03] py-4 text-[13px] font-semibold text-[#7a0008] transition-all hover:border-[#7a0008]/55 hover:bg-[#7a0008]/[0.06] ${FOCUS_RING}`}
-                >
-                  <ImagePlus size={16} />
-                  Importer une image (schéma, photo…) — recommandé pour ce type
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ===== BARRE FLOTTANTE ===== */}
+                accept="image}
         <div className="sticky bottom-4 z-20 mt-6 w-full">
           <div className="w-full overflow-hidden rounded-[24px] border border-[#0f172a]/20 bg-white">
             <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -823,7 +736,7 @@ export default function Selection() {
           </div>
         </div>
 
-        {/* ===== MODAL RÉCAP ===== */}
+        {}
         {showRecap && (
           <RecapModal
             onClose={() => setShowRecap(false)}
@@ -839,7 +752,7 @@ export default function Selection() {
   )
 }
 
-/* ===== SOUS-COMPOSANTS ===== */
+
 
 function SectionHeader({ icon: Icon, title, subtitle }) {
   return (

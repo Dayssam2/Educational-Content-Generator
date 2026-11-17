@@ -16,8 +16,7 @@ export default function WizardShell({ step, title, subtitle, backTo = null, hide
       <div className="relative z-10">
         <TopNav />
 
-        {/* Bandeau d'étapes intégré à WizardShell — une page peut le masquer
-            via hideStepper si elle affiche déjà son propre indicateur. */}
+        {}
         {!hideStepper && (
           <div className="border-b border-[#7a0008]/10 bg-white">
             <div className="mx-auto flex max-w-6xl items-center px-6">

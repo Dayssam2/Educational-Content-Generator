@@ -1,45 +1,3 @@
-"""
-Moteur de generation de quiz, appele par POST /api/examens (voir main.py).
-
-Comme l'ancien quiz_orchestrator.py (version chatbot), ce module NE REECRIT
-PAS rag_system/, services/gemini_service.py ni prompts/quiz_prompt.py -- il
-les importe et les appelle. La seule chose qui change par rapport a la
-version chatbot : plus besoin de extraire_infos_ia() ni
-appliquer_resultat_ia() (comprehension de texte libre), puisque le wizard
-React envoie deja matiere/niveau/chapitres/nb_questions de facon structuree
-(boutons et menus deroulants cote frontend). generer_quiz(), lister_chapitres()
-et lister_niveaux_disponibles() sont repris tels quels : c'est la meme
-"vraie" logique RAG + Gemini, juste appelee differemment.
-
-MISE A JOUR : models.models EST DE NOUVEAU UTILISE ICI (voir
-_construire_question_feuille / create_examen_from_response plus bas).
-models.py connait maintenant 12 types (les 4 d'origine + association,
-remise_en_ordre, tri, calcul, legende, dictee, redaction, et le
-regroupement "lecture") -- ce fichier les genere et les valide tous.
-
-IMPORTANT -- ce qui n'a PAS ete touche dans cette mise a jour :
-pdf_export.py et validation.py sont restes EXACTEMENT comme avant. Deux
-consequences a connaitre :
-
-1. Ils ne savent afficher/valider correctement que qcm / vrai_faux /
-   ouverte / texte_trous. Une question association/tri/calcul/legende/
-   dictee/redaction sera quand meme stockee et validee "structurellement"
-   par ce fichier (via models.py), mais pdf_export.py l'affichera sans
-   zone de reponse dediee (juste la consigne) tant qu'il n'est pas mis a
-   jour lui aussi.
-
-2. "lecture" est un REGROUPEMENT dans models.py (un texte + plusieurs
-   sous-questions), mais validation.py/pdf_export.py attendent une liste
-   PLATE de questions, chacune avec ses propres points. On aplati donc
-   chaque exercice de lecture en autant d'entrees que de sous-questions
-   au moment de construire la sortie (voir _aplatir_questions /
-   _vers_question_api plus bas) : chaque sous-question recupere le texte
-   partage dans son propre champ "support" si elle n'a pas le sien, et le
-   titre d'exercice est mis sur la premiere sous-question seulement (pour
-   ne pas le repeter). Le bareme est reparti sur le nombre REEL de
-   sous-questions, pas sur le nombre de blocs.
-"""
-
 import sys
 import json
 from pathlib import Path
@@ -57,10 +15,6 @@ from rag_system import SimpleRAG, DocumentLoader
 from prompts.quiz_prompt import construire_prompt
 import image_service
 
-# La structure reelle du projet a `models.py` a l'interieur d'un paquet
-# `models/` chez certains (d'ou "models.models" dans les commentaires
-# ci-dessus) -- mais pas chez tous. On tente les deux, dans cet ordre :
-# supprimez la branche qui ne correspond pas a votre projet.
 try:
     from models.models import (
         Examen, QuestionQCM, QuestionVraiFaux, QuestionOuverte, QuestionRedaction,
@@ -78,7 +32,7 @@ except ImportError:
 
 
 class QuizGenerationError(Exception):
-    """Levee quand le RAG ne trouve rien de pertinent, ou que Gemini echoue."""
+    pass
 
 
 MATIERE_DISPLAY = {
@@ -89,35 +43,10 @@ MATIERE_DISPLAY = {
     "histoire_geo": "التاريخ والجغرافيا",
 }
 
-BAREME_TOTAL = 20  # note sur 20 : convention standard des examens tunisiens
-
-# MISE A JOUR : les images sont maintenant generees les unes APRES les
-# autres, plus en parallele. Un run reel a montre que meme 4-5 appels
-# lances en meme temps se faisaient TOUS rejeter en 429 d'un coup : le
-# niveau gratuit du modele d'image autorise beaucoup moins de requetes
-# par minute que le modele de texte, et les lancer en rafale garantissait
-# de depasser cette limite. C'est plus lent (chaque image peut attendre
-# et reessayer, voir image_service.MAX_TENTATIVES) mais ca reussit
-# reellement, plutot que d'echouer vite et systematiquement.
+BAREME_TOTAL = 20
 
 
 def _repartir_bareme(nb_questions: int) -> List[int]:
-    """Repartit BAREME_TOTAL points sur nb_questions, le plus egalement
-    possible, en garantissant une somme EXACTE de 20 (les premieres
-    questions recoivent le point restant s'il ne se divise pas rond).
-    Ex: 4 questions -> [5,5,5,5]. 7 questions -> [3,3,3,3,3,3,2].
-
-    IMPORTANT : nb_questions doit etre le nombre de questions REELLEMENT
-    gradables une fois les exercices de lecture APLATIS (voir
-    _aplatir_questions) -- pas le nombre de blocs de haut niveau, sinon un
-    exercice de lecture a 3 sous-questions ne recevrait qu'1/N-ieme du
-    bareme au lieu de 3/N-iemes.
-
-    Simplification assumee : repartition egale entre toutes les questions,
-    quel que soit leur type. Le systeme tunisien pondere parfois les
-    exercices differemment (un probleme note plus qu'un QCM) -- si vos
-    enseignants suivent une ponderation precise par type, dites-le moi et
-    je l'ajoute plutot que de deviner un bareme specifique."""
     if nb_questions <= 0:
         return []
     base = BAREME_TOTAL // nb_questions
@@ -146,16 +75,12 @@ def get_document_loader() -> DocumentLoader:
 
 
 def lister_chapitres(matiere: str, niveau: str) -> List[str]:
-    """Titres exacts des chapitres disponibles pour une matiere/niveau, dans
-    l'ordre du fichier JSON source. Alimente GET /api/chapitres."""
     loader = get_document_loader()
     docs = loader.get_by_matiere_niveau(matiere, str(niveau))
     return [d.metadata.get("titre", "Sans titre") for d in docs]
 
 
 def lister_niveaux_disponibles(matiere: str) -> List[str]:
-    """Niveaux (1 a 6) pour lesquels du contenu existe reellement pour cette
-    matiere. Utile pour ne pas proposer un niveau vide dans le formulaire."""
     loader = get_document_loader()
     return [n for n in ["1", "2", "3", "4", "5", "6"] if loader.get_by_matiere_niveau(matiere, n)]
 
@@ -171,30 +96,11 @@ class ParametresExamen:
         self.langue = "fr" if matiere == "Français" else "ar"
         self.types_questions = ["qcm", "vrai_faux", "question_ouverte"]
         self.difficulte = "normale"
-        # NOUVEAU -- consignes libres de l'enseignant (etape Selection), ou
-        # recommandations de l'IA a corriger (etape Validation -> voir
-        # POST /api/examens/{id}/regenerer dans main.py). None par defaut :
-        # ne change rien au prompt si personne n'en fournit (voir
-        # generer_quiz_avec_gemini plus bas).
         self.notes = None
-        # NOUVEAU -- repartition optionnelle du nombre de questions par
-        # type, ex: {"qcm": 4, "texte_trous": 4, "ouverte": 2} pour un
-        # total de 10 (voir main.py:ExamenCreateIn.repartition_types).
-        # None par defaut : Gemini choisit librement parmi
-        # self.types_questions, comme avant -- c'est une CONSIGNE
-        # supplementaire dans le prompt (voir generer_quiz_avec_gemini),
-        # pas une contrainte forcee cote code : Gemini peut s'en ecarter
-        # legerement, comme pour le reste du prompt.
         self.repartition_types = None
 
 
 def _vers_reponse_texte(valeur, defaut="") -> str:
-    """Gemini renvoie parfois une liste pour un texte a trous a plusieurs
-    blancs (ex: ['امام', 'وراء']) plutot qu'une seule chaine. models.py
-    accepte cette liste directement en interne (QuestionTrous), mais le
-    contrat de sortie existant (reponseAttendue, lu par pdf_export.py)
-    attend une chaine -- ce join ne sert donc qu'a CETTE conversion
-    finale, plus a la validation."""
     if isinstance(valeur, list):
         return " / ".join(str(v) for v in valeur)
     return str(valeur) if valeur not in (None, "") else defaut
@@ -216,22 +122,7 @@ def build_rag_context(rag_results: List[Dict]) -> str:
     return "\n".join(context_parts)
 
 
-# ---------------------------------------------------------------------------
-# JSON brut de Gemini -> instances Pydantic de models.py
-# ---------------------------------------------------------------------------
-
 def _image_depuis_json(q: Dict) -> Optional["ImageRef"]:
-    """Accepte deux formes dans le JSON de Gemini : soit un objet "image"
-    deja complet ({"url" / "description" / "alt_text": ...}), soit le
-    raccourci "image_description" (une phrase) -- le plus courant, puisque
-    c'est ce que le prompt (voir generer_quiz_avec_gemini) lui demande
-    d'utiliser. Ne genere RIEN ici (pas d'appel reseau dans cette
-    fonction) : `image.url` reste vide a ce stade, seule `description`
-    est posee. La vraie generation (image_service.py) se fait plus tard,
-    en une seule passe apres coup sur TOUTE la liste de questions -- voir
-    _generer_images_manquantes -- pour pouvoir l'enrichir du contexte
-    matiere/niveau/chapitre (pas encore connu ici, question par question)
-    et pour paralleliser les appels plutot que d'attendre chacun son tour."""
     if isinstance(q.get("image"), dict):
         try:
             return ImageRef(**q["image"])
@@ -242,8 +133,6 @@ def _image_depuis_json(q: Dict) -> Optional["ImageRef"]:
 
 
 def _champs_communs(q: Dict) -> Dict:
-    """Champs partages par tous les types de question (voir
-    models.QuestionBase) : toujours lus avec .get(), jamais obligatoires."""
     tableau = q.get("tableau")
     return {
         "titre_exercice": q.get("titre_exercice") or None,
@@ -255,11 +144,6 @@ def _champs_communs(q: Dict) -> Dict:
 
 
 def _construire_question_feuille(q: Dict):
-    """Construit UNE question (pas un exercice de lecture) a partir de son
-    dict JSON brut -- reutilise a l'identique pour les questions de haut
-    niveau ET pour les sous_questions d'un exercice de "lecture" (voir
-    create_examen_from_response plus bas), pour ne pas dupliquer cette
-    logique deux fois."""
     commun = _champs_communs(q)
     t = q.get("type")
 
@@ -349,10 +233,6 @@ def _construire_question_feuille(q: Dict):
     if t == "legende":
         image = commun.pop("image", None)
         if image is None:
-            # QuestionLegende exige une image (voir models.py) -- sans ca,
-            # Pydantic le dirait aussi, mais avec un message moins parlant
-            # que celui-ci pour diagnostiquer un prompt Gemini qui a
-            # oublie "image_description".
             raise ValueError("Une question 'legende' doit avoir une image (image_description manquant).")
         return QuestionLegende(
             type="legende", question=q["question"], image=image,
@@ -396,9 +276,6 @@ def create_examen_from_response(quiz_data: Dict, params: ParametresExamen) -> Ex
                 ))
             else:
                 items.append(_construire_question_feuille(q))
-            # type inconnu (ni "lecture" ni reconnu dans _construire_question_feuille)
-            # -> KeyError levee ci-dessus, rattrapee juste en dessous : ignore silencieusement,
-            # meme comportement qu'avant cette mise a jour.
         except (ValidationError, KeyError, TypeError, ValueError) as e:
             print(f"[quiz_engine] Question ignoree (invalide) : {e}")
             continue
@@ -432,12 +309,6 @@ def create_examen_from_response(quiz_data: Dict, params: ParametresExamen) -> Ex
 
 
 def _prompt_image_enrichi(question, params: "ParametresExamen") -> str:
-    """Enrichit la description d'image fournie par Gemini (une phrase
-    isolee, ex: "trois pommes rouges") avec le contexte de l'examen --
-    matiere, niveau, chapitre -- et l'enonce de la question elle-meme.
-    Sans ce contexte, l'image generee ne sait rien du niveau scolaire ni
-    du sujet reel (une "plante" dessinee pour une 1ere annee n'a pas le
-    meme niveau de detail que pour une 6eme, par exemple)."""
     morceaux = [
         f"Matiere : {params.matiere}.",
         f"Niveau scolaire : {params.niveau}.",
@@ -451,10 +322,6 @@ def _prompt_image_enrichi(question, params: "ParametresExamen") -> str:
 
 
 def _images_a_generer(items: List) -> List:
-    """Rassemble TOUTES les images en attente d'une vraie generation --
-    celles des questions isolees, celles des sous-questions d'un exercice
-    de lecture, ET celle du bloc de lecture lui-meme (son image de
-    support partagee, independante de ses sous-questions)."""
     a_generer = []
     for item in items:
         if item.type == "lecture":
@@ -471,15 +338,6 @@ def _images_a_generer(items: List) -> List:
 
 
 def _generer_images_manquantes(examen: Examen, params: "ParametresExamen") -> None:
-    """Genere, l'UNE APRES L'AUTRE (voir la note sur MAX_TENTATIVES plus
-    haut -- le parallelisme causait des 429 systematiques), la vraie
-    image de chaque question/bloc qui n'a encore qu'une description en
-    attente. Best effort : une image qui echoue meme apres les retries de
-    image_service.generer_image() est retiree plutot que de laisser un
-    champ image a moitie rempli -- SAUF pour "legende", qui EXIGE une
-    image (voir models.py) : dans ce cas on garde la description, pour
-    que la question reste valide et affichable (avec un "pas encore
-    generee" cote frontend) plutot que de la perdre completement."""
     a_generer = _images_a_generer(examen.questions)
     if not a_generer:
         return
@@ -492,18 +350,11 @@ def _generer_images_manquantes(examen: Examen, params: "ParametresExamen") -> No
             item.image.alt_text = item.image.alt_text or item.image.description
         elif item.type != "legende":
             item.image = None
-        # sinon (legende sans image generee) : on garde item.image.description,
-        # voir docstring ci-dessus.
 
 
 def generer_quiz_avec_gemini(params: ParametresExamen, contexte_rag: str) -> Optional[Examen]:
     prompt = construire_prompt(params, contexte_programme=contexte_rag)
 
-    # NOUVEAU -- consignes libres (Selection) et/ou recommandations a
-    # corriger (regeneration depuis Validation, voir main.py). Place
-    # AVANT le format JSON pour que Gemini les traite comme des
-    # instructions de fond, pas comme un simple detail technique noye au
-    # milieu du schema attendu.
     if getattr(params, "notes", None):
         prompt += f"""
 
@@ -511,13 +362,6 @@ Consignes supplementaires de l'enseignant, a respecter en priorite :
 {params.notes.strip()}
 """
 
-    # NOUVEAU -- repartition par type demandee par l'enseignant (voir
-    # ParametresExamen.repartition_types). Place comme les "notes"
-    # ci-dessus, AVANT le format JSON, pour que Gemini la traite comme
-    # une contrainte de fond -- pas une garantie absolue (Gemini peut
-    # s'en ecarter comme pour toute consigne en langage naturel), mais
-    # une instruction bien plus precise que la simple liste de types
-    # autorises juste en dessous.
     if getattr(params, "repartition_types", None):
         lignes = "\n".join(
             f"- {n} question(s) de type \"{t}\""
@@ -634,26 +478,10 @@ Reponds UNIQUEMENT avec le JSON."""
         return create_examen_from_response(quiz_data, params)
     except Exception as e:
         print(f"Erreur Gemini: {e}")
-        # Avant : `return None` avalait l'exception -- l'appelant ne savait
-        # plus DU TOUT pourquoi ca avait echoue (quota Gemini ? cle absente ?
-        # JSON invalide ?) et affichait un message generique "verifie ta cle
-        # API" meme quand la vraie cause etait un simple 429 de quota. On
-        # relance plutot l'exception pour que generer_quiz_pour_wizard
-        # puisse donner un message qui correspond a la vraie cause.
         raise
 
 
-# ---------------------------------------------------------------------------
-# Examen (Pydantic, eventuellement imbrique via "lecture") -> contrat de
-# sortie plat existant (voir la note en tete de fichier)
-# ---------------------------------------------------------------------------
-
 def _aplatir_questions(items: List) -> List[Tuple[Optional["ExerciceLecture"], bool, object]]:
-    """Deplie chaque exercice de lecture en autant d'entrees (lecture,
-    est_premiere, sous_question) que de sous-questions ; une question
-    isolee devient (None, False, question). `est_premiere` sert a savoir
-    a laquelle des sous-questions accrocher le titre_exercice du bloc
-    (une seule fois, pas repete sur chacune) -- voir _vers_question_api."""
     plat: List[Tuple[Optional["ExerciceLecture"], bool, object]] = []
     for item in items:
         if item.type == "lecture":
@@ -665,17 +493,6 @@ def _aplatir_questions(items: List) -> List[Tuple[Optional["ExerciceLecture"], b
 
 
 def _vers_question_api(id_str: str, q, points: int, lecture=None, est_premiere: bool = False) -> Dict:
-    """Convertit une question (instance Pydantic de models.py) vers le
-    format attendu par le frontend/pdf_export.py/validation.py (id, type,
-    points, question, + les champs specifiques au type) -- INCHANGE pour
-    qcm/vrai_faux/ouverte/texte_trous, pour ne rien casser cote
-    frontend/pdf_export.py/validation.py (aucun des 3 n'a ete modifie ici).
-
-    `lecture`/`est_premiere` : si cette question vient d'un exercice de
-    lecture aplati (voir _aplatir_questions), elle recupere le texte/
-    l'image partages du bloc quand elle n'a pas les siens -- sinon ce
-    texte serait perdu, puisque validation.py/pdf_export.py ne
-    comprennent pas encore le regroupement "lecture" lui-meme."""
     base: Dict = {
         "id": id_str,
         "type": q.type,
@@ -732,7 +549,7 @@ def _vers_question_api(id_str: str, q, points: int, lecture=None, est_premiere: 
             base["criteres_evaluation"] = q.criteres_evaluation
         if q.longueur_min_mots:
             base["longueur_min_mots"] = q.longueur_min_mots
-    else:  # ouverte, texte_trous
+    else:
         base["reponseAttendue"] = _vers_reponse_texte(q.reponse_correcte)
     return base
 
@@ -748,32 +565,6 @@ def generer_quiz_pour_wizard(
     notes: Optional[str] = None,
     repartition_types: Optional[Dict[str, int]] = None,
 ) -> Dict:
-    """
-    Point d'entree appele par POST /api/examens (main.py) ET par
-    POST /api/examens/{id}/regenerer (meme fonction reutilisee pour les
-    deux : une regeneration n'est rien d'autre qu'une generation avec les
-    memes parametres d'origine + des consignes supplementaires -- voir
-    `notes`).
-
-    Reprend exactement la logique de generer_quiz(state) de la version
-    chatbot (voir la note dans ce fichier original sur pourquoi un titre
-    EXACT passe par DocumentLoader plutot que par SimpleRAG.search(), pour
-    eviter que rag_engine.py ne merge des chapitres voisins non demandes) --
-    seule la signature change : parametres explicites plutot qu'un dict
-    d'etat de conversation.
-
-    `notes` : consignes libres de l'enseignant (etape Selection), et/ou
-    recommandations de l'IA a corriger lors d'une regeneration (voir
-    _construire_notes_regeneration dans main.py) -- simplement ajoutees
-    au prompt envoye a Gemini, voir generer_quiz_avec_gemini.
-
-    `repartition_types` : nombre de questions VOULU pour chaque type
-    (ex: {"qcm": 4, "ouverte": 6}), optionnel -- voir
-    main.py:ExamenCreateIn.repartition_types pour la validation cote API
-    (la somme doit correspondre a nb_questions) et ParametresExamen pour
-    comment c'est transmis au prompt. Si absent, Gemini choisit librement
-    parmi `types_questions`, comme avant.
-    """
     matiere_display = MATIERE_DISPLAY.get(matiere_key, matiere_key)
 
     loader = get_document_loader()
@@ -830,12 +621,6 @@ def generer_quiz_pour_wizard(
     try:
         examen = generer_quiz_avec_gemini(params, contexte_rag)
     except Exception as e:
-        # 429 / "quota" / "rate limit" dans le message : c'est le cas le
-        # plus courant en pratique (le niveau gratuit de l'API Gemini
-        # autorise seulement 5 requetes par minute, partagees avec le chat
-        # de la page Assistant), et ca n'a rien a voir avec GEMINI_API_KEY.
-        # Un autre message ici induirait a tort a chercher du cote de la cle
-        # API alors qu'il suffit d'attendre une minute.
         message = str(e)
         if "429" in message or "quota" in message.lower() or "rate limit" in message.lower():
             raise QuizGenerationError(

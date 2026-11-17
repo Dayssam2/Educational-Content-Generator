@@ -1,34 +1,3 @@
-"""
-Moteur de l'assistant pedagogique conversationnel (page Assistant / lien
-"Aide" du frontend), appele par POST /api/assistant/chat (voir main.py).
-
-Ce module n'existait pas : le champ de saisie de la page Assistant etait un
-mockup visuel, jamais branche sur rien (voir le commentaire "TODO API" qui
-etait dans Assistant.jsx, et la note en tete de main.py qui explique que le
-chatbot conversationnel /api/chat a ete retire au profit du wizard
-structure). Ceci remet une reponse en langage libre, mais pour une question
-ponctuelle plutot que pour generer un examen complet.
-
-Reutilise le meme services/gemini_service.py que quiz_engine.py -- pas de
-nouvelle dependance, pas de nouvelle cle API a configurer.
-
-Aucun historique n'est persiste cote backend : le frontend renvoie a chaque
-appel les derniers echanges de la conversation en cours (stockes en state
-React), et tout est perdu au rechargement de la page -- suffisant pour de
-l'aide ponctuelle. A revoir (table dediee) si vous voulez un historique
-retrouve d'une session a l'autre ou visible depuis un autre appareil.
-
-MISE A JOUR : l'assistant peut maintenant repondre a partir d'un PDF joint
-par l'enseignant a sa question (programme, fiche de cours, sujet
-d'examen...), en plus de l'historique de conversation. Le texte est deja
-extrait par main.py (reutilise pdf_quiz_engine.extraire_texte_pdf, meme
-fonction que pour POST /api/examens/depuis-pdf -- pas de deuxieme
-implementation d'extraction PDF) : ce module ne fait QUE l'inserer dans le
-prompt, il ne decode jamais de base64 ni ne lit de PDF lui-meme. Meme
-usage PONCTUEL que le reste de ce fichier : ce texte n'est ni indexe ni
-conserve au-dela de la reponse en cours.
-"""
-
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -40,16 +9,14 @@ sys.path.insert(0, str(_ROOT))
 load_dotenv(_ROOT / ".env")
 
 from services.gemini_service import generate_content
+from voice_engine import detecter_langue
 
-# Cadre le sujet (pedagogie / plateforme) sans etre trop rigide -- sinon
-# l'assistant refuse des questions raisonnablement liees a l'evaluation
-# juste parce qu'elles ne rentrent pas mot pour mot dans une case.
 CONTEXTE = (
     "Tu es l'assistant pedagogique de ClassAssistant, une plateforme qui aide "
     "les enseignants du primaire en Tunisie a creer, personnaliser et corriger "
     "leurs examens grace a l'IA. Le generateur d'examens fonctionne en 4 "
     "etapes (Selection des parametres, Edition des questions, Validation, "
-    "Export PDF). Reponds en francais, de facon concise, concrete et "
+    "Export PDF). Reponds dans la langue de l'enseignant, de facon concise, concrete et "
     "bienveillante, sur la pedagogie, les types de questions, les baremes, "
     "l'utilisation de la plateforme, ou des idees d'exercices par matiere. "
     "Si l'enseignant a joint un document, appuie-toi dessus pour repondre "
@@ -72,15 +39,48 @@ CONTEXTE = (
     "que d'inventer une reponse."
 )
 
-# Au-dela, le prompt grossit pour rien : le debut d'une longue conversation
-# n'aide plus a repondre a la question du moment.
 MAX_TOURS_HISTORIQUE = 6
 
-# Plus court que pdf_quiz_engine.MAX_CARACTERES_PDF (12 000) : ici il s'agit
-# de repondre a UNE question sur un extrait du document, pas de generer un
-# examen complet a partir de tout son contenu -- pas besoin d'un contexte
-# aussi large, et ca garde le prompt (donc le temps de reponse) plus leger.
 MAX_CARACTERES_PDF = 8_000
+
+CONSIGNE_VOCALE = (
+    "\n\nMODE VOCAL : ta reponse sera LUE A VOIX HAUTE par une synthese vocale. "
+    "Reponds en 2 a 5 phrases courtes et naturelles, comme a l'oral. "
+    "Pas de markdown, pas de titres, pas de tableaux, pas de listes a puces, "
+    "pas d'emojis. Si une liste est indispensable, enumere au plus 3 elements "
+    "dans une phrase (d'abord..., ensuite..., enfin...). Termine si utile par "
+    "une courte question pour poursuivre l'echange."
+)
+CONSIGNE_LANGUE = {
+    "ar": (
+        "\n\nLANGUE : l'enseignant s'exprime en arabe. Reponds UNIQUEMENT en arabe "
+        "standard simple et clair, adapte a un enseignant tunisien. N'ecris aucune "
+        "phrase en francais ; garde seulement les sigles usuels (QCM, PDF) si besoin."
+    ),
+    "fr": (
+        "\n\nLANGUE : l'enseignant s'exprime en francais. Reponds UNIQUEMENT en francais."
+    ),
+}
+RAPPEL_LANGUE = {
+    "ar": "(Rappel : ta reponse doit etre entierement en arabe.)",
+    "fr": "(Rappel : ta reponse doit etre entierement en francais.)",
+}
+PROMPT_TRADUCTION = {
+    "ar": "Traduis le texte suivant en arabe standard simple et clair. Garde exactement le meme sens et la meme mise en forme, n'ajoute rien, reponds seulement avec la traduction :\n\n",
+    "fr": "Traduis le texte suivant en francais simple et clair. Garde exactement le meme sens et la meme mise en forme, n'ajoute rien, reponds seulement avec la traduction :\n\n",
+}
+
+
+def langue_cible(message: str, historique: Optional[List[Dict]] = None, langue: Optional[str] = None) -> str:
+    code = (langue or "").split("-")[0].lower()
+    if code in ("ar", "fr"):
+        return code
+    if any(c.isalpha() for c in message or ""):
+        return detecter_langue(message)
+    for tour in reversed(historique or []):
+        if tour.get("role") == "user" and any(c.isalpha() for c in tour.get("contenu") or ""):
+            return detecter_langue(tour["contenu"])
+    return "fr"
 
 
 def _tronquer_pdf_si_necessaire(texte: str) -> str:
@@ -98,7 +98,13 @@ def _construire_prompt(
     historique: Optional[List[Dict]],
     texte_pdf: Optional[str] = None,
     nom_fichier_pdf: Optional[str] = None,
+    mode_vocal: bool = False,
+    langue: str = "fr",
 ) -> str:
+    consignes = CONSIGNE_LANGUE.get(langue, CONSIGNE_LANGUE["fr"])
+    if mode_vocal:
+        consignes += CONSIGNE_VOCALE
+
     fil = ""
     for tour in (historique or [])[-MAX_TOURS_HISTORIQUE:]:
         role = "Enseignant" if tour.get("role") == "user" else "Assistant"
@@ -115,9 +121,23 @@ def _construire_prompt(
         )
 
     return (
-        f"{CONTEXTE}{contexte_pdf}\n\nConversation en cours :{fil}\n"
-        f"Enseignant : {message}\nAssistant :"
+        f"{CONTEXTE}{consignes}{contexte_pdf}\n\nConversation en cours :{fil}\n"
+        f"Enseignant : {message}\n{RAPPEL_LANGUE.get(langue, RAPPEL_LANGUE['fr'])}\nAssistant :"
     )
+
+
+def _corriger_langue(reponse: str, langue: str) -> str:
+    if detecter_langue(reponse) == langue:
+        return reponse
+    try:
+        traduction = generate_content(PROMPT_TRADUCTION[langue] + reponse)
+    except Exception as e:
+        print(f"[assistant_engine] Traduction impossible ({e}) : reponse renvoyee telle quelle.")
+        return reponse
+    traduction = (traduction or "").strip()
+    if traduction and detecter_langue(traduction) == langue:
+        return traduction
+    return reponse
 
 
 def repondre(
@@ -125,19 +145,15 @@ def repondre(
     historique: Optional[List[Dict]] = None,
     texte_pdf: Optional[str] = None,
     nom_fichier_pdf: Optional[str] = None,
+    mode_vocal: bool = False,
+    langue: Optional[str] = None,
 ) -> str:
-    """Point d'entree appele par POST /api/assistant/chat (main.py).
-
-    `texte_pdf` est deja extrait par main.py AVANT d'arriver ici (voir
-    pdf_quiz_engine.extraire_texte_pdf) : ce module ne s'occupe jamais du
-    decodage base64 ni de la lecture du fichier lui-meme -- meme separation
-    des responsabilites que pdf_quiz_engine.generer_quiz_depuis_pdf, qui ne
-    fait pas non plus de decodage (fait dans main.py:_decoder_pdf_base64)."""
     message = (message or "").strip()
     if not message:
         raise ValueError("Message vide")
 
-    prompt = _construire_prompt(message, historique, texte_pdf, nom_fichier_pdf)
+    cible = langue_cible(message, historique, langue)
+    prompt = _construire_prompt(message, historique, texte_pdf, nom_fichier_pdf, mode_vocal, cible)
     try:
         reponse = generate_content(prompt)
     except Exception as e:
@@ -146,4 +162,4 @@ def repondre(
     if not reponse or not reponse.strip():
         raise RuntimeError("Reponse vide de l'IA")
 
-    return reponse.strip()
+    return _corriger_langue(reponse.strip(), cible)

@@ -1,14 +1,40 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
-  Download, Loader2, AlertTriangle, Check, ArrowLeft, ArrowRight,
-  FileText, Printer, Globe, Settings2, Eye, Sparkles, CheckCircle2,
-  FileCheck2, FileType2, FileCode2, FileJson, Wand2,
-  X, GraduationCap, BookOpen, Clock,
+  Pencil, Copy, Trash2, Plus, Loader2, AlertTriangle, Check,
+  ListChecks, ArrowRight, FileEdit, Search, X,
+  ArrowUp, ArrowDown, Filter, Eye, AlertCircle,
+  Sparkles, GripVertical, ChevronDown,
 } from 'lucide-react'
 import WizardShell from '../../components/WizardShell.jsx'
 import { useWizard } from '../../context/WizardContext.jsx'
-import { MATIERE_LABEL, NIVEAU_LABEL } from '../../data/mockData.js'
+
+
+const TYPE_LABEL = {
+  qcm: 'QCM',
+  vrai_faux: 'Vrai / Faux',
+  ouverte: 'Ouverte',
+  texte_trous: 'Texte à trous',
+  calcul: 'Calcul',
+  legende: 'Légende',
+  association: 'Association',
+  remise_en_ordre: 'Remise en ordre',
+  tri: 'Tri',
+  dictee: 'Dictée',
+  redaction: 'Rédaction',
+}
+
+const TYPE_COLOR = {
+  qcm: { bg: 'bg-[#0f172a]/[0.08]', text: 'text-[#0f172a]' },
+  vrai_faux: { bg: 'bg-[#7a0008]/[0.08]', text: 'text-[#7a0008]' },
+  ouverte: { bg: 'bg-emerald-500/[0.10]', text: 'text-emerald-700' },
+  texte_trous: { bg: 'bg-amber-500/[0.10]', text: 'text-amber-700' },
+}
+const TYPE_COLOR_DEFAUT = { bg: 'bg-[#0f172a]/[0.06]', text: 'text-[#0f172a]/70' }
+
+function labelType(t) {
+  return TYPE_LABEL[t] || t || 'Question'
+}
 
 const WIZARD_STEPS = [
   { n: 1, label: 'Sélection' },
@@ -16,576 +42,219 @@ const WIZARD_STEPS = [
   { n: 3, label: 'Validation' },
   { n: 4, label: 'Export' },
 ]
-const CURRENT_STEP = 4
+const CURRENT_STEP = 2
 
 const FOCUS_RING = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f172a]/35 focus-visible:ring-offset-2'
 const HOVER_LIFT = 'motion-reduce:transition-none motion-reduce:hover:translate-y-0'
 
-/* ===== LOGOS DES FORMATS ===== */
-function LogoPDF({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="2" width="14" height="18" rx="2" fill="#DC2626" />
-      <rect x="5" y="4" width="10" height="14" rx="1" fill="#fff" fillOpacity="0.15" />
-      <text x="12" y="15" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#fff" fontFamily="Arial, sans-serif">PDF</text>
-      <path d="M15 2v5h5" fill="#B91C1C" />
-      <path d="M15 2l5 5h-5V2z" fill="#7F1D1D" />
-    </svg>
-  )
+const ACTION_BTN = 'flex h-8 w-8 items-center justify-center rounded-full text-[#0f172a]/50 transition-all hover:bg-[#0f172a]/[0.08] hover:text-[#0f172a] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#0f172a]/50'
+const ACTION_BTN_DANGER = 'flex h-8 w-8 items-center justify-center rounded-full text-[#0f172a]/50 transition-all hover:bg-red-50 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed'
+
+const INPUT_REPONSE = `w-full rounded-[12px] border-2 border-dashed border-[#0f172a]/25 px-3.5 py-2.5 text-[13.5px] text-[#0f172a]/80 outline-none transition-colors placeholder:text-[#0f172a]/35 focus:border-[#7a0008]/50 focus:text-[#0f172a] ${FOCUS_RING}`
+
+
+function texteRempli(v) {
+  return v != null && String(v).trim() !== ''
 }
 
-function LogoWord({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="2" width="14" height="18" rx="2" fill="#2B579A" />
-      <rect x="5" y="4" width="10" height="14" rx="1" fill="#fff" fillOpacity="0.15" />
-      <text x="12" y="15" textAnchor="middle" fontSize="7" fontWeight="bold" fill="#fff" fontFamily="Arial, sans-serif">W</text>
-      <path d="M15 2v5h5" fill="#1E3F6F" />
-      <path d="M15 2l5 5h-5V2z" fill="#152E52" />
-    </svg>
-  )
-}
-
-function LogoJSON({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="2" width="14" height="18" rx="2" fill="#F59E0B" />
-      <rect x="5" y="4" width="10" height="14" rx="1" fill="#fff" fillOpacity="0.15" />
-      <text x="12" y="15" textAnchor="middle" fontSize="4.5" fontWeight="bold" fill="#fff" fontFamily="monospace">{'{}'}</text>
-      <path d="M15 2v5h5" fill="#B45309" />
-      <path d="M15 2l5 5h-5V2z" fill="#78350F" />
-    </svg>
-  )
-}
-
-function LogoMarkdown({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="2" width="14" height="18" rx="2" fill="#0f172a" />
-      <rect x="5" y="4" width="10" height="14" rx="1" fill="#fff" fillOpacity="0.12" />
-      <text x="12" y="15" textAnchor="middle" fontSize="5" fontWeight="bold" fill="#fff" fontFamily="monospace">M↓</text>
-      <path d="M15 2v5h5" fill="#1E293B" />
-      <path d="M15 2l5 5h-5V2z" fill="#0F172A" />
-    </svg>
-  )
-}
-
-function LogoPrint({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="2" width="14" height="18" rx="2" fill="#475569" />
-      <rect x="5" y="4" width="10" height="14" rx="1" fill="#fff" fillOpacity="0.12" />
-      <path d="M8 10h8M8 13h6" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M15 2v5h5" fill="#334155" />
-      <path d="M15 2l5 5h-5V2z" fill="#1E293B" />
-    </svg>
-  )
-}
-
-/* ===== FORMATS D'EXPORT ===== */
-const FORMATS = [
-  { id: 'pdf', label: 'PDF', description: 'Idéal pour imprimer et partager', icon: LogoPDF, extension: '.pdf', tag: 'Recommandé', tagTone: 'emerald', enabled: true, nature: 'binaire' },
-  { id: 'impression', label: 'Impression directe', description: 'Ouvre la boîte de dialogue d\'impression', icon: LogoPrint, extension: null, tag: null, tagTone: null, enabled: true, nature: 'impression' },
-  { id: 'docx', label: 'Word (.docx)', description: 'Modifiable dans Word ou LibreOffice', icon: LogoWord, extension: '.docx', tag: null, tagTone: null, enabled: true, nature: 'binaire' },
-  { id: 'md', label: 'Markdown (.md)', description: 'Format texte — peut s\'ouvrir dans Word par défaut', icon: LogoMarkdown, extension: '.md', tag: null, tagTone: null, enabled: true, nature: 'texte' },
-  { id: 'json', label: 'JSON', description: 'Données structurées — à ouvrir avec un éditeur', icon: LogoJSON, extension: '.json', tag: null, tagTone: null, enabled: true, nature: 'texte' },
-]
-
-const ETAPES_GENERATION = [
-  { label: 'Préparation du document…', icon: FileText },
-  { label: 'Application du barème…', icon: FileCheck2 },
-  { label: 'Mise en page…', icon: Settings2 },
-  { label: 'Finalisation de l\'export…', icon: Wand2 },
-]
-
-const TAG_TONES = {
-  emerald: 'bg-emerald-100 text-emerald-700',
-  amber: 'bg-amber-100 text-amber-700',
-  navy: 'bg-[#0f172a]/[0.08] text-[#0f172a]/60',
-}
-
-/* ===== TYPES DE DEVOIRS ===== */
-const TYPES_DEVOIR = [
-  { id: 'controle_1', label: 'Devoir de contrôle N°1', short: 'Contrôle N°1' },
-  { id: 'controle_2', label: 'Devoir de contrôle N°2', short: 'Contrôle N°2' },
-  { id: 'controle_3', label: 'Devoir de contrôle N°3', short: 'Contrôle N°3' },
-  { id: 'synthese',   label: 'Devoir de synthèse',     short: 'Synthèse' },
-  { id: 'maison',     label: 'Devoir à la maison',     short: 'Maison' },
-]
-
-const TYPES_DEVOIR_AR = {
-  controle_1: 'فرض مراقبة عدد 1',
-  controle_2: 'فرض مراقبة عدد 2',
-  controle_3: 'فرض مراقبة عدد 3',
-  synthese:   'فرض تأليفي',
-  maison:     'فرض منزلي',
-}
-
-const DUREES = ['1h', '1h30', '2h', '2h30', '3h', '3h30', '4h']
-
-/* ===== MATIÈRES EN ARABE ===== */
-const MATIERE_AR = {
-  arabe: 'العربية', francais: 'الفرنسية', math: 'الرياضيات', maths: 'الرياضيات',
-  mathematiques: 'الرياضيات', mathématiques: 'الرياضيات',
-  eveil: 'الإيقاظ العلمي', eveil_scientifique: 'الإيقاظ العلمي',
-  sciences: 'العلوم', islamique: 'التربية الإسلامية',
-  education_islamique: 'التربية الإسلامية', histoire: 'التاريخ',
-  geographie: 'الجغرافيا', civique: 'التربية المدنية',
-  education_civique: 'التربية المدنية', anglais: 'الإنقليزية',
-  informatique: 'الإعلامية', techno: 'التكنولوجيا', dessin: 'الرسم',
-  musique: 'الموسيقى', sport: 'التربية البدنية',
-  physique: 'العلوم الفيزيائية', svt: 'علوم الحياة والأرض',
-  philosophie: 'الفلسفة', eco: 'الاقتصاد', gestion: 'التصرف',
-}
-
-const NIVEAU_AR = {
-  '1ere_primaire': 'السنة الأولى ابتدائي', '2eme_primaire': 'السنة الثانية ابتدائي',
-  '3eme_primaire': 'السنة الثالثة ابتدائي', '4eme_primaire': 'السنة الرابعة ابتدائي',
-  '5eme_primaire': 'السنة الخامسة ابتدائي', '6eme_primaire': 'السنة السادسة ابتدائي',
-  '1ere': 'السنة الأولى ابتدائي', '2eme': 'السنة الثانية ابتدائي',
-  '3eme': 'السنة الثالثة ابتدائي', '4eme': 'السنة الرابعة ابتدائي',
-  '5eme': 'السنة الخامسة ابتدائي', '6eme': 'السنة السادسة ابتدائي',
-  '1ere_annee': 'السنة الأولى ابتدائي', '2eme_annee': 'السنة الثانية ابتدائي',
-  '3eme_annee': 'السنة الثالثة ابتدائي', '4eme_annee': 'السنة الرابعة ابتدائي',
-  '5eme_annee': 'السنة الخامسة ابتدائي', '6eme_annee': 'السنة السادسة ابتدائي',
-  '1ere_annee_primaire': 'السنة الأولى ابتدائي', '2eme_annee_primaire': 'السنة الثانية ابتدائي',
-  '3eme_annee_primaire': 'السنة الثالثة ابتدائي', '4eme_annee_primaire': 'السنة الرابعة ابتدائي',
-  '5eme_annee_primaire': 'السنة الخامسة ابتدائي', '6eme_annee_primaire': 'السنة السادسة ابتدائي',
-}
-
-const MATIERES_ARABES = new Set([
-  'arabe', 'islamique', 'education_islamique', 'histoire', 'geographie',
-  'civique', 'education_civique', 'philosophie',
-])
-
-const L = {
-  exercice: 'التمرين', point: 'نقطة', points: 'نقاط', page: 'صفحة',
-  pays: 'الجمهورية التونسية', ministere: 'وزارة التربية',
-  etablissement: 'المؤسسة التربوية', annee: 'السنة الدراسية',
-  matiere: 'المادة', niveau: 'المستوى', professeur: 'الأستاذ(ة)',
-  nomPrenom: 'الاسم واللقب', classe: 'القسم', numero: 'العدد', date: 'التاريخ',
-  note: 'العدد', bonCourage: 'بالتوفيق', vrai: 'صحيح', faux: 'خطأ',
-  questionVide: 'سؤال فارغ', optionVide: 'خيار فارغ', aucuneQuestion: 'لا توجد أسئلة',
-}
-
-/* ===== TRADUCTIONS AR ===== */
-const ENONCE_AR = {
-  "Légende les éléments indiqués sur l'image.": 'أكمل البيانات المشار إليها على الصورة.',
-  "Légende les éléments indiqués sur l'image": 'أكمل البيانات المشار إليها على الصورة.',
-  "Légende les éléments numérotés sur l'image.": 'أكمل البيانات المرقّمة على الصورة.',
-  "Légende les éléments numérotés sur l'image": 'أكمل البيانات المرقّمة على الصورة.',
-  "Légende l'image.": 'أكمل بيانات الصورة.',
-  "Légende l'image": 'أكمل بيانات الصورة.',
-  'Écris le texte dicté.': 'اكتب النص المُملّى.',
-  'Écoute et écris le texte dicté.': 'استمع واكتب النص المُملّى.',
-  'Rédige un texte sur le sujet proposé.': 'اكتب نصًا في الموضوع المقترح.',
-  'Rédige un texte.': 'اكتب نصًا.',
-  'Calcule le résultat.': 'احسب الناتج.',
-  'Effectue le calcul.': 'أنجز العملية الحسابية.',
-  'Classe les éléments dans les bonnes catégories.': 'صنّف العناصر في الأصناف المناسبة.',
-  'Associe chaque élément de la colonne de gauche à sa correspondance.': 'اربط كل عنصر من العمود الأيسر بما يناسبه.',
-  'Remets les éléments dans le bon ordre.': 'أعد ترتيب العناصر ترتيبًا صحيحًا.',
-  'Choisis la bonne réponse.': 'اختر الجواب الصحيح.',
-  'Coche la bonne réponse.': 'ضع علامة على الجواب الصحيح.',
-  'Réponds par vrai ou faux.': 'أجب بصحيح أو خطأ.',
-  'Réponds par vrai ou faux :': 'أجب بصحيح أو خطأ :',
-  'Complète le texte par les mots suivants.': 'أكمل النص بالكلمات التالية.',
-  'Complète le texte.': 'أكمل النص.',
-}
-
-/* ===== HELPERS ===== */
-function normaliserType(t) {
-  return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-}
-function estLegende(q) {
-  return normaliserType(q?.type) === 'legende'
-}
-function enonceAffiche(q, matiereEstArabe) {
-  const brut = q?.question || ''
-  if (!brut) return ''
-  const forceAr = matiereEstArabe || estLegende(q)
-  if (!forceAr) return brut
-  const trimmed = brut.trim()
-  if (ENONCE_AR[trimmed]) return ENONCE_AR[trimmed]
-  const cleaned = trimmed.replace(/[.…]+$/, '')
-  for (const [fr, ar] of Object.entries(ENONCE_AR)) {
-    if (fr.replace(/[.…]+$/, '') === cleaned) return ar
+function questionComplete(q) {
+  if (!texteRempli(q.question)) return false
+  switch (q.type) {
+    case 'qcm':
+      return Array.isArray(q.options)
+        && q.options.length >= 2
+        && q.options.every(texteRempli)
+        && q.reponseCorrecteIndex != null
+        && q.reponseCorrecteIndex >= 0
+        && q.reponseCorrecteIndex < q.options.length
+    case 'vrai_faux':
+      return q.reponseCorrecte === true || q.reponseCorrecte === false
+    case 'ouverte':
+    case 'texte_trous':
+    case 'calcul':
+      return texteRempli(q.reponseAttendue)
+    case 'legende':
+      return Array.isArray(q.reponseCorrecte) && q.reponseCorrecte.length > 0 && q.reponseCorrecte.every(texteRempli)
+    case 'dictee':
+      return texteRempli(q.texte_dictee)
+    case 'association':
+      return Array.isArray(q.colonne_gauche) && q.colonne_gauche.length > 0
+        && Array.isArray(q.reponseCorrecte) && q.reponseCorrecte.length === q.colonne_gauche.length
+    case 'tri':
+      return Array.isArray(q.elements) && q.elements.length > 0
+        && Array.isArray(q.reponseCorrecte) && q.reponseCorrecte.length === q.elements.length
+    default:
+      return true
   }
-  return brut
-}
-function estEnArabe(q, matiereEstArabe) {
-  return matiereEstArabe || estLegende(q)
 }
 
-/* ===== IMAGE LEGENDE — FALLBACK MULTI-SOURCE ===== */
-function recupererImageLegende() {
-  try {
-    const s = sessionStorage.getItem('examai_image_legende')
-    if (s && s.length > 20) return s
-  } catch {}
-  try {
-    const l = localStorage.getItem('examai_image_legende')
-    if (l && l.length > 20) return l
-  } catch {}
-  return null
-}
-function recupererImageLegendeNom() {
-  try { return sessionStorage.getItem('examai_image_legende_nom') || '' } catch { return '' }
-}
 
-function extraireUrlImage(q) {
-  if (!q) return null
-  if (q.image?.url && String(q.image.url).length > 20) return q.image.url
-  if (q.image_url && String(q.image_url).length > 20) return q.image_url
-  if (q.imageUrl && String(q.imageUrl).length > 20) return q.imageUrl
-  if (q.illustration && String(q.illustration).length > 20) return q.illustration
-  if (q.image_data && String(q.image_data).length > 20) return q.image_data
-  return null
-}
-
-function enrichirQuestionsAvecImage(questions, imageFallback, nomFallback) {
-  if (!Array.isArray(questions)) return []
-  return questions.map((q) => {
-    if (!estLegende(q)) return q
-    const urlExistante = extraireUrlImage(q)
-    if (urlExistante) {
-      if (!q.image?.url) {
-        return {
-          ...q,
-          image: {
-            ...(q.image || {}),
-            url: urlExistante,
-            alt_text: q.image?.alt_text || nomFallback || '',
-            description: q.image?.description || '',
-          },
-        }
-      }
-      return q
-    }
-    if (!imageFallback) return q
-    return {
-      ...q,
-      image: {
-        ...(q.image || {}),
-        url: imageFallback,
-        alt_text: q.image?.alt_text || nomFallback || 'Image de la question',
-        description: q.image?.description || nomFallback || 'Image fournie pour la question à légender',
-      },
-    }
-  })
-}
-
-/* ===== REGROUPEMENT GLOBAL PAR TYPE ===== */
-function regrouperEnExercices(questions = []) {
-  if (!questions.length) return []
-  const aExerciceExplicite = questions.some((q) => q.exercice != null)
-
-  if (aExerciceExplicite) {
-    const map = new Map()
-    questions.forEach((q) => {
-      const n = q.exercice ?? 1
-      if (!map.has(n)) map.set(n, [])
-      map.get(n).push(q)
-    })
-    return Array.from(map.entries())
-      .sort((a, b) => a[0] - b[0])
-      .map(([numero, items]) => ({
-        numero, type: items[0]?.type, questions: items,
-        totalPoints: items.reduce((s, q) => s + (Number(q.points) || 0), 0),
-      }))
-  }
-
-  const ordreTypes = []
-  const parType = new Map()
-  questions.forEach((q) => {
-    const t = q.type || 'ouverte'
-    if (!parType.has(t)) { parType.set(t, []); ordreTypes.push(t) }
-    parType.get(t).push(q)
-  })
-  return ordreTypes.map((t, idx) => {
-    const items = parType.get(t)
-    return {
-      numero: idx + 1, type: t, questions: items,
-      totalPoints: items.reduce((s, q) => s + (Number(q.points) || 0), 0),
-    }
-  })
-}
-
-export default function Export() {
+export default function Edition() {
   const navigate = useNavigate()
-  const { examen, exporterExamen, loading, error } = useWizard()
+  const {
+    examen,
+    updateQuestion,
+    removeQuestion,
+    duplicateQuestion,
+    addQuestion,
+    sauvegarderQuestions,
+    loading,
+    error,
+  } = useWizard()
 
-  const [langue, setLangue] = useState('fr')
-  const [format, setFormat] = useState('pdf')
-  const [enTete, setEnTete] = useState(true)
-  const [pagination, setPagination] = useState(true)
-  const [fichierUrl, setFichierUrl] = useState(null)
-  const [fichierNom, setFichierNom] = useState(null)
-  const [generation, setGeneration] = useState(false)
-  const [lastError, setLastError] = useState(null)
+  const questions = examen.questions || []
+  const [selected, setSelected] = useState(questions[0]?.id)
 
-  const [nomLycee, setNomLycee] = useState('')
-  const [nomProfesseur, setNomProfesseur] = useState('')
-  const [anneeScolaire, setAnneeScolaire] = useState('2024 / 2025')
-  const [typeDevoir, setTypeDevoir] = useState('controle_1')
-  const [showInfosTun, setShowInfosTun] = useState(true)
+  const [recherche, setRecherche] = useState('')
+  const [filtreType, setFiltreType] = useState('all')
+  const [filtreOuvert, setFiltreOuvert] = useState(false)
+  const [showApercu, setShowApercu] = useState(false)
+  const [showShortcuts, setShowShortcuts] = useState(false)
+  const [questionASupprimer, setQuestionASupprimer] = useState(null)
+  const filtreRef = useRef(null)
 
-  const { exporterCorrection } = useWizard()
-  const [genererCorrige, setGenererCorrige] = useState(false)
-  const [erreurCorrige, setErreurCorrige] = useState(null)
+  const totalPoints = questions.reduce((sum, q) => sum + (Number(q.points) || 0), 0)
 
-  const matiereEstArabe = MATIERES_ARABES.has(examen.matiere)
-
-  const imageLegendeFallback = recupererImageLegende()
-  const imageLegendeNomFallback = recupererImageLegendeNom()
-
-  const questionsEnrichies = enrichirQuestionsAvecImage(
-    examen.questions || [],
-    imageLegendeFallback,
-    imageLegendeNomFallback,
+  const questionsIncompletes = useMemo(
+    () => questions.filter((q) => !questionComplete(q)),
+    [questions]
   )
 
-  /* ===== VALEURS PRÉ-REMPLIES ===== */
-  const matiereLabel = MATIERE_LABEL[examen.matiere] || examen.matiere || '—'
-  const niveauLabel = NIVEAU_LABEL[examen.niveau] || examen.niveau || '—'
+  const questionsFiltrees = useMemo(() => {
+    const r = recherche.trim().toLowerCase()
+    return questions.filter((question, i) => {
+      const matchRecherche = !r
+        || question.question?.toLowerCase().includes(r)
+        || `q${i + 1}`.includes(r)
+        || String(i + 1).includes(r)
+      const matchType = filtreType === 'all' || question.type === filtreType
+      return matchRecherche && matchType
+    })
+  }, [questions, recherche, filtreType])
 
-  const matiereAr = (() => {
-    if (MATIERE_AR[examen.matiere]) return MATIERE_AR[examen.matiere]
-    const key = String(examen.matiere || '').toLowerCase()
-    if (key.includes('math')) return 'الرياضيات'
-    if (key.includes('arabe')) return 'العربية'
-    if (key.includes('franc')) return 'الفرنسية'
-    if (key.includes('angla')) return 'الإنقليزية'
-    if (key.includes('islam')) return 'التربية الإسلامية'
-    if (key.includes('eveil')) return 'الإيقاظ العلمي'
-    if (key.includes('science')) return 'العلوم'
-    if (key.includes('hist')) return 'التاريخ'
-    if (key.includes('geo')) return 'الجغرافيا'
-    if (key.includes('civi')) return 'التربية المدنية'
-    if (key.includes('info')) return 'الإعلامية'
-    if (key.includes('techno')) return 'التكنولوجيا'
-    if (key.includes('dessin')) return 'الرسم'
-    if (key.includes('musiq')) return 'الموسيقى'
-    if (key.includes('sport') || key.includes('physi')) return 'التربية البدنية'
-    return matiereLabel
-  })()
+  const typesDispo = [...new Set(questions.map((q) => q.type))]
 
-  const niveauAr = (() => {
-    if (NIVEAU_AR[examen.niveau]) return NIVEAU_AR[examen.niveau]
-    const num = String(examen.niveau || '').match(/\d+/)?.[0]
-    if (num) {
-      const map = {
-        '1': 'السنة الأولى ابتدائي', '2': 'السنة الثانية ابتدائي',
-        '3': 'السنة الثالثة ابتدائي', '4': 'السنة الرابعة ابتدائي',
-        '5': 'السنة الخامسة ابتدائي', '6': 'السنة السادسة ابتدائي',
-      }
-      if (map[num]) return map[num]
+  useEffect(() => {
+    if (!questions.some((q) => q.id === selected)) setSelected(questions[0]?.id)
+  }, [questions, selected])
+
+  useEffect(() => {
+    if (!filtreOuvert) return
+    function handleClick(e) {
+      if (filtreRef.current && !filtreRef.current.contains(e.target)) setFiltreOuvert(false)
     }
-    return niveauLabel
-  })()
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [filtreOuvert])
 
-  const dureeMinutes = examen.duree_minutes ?? examen.duree ?? null
-  function formaterDuree(min) {
-    if (min == null || min === '') return '—'
-    const m = Number(min)
-    if (Number.isNaN(m) || m <= 0) return '—'
-    const h = Math.floor(m / 60)
-    const r = m % 60
-    if (h === 0) return `${r} min`
-    if (r === 0) return `${h}h`
-    return `${h}h${String(r).padStart(2, '0')}`
-  }
-  const dureeLabel = formaterDuree(dureeMinutes)
-
-  const formatSelectionne = FORMATS.find((f) => f.id === format) || FORMATS[0]
-  const pret = Boolean(fichierUrl)
-
-  const typeDevoirLabel =
-    TYPES_DEVOIR.find((t) => t.id === typeDevoir)?.label || 'Devoir de contrôle N°1'
-  const typeDevoirLabelAr = TYPES_DEVOIR_AR[typeDevoir] || TYPES_DEVOIR_AR.controle_1
-
-  const exercices = regrouperEnExercices(questionsEnrichies)
-  const nbExercices = exercices.length
-  const nbQuestions = questionsEnrichies.length
-  const totalPoints = questionsEnrichies.reduce((s, q) => s + (Number(q.points) || 0), 0) || 0
-
-  /* ===== GÉNÉRATION ===== */
-  async function handleGenerer() {
-    setGeneration(true)
-    setLastError(null)
-
-    try {
-      const formatBackend = format === 'impression' ? 'pdf' : format
-
-      const payload = {
-        format: formatBackend,
-        langue,
-        en_tete: enTete,
-        pagination,
-        nom_etablissement: nomLycee || '',
-        nom_professeur: nomProfesseur || '',
-        annee_scolaire: anneeScolaire,
-        type_devoir: typeDevoir,
-        type_devoir_label: typeDevoirLabel,
-        type_devoir_label_ar: typeDevoirLabelAr,
-        duree: dureeLabel,
-        duree_minutes: dureeMinutes,
-        matiere: examen.matiere,
-        matiere_label: matiereLabel,
-        matiere_label_ar: matiereAr,
-        niveau: examen.niveau,
-        niveau_label: niveauLabel,
-        niveau_label_ar: niveauAr,
-        nb_questions: nbQuestions,
-        contenu_langue: matiereEstArabe ? 'ar' : 'fr',
-        pays_ar: L.pays,
-        ministere_ar: L.ministere,
-        pays_fr: 'République Tunisienne',
-        ministere_fr: "Ministère de l'Éducation",
-        exercices: exercices.map((ex) => ({
-          numero: ex.numero, type: ex.type, total_points: ex.totalPoints,
-          questions: ex.questions.map((q) => ({
-            id: q.id,
-            // ✅ Consigne traduite (legende → AR) pour le backend
-            question: enonceAffiche(q, matiereEstArabe),
-            question_ar: estLegende(q) ? enonceAffiche(q, true) : null,
-            type: q.type, points: q.points,
-            options: q.options || null,
-            reponseCorrecte: q.reponseCorrecte ?? null,
-            reponseCorrecteIndex: q.reponseCorrecteIndex ?? null,
-            reponseAttendue: q.reponseAttendue ?? null,
-            image: q.image ?? null,
-            support: q.support ?? null,
-            tableau: q.tableau ?? null,
-            titre_exercice: q.titre_exercice ?? null,
-            colonne_gauche: q.colonne_gauche ?? null,
-            colonne_droite: q.colonne_droite ?? null,
-            elements: q.elements ?? null,
-            categories: q.categories ?? null,
-            texte_dictee: q.texte_dictee ?? null,
-            criteres_evaluation: q.criteres_evaluation ?? null,
-            unite: q.unite ?? null,
-            longueur_min_mots: q.longueur_min_mots ?? null,
-          })),
-        })),
-      }
-
-      const blob = await exporterExamen(payload)
-      const url = URL.createObjectURL(blob)
-      const ext = formatSelectionne.extension || '.pdf'
-      const nom = `devoir_${examen.id}${ext}`
-
-      if (format === 'impression') {
-        const win = window.open(url, '_blank', 'noopener,noreferrer')
-        if (win) {
-          win.addEventListener('load', () => {
-            try { win.print() } catch { /* ignoré */ }
-          })
-        }
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (questionASupprimer || showApercu || showShortcuts) {
+        if (e.key === '?' && showShortcuts && !e.target.matches('input, textarea')) setShowShortcuts(false)
         return
       }
-
-      if (formatSelectionne.nature === 'texte') {
-        setFichierUrl(url)
-        setFichierNom(nom)
-        return
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        sauvegarderQuestions().catch(() => {})
       }
-
-      setFichierUrl(url)
-      setFichierNom(nom)
-      declencherTelechargement(url, nom)
-    } catch (err) {
-      setLastError(err?.message || 'Erreur lors de la génération du fichier.')
-    } finally {
-      setGeneration(false)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd' && selected) {
+        e.preventDefault()
+        duplicateQuestion(selected)
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault()
+        handleVerifier()
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        document.getElementById('search-input')?.focus()
+      }
+      if (e.key === '?' && !e.target.matches('input, textarea')) {
+        setShowShortcuts(true)
+      }
     }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  })
+
+  function scrollTo(id) {
+    setSelected(id)
+    document.getElementById(`question-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
-  function declencherTelechargement(url, filename) {
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
+  function handleAjouter() {
+    setRecherche('')
+    setFiltreType('all')
+    const id = addQuestion()
+    if (id) requestAnimationFrame(() => scrollTo(id))
   }
 
-  function handleReinitialiser() {
-    if (fichierUrl) URL.revokeObjectURL(fichierUrl)
-    setFichierUrl(null)
-    setFichierNom(null)
-    setLastError(null)
+  function handleSupprimer(id) {
+    const index = questions.findIndex((x) => x.id === id)
+    if (index !== -1) setQuestionASupprimer({ id, index, question: questions[index] })
   }
 
-  async function handleTelechargerCorrige() {
-    setGenererCorrige(true)
-    setErreurCorrige(null)
+  function confirmerSuppression() {
+    if (!questionASupprimer) return
+    removeQuestion(questionASupprimer.id)
+    setQuestionASupprimer(null)
+  }
+
+  function echanger(indexA, indexB) {
+    const a = questions[indexA]
+    const b = questions[indexB]
+    if (!a || !b) return
+    const { id: _idA, ...contenuA } = a
+    const { id: _idB, ...contenuB } = b
+    updateQuestion(a.id, contenuB)
+    updateQuestion(b.id, contenuA)
+    setSelected(b.id)
+  }
+
+  function handleMonter(id) {
+    const idx = questions.findIndex((q) => q.id === id)
+    if (idx > 0) echanger(idx, idx - 1)
+  }
+
+  function handleDescendre(id) {
+    const idx = questions.findIndex((q) => q.id === id)
+    if (idx !== -1 && idx < questions.length - 1) echanger(idx, idx + 1)
+  }
+
+  async function handleVerifier() {
+    if (loading) return
     try {
-      const blob = await exporterCorrection({
-        format: 'pdf',
-        langue,
-        en_tete: enTete,
-        pagination,
-        nom_etablissement: nomLycee || '',
-        nom_professeur: nomProfesseur || '',
-        annee_scolaire: anneeScolaire,
-        type_devoir: typeDevoir,
-        type_devoir_label: typeDevoirLabel,
-        type_devoir_label_ar: typeDevoirLabelAr,
-        duree: dureeLabel,
-        duree_minutes: dureeMinutes,
-        matiere: examen.matiere,
-        matiere_label: matiereLabel,
-        matiere_label_ar: matiereAr,
-        niveau: examen.niveau,
-        niveau_label: niveauLabel,
-        niveau_label_ar: niveauAr,
-        contenu_langue: matiereEstArabe ? 'ar' : 'fr',
-        pays_ar: L.pays,
-        ministere_ar: L.ministere,
-        exercices: exercices.map((ex) => ({
-          numero: ex.numero, type: ex.type, total_points: ex.totalPoints,
-          questions: ex.questions.map((q) => ({
-            ...q,
-            question: enonceAffiche(q, matiereEstArabe),
-          })),
-        })),
-      })
-      const url = URL.createObjectURL(blob)
-      const nom = `corrige_${examen.id}.pdf`
-      declencherTelechargement(url, nom)
-    } catch (err) {
-      setErreurCorrige(err?.message || 'Erreur lors de la génération du corrigé.')
-    } finally {
-      setGenererCorrige(false)
+      await sauvegarderQuestions()
+      navigate('/wizard/validation')
+    } catch {
     }
   }
 
-  /* ===== GARDE ===== */
+  
   if (!examen.id) {
     return (
-      <WizardShell step={4} hideStepper>
+      <WizardShell step={2} hideStepper>
         <div className="mx-auto max-w-lg py-14 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#7a0008]/[0.08] text-[#7a0008]">
-            <FileText size={22} />
+            <FileEdit size={22} />
           </div>
           <h1 className="examai-serif text-[20px] font-semibold text-[#0f172a]">Aucun examen en cours</h1>
           <p className="mt-2 text-[13.5px] font-bold italic text-[#0f172a]/55">
-            Retournez à l'étape 1 pour générer un examen avant de pouvoir l'exporter.
+            Retournez à l'étape 1 pour générer un examen avant de pouvoir le modifier ici.
           </p>
-          <button
-            onClick={() => navigate('/wizard/selection')}
+          <Link
+            to="/wizard/selection"
             className={`mt-5 inline-flex items-center gap-2 rounded-full bg-[#7a0008] px-6 py-3 text-[13.5px] font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.2),0_10px_22px_-8px_rgba(122,0,8,0.5)] transition-all hover:-translate-y-0.5 active:scale-[0.985] ${FOCUS_RING}`}
           >
             Aller à la sélection <ArrowRight size={15} />
-          </button>
+          </Link>
         </div>
       </WizardShell>
     )
   }
 
   return (
-    <WizardShell step={4} hideStepper>
+    <WizardShell step={2} hideStepper>
       <style>{`
         .examai-underline-wave {
           background-color: rgba(122,0,8,0.12);
@@ -594,118 +263,57 @@ export default function Export() {
           background-position: 0 88%;
           padding: 0 0.15em;
         }
-        @keyframes examaiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        .examai-pulse { animation: examaiPulse 1.6s ease-in-out infinite; }
-        @keyframes examaiSpinSlow { to { transform: rotate(360deg); } }
-        @keyframes examaiOrbitPulse {
-          0%, 100% { transform: scale(1); opacity: 0.6; }
-          50% { transform: scale(1.08); opacity: 1; }
-        }
-        @keyframes examaiScanLine {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(400%); }
-        }
-        @keyframes examaiFadeInUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes examaiDot {
-          0%, 20% { opacity: 0.3; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.1); }
-          80%, 100% { opacity: 0.3; transform: scale(0.8); }
-        }
-        .examai-orbit { animation: examaiSpinSlow 2.4s linear infinite; }
-        .examai-orbit-slow { animation: examaiSpinSlow 3.6s linear infinite reverse; }
-        .examai-orbit-pulse { animation: examaiOrbitPulse 2s ease-in-out infinite; }
-        .examai-scan { animation: examaiScanLine 2s ease-in-out infinite; }
-        .examai-fade-in-up { animation: examaiFadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
-        .examai-dot-1 { animation: examaiDot 1.4s ease-in-out infinite; }
-        .examai-dot-2 { animation: examaiDot 1.4s ease-in-out 0.2s infinite; }
-        .examai-dot-3 { animation: examaiDot 1.4s ease-in-out 0.4s infinite; }
-
-        .examai-a4 {
-          width: 100%; max-width: 800px; margin: 0 auto; background: #ffffff;
-          padding: 40px 44px;
-          box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 10px 30px -10px rgba(15,23,42,0.18);
-          border: 1px solid rgba(15,23,42,0.08);
-          position: relative;
-          font-feature-settings: 'kern';
-          -webkit-font-smoothing: antialiased;
-        }
-        .examai-a4::before {
-          content: ''; position: absolute; inset: 12px;
-          border: 1px solid rgba(122,0,8,0.12); pointer-events: none; border-radius: 4px;
-        }
-        .examai-a4::after {
-          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-          background: linear-gradient(90deg,
-            #7a0008 0%, #7a0008 33%,
-            rgba(122,0,8,0.4) 33%, rgba(122,0,8,0.4) 66%,
-            rgba(122,0,8,0.15) 66%, rgba(122,0,8,0.15) 100%);
-        }
-        .examai-arabic {
-          font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', 'Times New Roman', serif;
-          direction: rtl; unicode-bidi: embed;
-        }
-        .examai-serif-pdf { font-family: 'Georgia', 'Times New Roman', 'Cambria', serif; }
-        @media print {
-          .examai-a4 { box-shadow: none; border: none; max-width: 100%; padding: 20mm 15mm; }
-          .examai-a4::before { inset: 8px; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .examai-pulse, .examai-orbit, .examai-orbit-slow, .examai-orbit-pulse,
-          .examai-scan, .examai-fade-in-up, .examai-dot-1, .examai-dot-2, .examai-dot-3 {
-            animation: none !important;
-          }
+        @keyframes examaiModalFadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes examaiModalSlideUp {
+          from { opacity: 0; transform: translateY(16px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
 
       <div className="w-full max-w-full overflow-x-hidden">
 
-        {/* ===== EN-TÊTE PAGE ===== */}
+        {}
         <div className="relative mb-6 w-full overflow-hidden rounded-[28px] border border-[#0f172a]/20 bg-white p-6 sm:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <h1 className="examai-serif text-[30px] sm:text-[40px] lg:text-[42px] font-semibold tracking-[-0.025em] text-[#0f172a] leading-[1.15]">
-                Finaliser{' '}
-                <span className="text-[#7a0008] relative">
-                  <span className="examai-underline-wave">et exporter.</span>
-                </span>
-              </h1>
-              <p className="examai-serif mt-3 text-[14px] sm:text-[15px] font-normal italic leading-[1.6] text-[#0f172a]/75">
-                Choisissez le format de votre choix et générez votre fichier.
-              </p>
-            </div>
-            <div className={`flex shrink-0 items-center gap-2 rounded-full border-2 px-3 py-1.5 text-[11.5px] font-semibold transition-all ${
-              pret ? 'border-emerald-500 bg-emerald-50/40' : 'border-[#0f172a]/15 bg-white'
-            }`}>
-              {pret ? (
-                <>
-                  <Check size={12} className="text-emerald-600" strokeWidth={3} />
-                  <span className="font-bold text-emerald-700">Fichier prêt</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles size={12} className="text-[#0f172a]/50" />
-                  <span className="text-[#0f172a]/60">Prêt à exporter</span>
-                </>
-              )}
-            </div>
-          </div>
+          <h1 className="examai-serif text-[30px] sm:text-[40px] lg:text-[42px] font-semibold tracking-[-0.025em] text-[#0f172a] leading-[1.15]">
+            Modifier{' '}
+            <span className="text-[#7a0008] relative">
+              <span className="examai-underline-wave">L'examen.</span>
+            </span>
+          </h1>
+          <p className="examai-serif mt-3 text-[14px] sm:text-[15px] font-normal italic leading-[1.6] text-[#0f172a]/75">
+            Ajustez les questions, les réponses et le barème avant de passer à la validation.
+          </p>
         </div>
 
-        {/* ===== ERREURS ===== */}
-        {(error || lastError) && (
+        {}
+        {error && (
           <div role="alert" className="mb-5 flex items-start gap-3 rounded-[16px] border border-[#7a0008]/40 bg-[#0f172a]/[0.035] p-4 text-[13px] text-[#0f172a]">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#7a0008]/10">
               <AlertTriangle size={14} className="text-[#7a0008]" />
             </span>
-            <span className="min-w-0 break-words pt-0.5 font-medium">{lastError || error}</span>
+            <span className="min-w-0 break-words pt-0.5 font-medium">{error}</span>
           </div>
         )}
 
-        {/* ===== STEPPER ===== */}
-        <div className="mb-5 flex items-center rounded-[20px] border border-[#0f172a]/20 bg-white px-5 py-4" role="list">
+        {}
+        {questionsIncompletes.length > 0 && (
+          <div className="mb-5 flex items-start gap-3 rounded-[16px] border border-amber-300 bg-amber-50/70 p-4 text-[13px] text-amber-900">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-200">
+              <AlertCircle size={14} className="text-amber-700" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-bold">
+                {questionsIncompletes.length} question{questionsIncompletes.length > 1 ? 's' : ''} incomplète{questionsIncompletes.length > 1 ? 's' : ''}
+              </p>
+              <p className="mt-0.5 text-[12px] font-bold italic text-amber-800/80">
+                Vérifiez l'énoncé, les options et la bonne réponse avant de valider.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {}
+        <div className="mb-5 flex items-center rounded-[20px] border border-[#0f172a]/20 bg-white px-5 py-4" role="list" aria-label="Étapes de création de l'examen">
           {WIZARD_STEPS.map((s, i) => {
             const active = s.n === CURRENT_STEP
             const done = s.n < CURRENT_STEP
@@ -733,906 +341,933 @@ export default function Export() {
           })}
         </div>
 
-        {/* ===== LOADER ===== */}
-        {generation && <GenerationLoader formatLabel={formatSelectionne.label} />}
+        {}
+        <div className="grid gap-5 lg:grid-cols-[280px_1fr] lg:items-start">
 
-        {/* ===== CONTENU ===== */}
-        {!generation && (
-          <div className="grid gap-5 lg:grid-cols-[1fr_360px] lg:items-start">
-
-            {/* ===== COLONNE PRINCIPALE ===== */}
-            <div className="min-w-0 space-y-5">
-              {/* APERÇU PDF */}
-              <div className="rounded-[24px] border border-[#0f172a]/20 bg-[#f7f5f4] p-5 sm:p-6">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px] bg-[#0f172a]/[0.08] text-[#0f172a]">
-                      <Eye size={17} />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="examai-serif truncate text-[16.5px] font-semibold text-[#0f172a]">Aperçu du rendu</p>
-                      <p className="mt-0.5 truncate text-[11.5px] text-[#0f172a]/50">
-                        Format officiel — République Tunisienne · A4
-                      </p>
-                    </div>
-                  </div>
-                  <div className="hidden shrink-0 items-center gap-1.5 rounded-full border border-[#0f172a]/15 bg-white px-3 py-1.5 text-[10.5px] font-bold uppercase tracking-wider text-[#0f172a]/60 sm:flex">
-                    <FileText size={11} />
-                    A4 · 210 × 297 mm
-                  </div>
-                </div>
-
-                <div className="examai-a4">
-                  {enTete && (
-                    <div className="mb-5">
-                      <div className="examai-arabic text-center">
-                        <p className="text-[15px] font-bold tracking-wide text-[#7a0008]">{L.pays}</p>
-                        <p className="mt-1 text-[12px] font-semibold text-[#7a0008]/85">{L.ministere}</p>
-                      </div>
-                      <div className="my-3 h-[2px] bg-gradient-to-r from-transparent via-[#7a0008]/40 to-transparent" />
-                      <div className="grid grid-cols-2 gap-4 text-[11px] leading-relaxed">
-                        <div className="examai-arabic space-y-1 text-right">
-                          <p>
-                            <span className="font-bold text-[#7a0008]">{L.etablissement} : </span>
-                            {nomLycee ? <span className="font-medium">{nomLycee}</span>
-                              : <span className="text-[#4f0005]/40 tracking-widest">............................</span>}
-                          </p>
-                          <p>
-                            <span className="font-bold text-[#7a0008]">{L.annee} : </span>
-                            <span className="font-medium">{anneeScolaire}</span>
-                          </p>
-                          <p>
-                            <span className="font-bold text-[#7a0008]">{L.matiere} : </span>
-                            <span className="font-medium">{matiereAr}</span>
-                            <span className="mx-1.5 text-[#7a0008]/40">•</span>
-                            <span className="font-bold text-[#7a0008]">{L.niveau} : </span>
-                            <span className="font-medium">{niveauAr}</span>
-                          </p>
-                          <p>
-                            <span className="font-bold text-[#7a0008]">{L.professeur} : </span>
-                            {nomProfesseur ? <span className="font-medium">{nomProfesseur}</span>
-                              : <span className="text-[#4f0005]/40 tracking-widest">............................</span>}
-                          </p>
-                        </div>
-                        <div className="examai-arabic space-y-1 border-r border-[#7a0008]/20 pr-4 text-right">
-                          <p>
-                            <span className="font-bold text-[#7a0008]">{L.nomPrenom} : </span>
-                            <span className="text-[#4f0005]/40 tracking-widest">............................</span>
-                          </p>
-                          <p>
-                            <span className="font-bold text-[#7a0008]">{L.classe} : </span>
-                            <span className="text-[#4f0005]/40 tracking-widest">..............</span>
-                            <span className="ml-2 font-bold text-[#7a0008]">{L.numero} : </span>
-                            <span className="text-[#4f0005]/40 tracking-widest">........</span>
-                          </p>
-                          <p>
-                            <span className="font-bold text-[#7a0008]">{L.date} : </span>
-                            <span className="text-[#4f0005]/40 tracking-widest">......../......../..............</span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="examai-arabic my-5 text-center">
-                    <p className="text-[15px] font-bold tracking-wide text-[#250002]">{typeDevoirLabelAr}</p>
-                    <div className="mx-auto mt-2 h-[2px] w-32 bg-[#7a0008]/30" />
-                    {dureeLabel !== '—' && (
-                      <p className="mt-2 text-[11px] italic text-[#4f0005]/60">Durée : {dureeLabel}</p>
-                    )}
-                  </div>
-
-                  <div className={`space-y-5 ${matiereEstArabe ? 'examai-arabic' : 'examai-serif-pdf'}`} dir={matiereEstArabe ? 'rtl' : 'ltr'}>
-                    {exercices.slice(0, 3).map((ex) => (
-                      <div key={ex.numero} className="rounded-[6px] border border-[#7a0008]/20 bg-white/70 p-4">
-                        <div className="examai-arabic flex items-baseline justify-between gap-3 border-b border-dashed border-[#7a0008]/30 pb-2">
-                          <p className="text-[13px] font-bold tracking-wide text-[#7a0008]">
-                            {L.exercice} {ex.numero}
-                          </p>
-                          <span className="shrink-0 rounded-full bg-[#7a0008]/[0.08] px-2.5 py-0.5 text-[11px] font-bold text-[#7a0008]">
-                            {ex.totalPoints} {ex.totalPoints > 1 ? L.points : L.point}
-                          </span>
-                        </div>
-                        <div className="mt-3 space-y-3">
-                          {ex.questions.map((q, qi) => {
-                            const rtl = estEnArabe(q, matiereEstArabe)
-                            const imageUrl = extraireUrlImage(q)
-                            return (
-                              <div key={q.id ?? qi}>
-                                <div className="flex items-start justify-between gap-3">
-                                  <p
-                                    className={`min-w-0 flex-1 text-[12px] font-medium leading-[1.85] text-[#250002] ${rtl ? 'examai-arabic' : ''}`}
-                                    dir={rtl ? 'rtl' : 'ltr'}
-                                  >
-                                    <span className="font-bold text-[#7a0008]">{qi + 1}) </span>
-                                    {enonceAffiche(q, matiereEstArabe) || <span className="italic text-[#4f0005]/40">{L.questionVide}</span>}
-                                  </p>
-                                  <span className="shrink-0 pt-0.5 text-[10.5px] font-semibold text-[#7a0008]/75">
-                                    {q.points} {Number(q.points) > 1 ? L.points : L.point}
-                                  </span>
-                                </div>
-
-                                {q.support && (
-                                  <p className="mt-2 whitespace-pre-line rounded-[6px] bg-[#0f172a]/[0.03] px-2.5 py-2 text-[11.5px] italic text-[#4f0005]/85">
-                                    {q.support}
-                                  </p>
-                                )}
-
-                                {q.tableau && q.tableau.headers && q.tableau.rows && (
-                                  <div className="mt-2 overflow-x-auto">
-                                    <table className="w-full border-collapse text-[11.5px] text-[#250002]">
-                                      <thead>
-                                        <tr className="bg-[#7a0008]/[0.06]">
-                                          {q.tableau.headers.map((h, hi) => (
-                                            <th key={hi} className="border border-[#7a0008]/25 px-2 py-1 text-center font-bold">
-                                              {h}
-                                            </th>
-                                          ))}
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {q.tableau.rows.map((row, ri) => (
-                                          <tr key={ri}>
-                                            {row.map((cell, ci) => (
-                                              <td key={ci} className="border border-[#7a0008]/25 px-2 py-1 text-center">
-                                                {cell}
-                                              </td>
-                                            ))}
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                )}
-
-                                {/* ✅ IMAGE — affichée pour legende (aperçu A4) */}
-                                {estLegende(q) && (
-                                  <div className="mt-2.5 pl-4">
-                                    {imageUrl ? (
-                                      <img
-                                        src={imageUrl}
-                                        alt={q.image?.alt_text || ''}
-                                        className="max-h-56 w-auto rounded-[6px] border border-[#7a0008]/25 object-contain"
-                                      />
-                                    ) : (
-                                      <div className="flex h-28 w-full max-w-md flex-col items-center justify-center rounded-[6px] border border-dashed border-amber-400 bg-amber-50/50 px-3 text-center text-[10.5px] italic text-amber-700">
-                                        <span className="font-bold not-italic">⚠ Image de la légende introuvable</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
-                                {q.type === 'qcm' && q.options && (
-                                  <ul className="mt-2 space-y-1.5 pl-4">
-                                    {q.options.slice(0, 4).map((o, j) => (
-                                      <li key={j} className="flex items-center gap-2 text-[11.5px] text-[#4f0005]/85">
-                                        <span className="shrink-0 font-bold text-[#7a0008]">{String.fromCharCode(97 + j)})</span>
-                                        <span className="min-w-0 flex-1">
-                                          {o || <span className="italic text-[#4f0005]/30">{L.optionVide}</span>}
-                                        </span>
-                                        <span className="ml-3 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[2px] border border-[#7a0008]/50" />
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-
-                                {q.type === 'vrai_faux' && (
-                                  <div className="mt-2 flex gap-6 pl-4 text-[11.5px] text-[#4f0005]/85">
-                                    <span className="flex items-center gap-2">
-                                      <span className="flex h-4 w-4 items-center justify-center rounded-[2px] border-2 border-[#7a0008]/50" />
-                                      <span className="examai-arabic font-medium">{L.vrai}</span>
-                                    </span>
-                                    <span className="flex items-center gap-2">
-                                      <span className="flex h-4 w-4 items-center justify-center rounded-[2px] border-2 border-[#7a0008]/50" />
-                                      <span className="examai-arabic font-medium">{L.faux}</span>
-                                    </span>
-                                  </div>
-                                )}
-
-                                {(q.type === 'ouverte' || q.type === 'texte_trous') && (
-                                  <div className="mt-3 space-y-4 pl-4">
-                                    {[1, 2, 3].map((n) => (
-                                      <div key={n} className="border-b border-dotted border-[#7a0008]/35" />
-                                    ))}
-                                  </div>
-                                )}
-
-                                {estLegende(q) && (
-                                  <ul className="mt-2 space-y-1.5 pl-4">
-                                    {(q.reponseCorrecte || []).map((_, i) => (
-                                      <li key={i} className="flex items-center gap-2 text-[11.5px] text-[#4f0005]/85">
-                                        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#7a0008]/50 text-[9px] font-bold text-[#7a0008]">
-                                          {i + 1}
-                                        </span>
-                                        <span className="inline-block min-w-[160px] flex-1 border-b border-dotted border-[#7a0008]/45" />
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-
-                                {q.type === 'association' && (
-                                  <ul className="mt-2 space-y-1 pl-4 text-[11.5px] text-[#4f0005]/85">
-                                    {(q.colonne_gauche || []).map((g, i) => (
-                                      <li key={i} className="flex items-center gap-2">
-                                        <span className="font-bold text-[#7a0008]">{i + 1})</span>
-                                        <span className="min-w-0 flex-1">{g}</span>
-                                        <span className="text-[#7a0008]/50">→</span>
-                                        <span className="inline-block min-w-[80px] border-b border-dotted border-[#7a0008]/45" />
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-
-                                {q.type === 'remise_en_ordre' && (
-                                  <ol className="mt-2 space-y-1 pl-4 text-[11.5px] text-[#4f0005]/85">
-                                    {(q.elements || []).map((el, i) => (
-                                      <li key={i} className="flex items-center gap-2">
-                                        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border border-[#7a0008]/50" />
-                                        <span>{el}</span>
-                                      </li>
-                                    ))}
-                                  </ol>
-                                )}
-
-                                {q.type === 'tri' && (
-                                  <div className="mt-2 space-y-2 pl-4 text-[11.5px]">
-                                    <div className="flex flex-wrap gap-2">
-                                      {(q.categories || []).map((c, i) => (
-                                        <span key={i} className="rounded-full border border-[#7a0008]/40 px-2 py-0.5 font-bold text-[#7a0008]">
-                                          {c}
-                                        </span>
-                                      ))}
-                                    </div>
-                                    <ul className="space-y-1">
-                                      {(q.elements || []).map((el, i) => (
-                                        <li key={i} className="flex items-center gap-2 text-[#4f0005]/85">
-                                          <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-[#7a0008]/50" />
-                                          <span>{el}</span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-
-                                {q.type === 'calcul' && (
-                                  <div className="mt-2 flex items-center gap-2 pl-4">
-                                    <span className="inline-block min-w-[140px] border-b border-dotted border-[#7a0008]/45" />
-                                    {q.unite && <span className="text-[11px] font-bold text-[#7a0008]/70">{q.unite}</span>}
-                                  </div>
-                                )}
-
-                                {q.type === 'dictee' && (
-                                  <div className="mt-3 space-y-4 pl-4">
-                                    {[1, 2, 3, 4].map((n) => (
-                                      <div key={n} className="border-b border-dotted border-[#7a0008]/35" />
-                                    ))}
-                                  </div>
-                                )}
-
-                                {q.type === 'redaction' && (
-                                  <div className="mt-3 space-y-4 pl-4">
-                                    {Array.from({ length: 6 }).map((_, n) => (
-                                      <div key={n} className="border-b border-dotted border-[#7a0008]/35" />
-                                    ))}
-                                    {q.longueur_min_mots && (
-                                      <p className="text-[10.5px] italic text-[#4f0005]/55">
-                                        Longueur minimale : {q.longueur_min_mots} mots
-                                      </p>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                    {nbExercices > 3 && (
-                      <p className="examai-arabic text-center text-[11px] italic text-[#4f0005]/40">
-                        … {nbExercices - 3} تمارين أخرى في الوثيقة الكاملة
-                      </p>
-                    )}
-                  </div>
-
-                  {pagination && (
-                    <div className="examai-arabic mt-6 border-t border-[#7a0008]/15 pt-3 text-center">
-                      <p className="text-[10.5px] italic text-[#4f0005]/45">{L.page} 1</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-5 flex flex-wrap items-center gap-2 text-[11px] text-[#0f172a]/55">
-                  <span className="flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-                    <FileText size={11} /> {nbExercices} exercice{nbExercices > 1 ? 's' : ''}
-                  </span>
-                  <span className="flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-                    <CheckCircle2 size={11} /> {totalPoints} point{totalPoints > 1 ? 's' : ''}
-                  </span>
-                  <span className="flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 font-semibold text-[#7a0008] shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-                    <formatSelectionne.icon size={11} /> {formatSelectionne.label}
-                  </span>
-                </div>
-
-                {pret && fichierNom && (
-                  <div className="mt-4 flex items-center justify-between gap-3 rounded-[14px] border border-emerald-500/30 bg-emerald-50/40 p-3.5">
-                    <div className="flex min-w-0 items-center gap-2.5">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                        <CheckCircle2 size={15} className="text-emerald-600" strokeWidth={2.4} />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-[12.5px] font-bold text-emerald-800">Fichier généré</p>
-                        <p className="truncate text-[11px] italic text-emerald-700/70">{fichierNom}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleReinitialiser}
-                      className={`shrink-0 rounded-full border border-emerald-500/40 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 ${FOCUS_RING}`}
-                    >
-                      Régénérer
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* CORRIGÉ */}
-              <div className="rounded-[24px] border border-emerald-300/70 bg-emerald-50/40 p-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-emerald-100 text-emerald-700">
-                    <FileCheck2 size={15} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="examai-serif text-[15px] font-semibold text-[#0f172a]">Corrigé de l'examen</p>
-                    <p className="text-[10.5px] font-bold italic text-[#0f172a]/45">Réponses, barème et explications</p>
-                  </div>
-                </div>
-                <p className="mt-3 text-[11.5px] leading-snug text-[#0f172a]/60">
-                  Aperçu ci-dessous. Le PDF (réservé à l'enseignant) reprend l'en-tête officiel tunisien.
-                </p>
-                <div className="mt-3 max-h-72 space-y-2 overflow-y-auto rounded-[14px] border border-emerald-200 bg-white p-3">
-                  {exercices.length === 0 ? (
-                    <p className="text-[11px] italic text-[#0f172a]/40">{L.aucuneQuestion}</p>
-                  ) : (
-                    exercices.map((ex) => (
-                      <div key={ex.numero} className="rounded-[10px] border border-emerald-200/70 bg-emerald-50/30 p-2.5">
-                        <p className="examai-arabic mb-1.5 text-[11px] font-bold tracking-wide text-emerald-700">
-                          {L.exercice} {ex.numero} — {ex.totalPoints} {ex.totalPoints > 1 ? L.points : L.point}
-                        </p>
-                        <div className="space-y-1.5">
-                          {ex.questions.map((q, i) => {
-                            const rtl = estEnArabe(q, matiereEstArabe)
-                            const imageUrl = extraireUrlImage(q)
-                            return (
-                              <div key={q.id ?? i} className="rounded-[8px] border border-[#0f172a]/10 bg-white p-2">
-                                <p
-                                  className={`text-[11px] font-semibold text-[#0f172a] ${rtl ? 'examai-arabic' : ''}`}
-                                  dir={rtl ? 'rtl' : 'ltr'}
-                                >
-                                  {i + 1}. {enonceAffiche(q, matiereEstArabe) || <span className="italic text-[#0f172a]/40">—</span>}
-                                </p>
-
-                                {q.support && (
-                                  <p className="mt-1 whitespace-pre-line rounded-[6px] bg-[#0f172a]/[0.03] px-2 py-1 text-[10px] italic text-[#0f172a]/60">
-                                    {q.support}
-                                  </p>
-                                )}
-
-                                {/* ✅ IMAGE dans le corrigé — affichée pour legende */}
-                                {estLegende(q) && (
-                                  <div className="mt-1.5">
-                                    {imageUrl ? (
-                                      <img
-                                        src={imageUrl}
-                                        alt={q.image?.alt_text || ''}
-                                        className="max-h-40 w-auto rounded-[6px] border border-emerald-200 object-contain"
-                                      />
-                                    ) : (
-                                      <div className="flex h-16 w-full max-w-xs items-center justify-center rounded-[6px] border border-dashed border-amber-300 bg-amber-50/50 text-center text-[10px] italic text-amber-700">
-                                        ⚠ Image introuvable
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
-                                {q.type === 'qcm' && (
-                                  <ul className="mt-1 space-y-0.5">
-                                    {(q.options || []).map((o, j) => (
-                                      <li key={j} className={`flex items-center gap-1.5 text-[10.5px] ${
-                                        j === q.reponseCorrecteIndex ? 'font-bold text-emerald-700' : 'text-[#0f172a]/55'
-                                      }`}>
-                                        {j === q.reponseCorrecteIndex && (
-                                          <Check size={9} strokeWidth={3} className="shrink-0 text-emerald-600" />
-                                        )}
-                                        {String.fromCharCode(97 + j)}) {o}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-
-                                {q.type === 'vrai_faux' && (
-                                  <p className="examai-arabic mt-1 text-[10.5px] font-bold text-emerald-700">
-                                    الإجابة الصحيحة : {q.reponseCorrecte ? L.vrai : L.faux}
-                                  </p>
-                                )}
-
-                                {(q.type === 'ouverte' || q.type === 'texte_trous') && (
-                                  <p className="mt-1 text-[10.5px] font-bold text-emerald-700">
-                                    <span className="examai-arabic">الإجابة المنتظرة</span> :{' '}
-                                    {q.reponseAttendue || <span className="italic font-normal text-[#0f172a]/40">—</span>}
-                                  </p>
-                                )}
-
-                                {estLegende(q) && (
-                                  <ul className="mt-1 space-y-0.5 text-[10.5px] font-bold text-emerald-700">
-                                    {(q.reponseCorrecte || []).map((r, ri) => (
-                                      <li key={ri} className="flex items-center gap-1.5">
-                                        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[9px] font-bold text-emerald-700">
-                                          {ri + 1}
-                                        </span>
-                                        <span>{r || '—'}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-
-                                {q.type === 'association' && (
-                                  <ul className="mt-1 space-y-0.5 text-[10.5px] text-emerald-700">
-                                    {(q.colonne_gauche || []).map((g, gi) => (
-                                      <li key={gi}>
-                                        <span className="font-bold">{g}</span>
-                                        {' → '}
-                                        <span className="font-bold">{q.colonne_droite?.[q.reponseCorrecte?.[gi]] ?? '?'}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-
-                                {q.type === 'remise_en_ordre' && (
-                                  <p className="mt-1 text-[10.5px] font-bold text-emerald-700">
-                                    Ordre : {(q.reponseCorrecte || []).map((idx) => q.elements?.[idx]).join(' → ')}
-                                  </p>
-                                )}
-
-                                {q.type === 'tri' && (
-                                  <ul className="mt-1 space-y-0.5 text-[10.5px] text-emerald-700">
-                                    {(q.elements || []).map((el, ei) => (
-                                      <li key={ei}>
-                                        <span className="font-bold">{el}</span>
-                                        {' — '}
-                                        <span className="font-bold">{q.categories?.[q.reponseCorrecte?.[ei]] ?? '?'}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-
-                                {q.type === 'calcul' && (
-                                  <p className="mt-1 text-[10.5px] font-bold text-emerald-700">
-                                    Réponse : {q.reponseAttendue} {q.unite || ''}
-                                  </p>
-                                )}
-
-                                {q.type === 'dictee' && (
-                                  <p className="mt-1 text-[10.5px] font-bold text-emerald-700">
-                                    Texte : {q.texte_dictee}
-                                  </p>
-                                )}
-
-                                {q.type === 'redaction' && (
-                                  <p className="mt-1 text-[10.5px] italic text-emerald-700/80">
-                                    {(q.criteres_evaluation || []).join(' · ') || 'Évaluée sur critères (pas de réponse unique)'}
-                                  </p>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-                {erreurCorrige && (
-                  <p className="mt-2 text-[11.5px] font-medium text-[#7a0008]">{erreurCorrige}</p>
-                )}
-                <button
-                  onClick={handleTelechargerCorrige}
-                  disabled={genererCorrige}
-                  className={`mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2.5 text-[12.5px] font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-emerald-700 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING} ${HOVER_LIFT}`}
-                >
-                  {genererCorrige ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} strokeWidth={2.4} />}
-                  {genererCorrige ? 'Génération…' : 'Télécharger le corrigé (PDF)'}
-                </button>
-              </div>
+          {}
+          <aside className="h-fit rounded-[24px] border border-[#0f172a]/20 bg-white p-4 lg:sticky lg:top-6">
+            <div className="mb-3 flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-[#7a0008]/[0.08] text-[#7a0008]">
+                <ListChecks size={15} />
+              </span>
+              <p className="examai-serif text-[14.5px] font-semibold text-[#0f172a]">
+                Questions <span className="text-[#7a0008]/60">({questions.length})</span>
+              </p>
             </div>
 
-            {/* ===== COLONNE DROITE ===== */}
-            <div className="space-y-4">
-
-              <div className="rounded-[24px] border border-[#7a0008]/25 bg-[#7a0008]/[0.02] p-5">
+            <div className="relative mb-2">
+              <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#0f172a]" strokeWidth={2.4} />
+              <input
+                id="search-input"
+                type="text"
+                value={recherche}
+                onChange={(e) => setRecherche(e.target.value)}
+                placeholder="Rechercher… (Ctrl+K)"
+                aria-label="Rechercher une question"
+                className={`w-full rounded-[12px] border-2 border-[#0f172a] bg-white py-2 pl-9 pr-8 text-[12.5px] text-[#0f172a] placeholder:text-[#0f172a]/40 focus:outline-none focus:shadow-[0_0_0_4px_rgba(15,23,42,0.15)] ${FOCUS_RING}`}
+              />
+              {recherche && (
                 <button
                   type="button"
-                  onClick={() => setShowInfosTun((v) => !v)}
-                  className={`flex w-full items-center gap-2.5 text-left ${FOCUS_RING}`}
+                  onClick={() => setRecherche('')}
+                  aria-label="Effacer"
+                  className="absolute right-2 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-[#0f172a] hover:bg-[#0f172a]/[0.10]"
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-[#7a0008]/10 text-[#7a0008]">
-                    🇹🇳
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="examai-serif text-[15px] font-semibold text-[#0f172a]">
-                      En-tête officiel tunisien
-                    </p>
-                    <p className="text-[10.5px] font-bold italic text-[#0f172a]/45">
-                      {L.pays} • {L.ministere}
-                    </p>
-                  </div>
-                  <ArrowRight
-                    size={14}
-                    className={`shrink-0 text-[#0f172a]/40 transition-transform ${showInfosTun ? 'rotate-90' : ''}`}
-                  />
+                  <X size={11} strokeWidth={2.6} />
                 </button>
+              )}
+            </div>
 
-                {showInfosTun && (
-                  <div className="mt-4 space-y-3">
-                    <label className="block">
-                      <span className="block text-[11px] font-bold uppercase tracking-wider text-[#0f172a]/60">Ecole</span>
-                      <input
-                        type="text"
-                        value={nomLycee}
-                        onChange={(e) => setNomLycee(e.target.value)}
-                        placeholder="مثال : معهد ابن خلدون — تونس"
-                        className={`examai-arabic mt-1 w-full rounded-[10px] border border-[#0f172a]/20 bg-white px-3 py-2 text-[12.5px] text-[#0f172a] placeholder:text-[#0f172a]/30 focus:border-[#7a0008]/60 ${FOCUS_RING}`}
-                      />
-                    </label>
+            <div ref={filtreRef} className="relative mb-3">
+              <button
+                type="button"
+                onClick={() => setFiltreOuvert((v) => !v)}
+                className={`flex w-full items-center justify-between gap-2 rounded-[12px] border border-[#0f172a]/20 bg-white px-3 py-2 text-[12.5px] font-semibold text-[#0f172a]/80 transition-all hover:border-[#0f172a]/40 ${FOCUS_RING}`}
+              >
+                <span className="flex items-center gap-2">
+                  <Filter size={12} strokeWidth={2.4} />
+                  {filtreType === 'all' ? 'Tous les types' : labelType(filtreType)}
+                </span>
+                <ChevronDown size={12} className={`transition-transform ${filtreOuvert ? 'rotate-180' : ''}`} />
+              </button>
 
-                    <label className="block">
-                      <span className="block text-[11px] font-bold uppercase tracking-wider text-[#0f172a]/60">Professeur</span>
-                      <input
-                        type="text"
-                        value={nomProfesseur}
-                        onChange={(e) => setNomProfesseur(e.target.value)}
-                        placeholder="مثال : الأستاذ محمد بن صالح"
-                        className={`examai-arabic mt-1 w-full rounded-[10px] border border-[#0f172a]/20 bg-white px-3 py-2 text-[12.5px] text-[#0f172a] placeholder:text-[#0f172a]/30 focus:border-[#7a0008]/60 ${FOCUS_RING}`}
-                      />
-                    </label>
-
-                    <label className="block">
-                      <span className="block text-[11px] font-bold uppercase tracking-wider text-[#0f172a]/60">Année scolaire</span>
-                      <input
-                        type="text"
-                        value={anneeScolaire}
-                        onChange={(e) => setAnneeScolaire(e.target.value)}
-                        placeholder="2024 / 2025"
-                        className={`mt-1 w-full rounded-[10px] border border-[#0f172a]/20 bg-white px-3 py-2 text-[12.5px] text-[#0f172a] placeholder:text-[#0f172a]/30 focus:border-[#7a0008]/60 ${FOCUS_RING}`}
-                      />
-                    </label>
-
-                    <label className="block">
-                      <span className="block text-[11px] font-bold uppercase tracking-wider text-[#0f172a]/60">Type de devoir</span>
-                      <select
-                        value={typeDevoir}
-                        onChange={(e) => setTypeDevoir(e.target.value)}
-                        className={`mt-1 w-full rounded-[10px] border border-[#0f172a]/20 bg-white px-3 py-2 text-[12.5px] text-[#0f172a] focus:border-[#7a0008]/60 ${FOCUS_RING}`}
+              {filtreOuvert && (
+                <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-[14px] border border-[#0f172a]/20 bg-white shadow-[0_16px_32px_-12px_rgba(15,23,42,0.25)]">
+                  <div className="p-1.5">
+                    {['all', ...typesDispo].map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => { setFiltreType(t); setFiltreOuvert(false) }}
+                        className={`flex w-full items-center justify-between rounded-[10px] px-2.5 py-2 text-left text-[12px] font-semibold transition-colors ${
+                          filtreType === t ? 'bg-[#0f172a]/[0.08] text-[#0f172a]' : 'text-[#0f172a]/70 hover:bg-[#0f172a]/[0.04]'
+                        }`}
                       >
-                        {TYPES_DEVOIR.map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {TYPES_DEVOIR_AR[t.id]} — {t.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <div className="space-y-2 pt-1">
-                      <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#0f172a]/45">
-                        Issus de votre sélection
-                      </p>
-
-                      <div className="flex items-center gap-2.5 rounded-[10px] border border-[#0f172a]/10 bg-white/70 p-2.5">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px] bg-[#0f172a]/[0.06] text-[#0f172a]/70">
-                          <BookOpen size={13} />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#0f172a]/50">Matière</p>
-                          <p className="examai-arabic truncate text-[12px] font-semibold text-[#0f172a]">{matiereAr}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2.5 rounded-[10px] border border-[#0f172a]/10 bg-white/70 p-2.5">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px] bg-[#0f172a]/[0.06] text-[#0f172a]/70">
-                          <GraduationCap size={13} />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#0f172a]/50">Niveau</p>
-                          <p className="examai-arabic truncate text-[12px] font-semibold text-[#0f172a]">{niveauAr}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2.5 rounded-[10px] border border-[#0f172a]/10 bg-white/70 p-2.5">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px] bg-[#0f172a]/[0.06] text-[#0f172a]/70">
-                          <Clock size={13} />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#0f172a]/50">Durée</p>
-                          <p className="truncate text-[12px] font-semibold text-[#0f172a]">{dureeLabel}</p>
-                        </div>
-                      </div>
-                    </div>
+                        {t === 'all' ? 'Tous les types' : labelType(t)}
+                        {filtreType === t && <Check size={12} strokeWidth={3} />}
+                      </button>
+                    ))}
                   </div>
+                </div>
+              )}
+            </div>
+
+            {questions.length === 0 ? (
+              <p className="rounded-[14px] border border-dashed border-[#7a0008]/25 bg-[#0f172a]/[0.03] px-3 py-4 text-center text-[12px] font-bold italic text-[#0f172a]/50">
+                Aucune question pour l'instant
+              </p>
+            ) : questionsFiltrees.length === 0 ? (
+              <p className="rounded-[14px] border border-dashed border-[#0f172a]/25 bg-[#0f172a]/[0.03] px-3 py-4 text-center text-[12px] font-bold italic text-[#0f172a]/50">
+                Aucun résultat
+              </p>
+            ) : (
+              <ul className="max-h-[400px] space-y-1 overflow-y-auto pr-1">
+                {questionsFiltrees.map((q) => {
+                  const realIndex = questions.findIndex((x) => x.id === q.id)
+                  const active = selected === q.id
+                  const complete = questionComplete(q)
+                  const tc = TYPE_COLOR[q.type] || TYPE_COLOR_DEFAUT
+                  return (
+                    <li key={q.id}>
+                      <button
+                        onClick={() => scrollTo(q.id)}
+                        className={`flex w-full items-center justify-between gap-2 rounded-[12px] px-3 py-2 text-left text-[13px] transition-colors ${FOCUS_RING} ${
+                          active
+                            ? 'bg-[#7a0008]/[0.08] font-bold text-[#7a0008]'
+                            : 'text-[#0f172a]/60 hover:bg-[#0f172a]/[0.05] hover:text-[#0f172a]'
+                        }`}
+                      >
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                            active ? 'bg-[#7a0008] text-white' : 'bg-[#0f172a]/[0.08] text-[#0f172a]/60'
+                          }`}>{realIndex + 1}</span>
+                          <span className="max-w-[120px] truncate">
+                            {q.question?.trim() || `Question ${realIndex + 1}`}
+                          </span>
+                        </span>
+                        <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${complete ? `${tc.bg} ${tc.text}` : 'bg-amber-100 text-amber-800'}`}>
+                          {complete ? labelType(q.type) : '⚠'}
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setShowShortcuts(true)}
+              className={`mt-3 flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-[#0f172a]/40 bg-white py-2 text-[11px] font-bold text-[#0f172a] transition-colors hover:border-[#0f172a] hover:bg-[#0f172a]/[0.04] ${FOCUS_RING}`}
+            >
+              <Sparkles size={11} strokeWidth={2.4} />
+              Raccourcis clavier ( ? )
+            </button>
+          </aside>
+
+          {}
+          <div className="min-w-0 space-y-4">
+            {questionsFiltrees.length === 0 && questions.length > 0 ? (
+              <div className="rounded-[20px] border border-dashed border-[#0f172a]/25 bg-white py-14 text-center">
+                <p className="text-[13.5px] font-bold italic text-[#0f172a]/50">
+                  Aucune question ne correspond à votre recherche
+                </p>
+              </div>
+            ) : (
+              questionsFiltrees.map((q) => {
+                const realIndex = questions.findIndex((x) => x.id === q.id)
+                return (
+                  <QuestionCard
+                    key={q.id}
+                    index={realIndex}
+                    question={q}
+                    onChange={(patch) => updateQuestion(q.id, patch)}
+                    onDuplicate={() => duplicateQuestion(q.id)}
+                    onDelete={() => handleSupprimer(q.id)}
+                    onUp={() => handleMonter(q.id)}
+                    onDown={() => handleDescendre(q.id)}
+                    canUp={realIndex > 0}
+                    canDown={realIndex < questions.length - 1}
+                    onFocus={() => setSelected(q.id)}
+                  />
+                )
+              })
+            )}
+
+            <button
+              onClick={handleAjouter}
+              className={`flex w-full items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-[#0f172a]/30 bg-white py-3.5 text-[13.5px] font-bold text-[#0f172a]/60 transition-all hover:-translate-y-0.5 hover:border-[#0f172a]/60 hover:text-[#0f172a] ${FOCUS_RING} ${HOVER_LIFT}`}
+            >
+              <Plus size={16} strokeWidth={2.4} /> Ajouter une question
+            </button>
+          </div>
+        </div>
+
+        {}
+        <div className="sticky bottom-4 z-20 mt-5 w-full">
+          <div className="w-full overflow-hidden rounded-[20px] border border-[#0f172a]/20 bg-white shadow-[0_14px_32px_-14px_rgba(15,23,42,0.25)]">
+            <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2 text-[12px] text-[#0f172a]/60">
+                <span className="flex items-center gap-1.5">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0f172a]/[0.08] text-[10px] font-bold text-[#0f172a]">
+                    {questions.length}
+                  </span>
+                  question{questions.length > 1 ? 's' : ''}
+                </span>
+                <span className="h-3 w-px bg-[#0f172a]/15" />
+                <span className="flex items-center gap-1.5">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7a0008]/[0.08] text-[10px] font-bold text-[#7a0008]">
+                    {totalPoints}
+                  </span>
+                  point{totalPoints > 1 ? 's' : ''}
+                </span>
+                {questionsIncompletes.length > 0 && (
+                  <>
+                    <span className="h-3 w-px bg-[#0f172a]/15" />
+                    <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10.5px] font-bold text-amber-800">
+                      <AlertCircle size={10} />
+                      {questionsIncompletes.length} incomplète{questionsIncompletes.length > 1 ? 's' : ''}
+                    </span>
+                  </>
                 )}
               </div>
 
-              <div className="rounded-[24px] border border-[#0f172a]/20 bg-white p-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-[#0f172a]/[0.08] text-[#0f172a]">
-                    <Globe size={15} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="examai-serif text-[15px] font-semibold text-[#0f172a]">Langue du rendu</p>
-                    <p className="text-[10.5px] font-bold italic text-[#0f172a]/45">Langue du document</p>
-                  </div>
-                </div>
-                <div className="mt-3 space-y-1.5">
-                  {[
-                    { id: 'fr', label: 'Français' },
-                    { id: 'ar', label: 'العربية', disabled: true, tag: 'Bientôt' },
-                    { id: 'bilingue', label: 'Bilingue FR + AR', disabled: true, tag: 'Bientôt' },
-                  ].map((opt) => (
-                    <label
-                      key={opt.id}
-                      className={`flex items-center justify-between gap-2 rounded-[12px] border px-3 py-2 text-[13px] transition-colors ${
-                        opt.disabled
-                          ? 'cursor-not-allowed border-[#0f172a]/10 bg-[#0f172a]/[0.02] text-[#0f172a]/35'
-                          : langue === opt.id
-                            ? 'cursor-pointer border-[#7a0008]/40 bg-[#7a0008]/[0.04] text-[#0f172a]'
-                            : 'cursor-pointer border-[#0f172a]/15 text-[#0f172a]/70 hover:border-[#0f172a]/30'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2.5">
-                        <input
-                          type="radio" name="langue" checked={langue === opt.id}
-                          disabled={opt.disabled}
-                          onChange={() => setLangue(opt.id)}
-                          className="h-4 w-4 border-[#0f172a]/30 text-[#7a0008] focus:ring-[#7a0008]/30 disabled:cursor-not-allowed"
-                        />
-                        <span className="font-medium">{opt.label}</span>
-                      </span>
-                      {opt.tag && (
-                        <span className={`rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wider ${TAG_TONES.amber}`}>
-                          {opt.tag}
-                        </span>
-                      )}
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowApercu(true)}
+                  className={`flex items-center gap-1.5 rounded-full border-2 border-[#7a0008]/30 bg-white px-3.5 py-2 text-[12px] font-semibold text-[#7a0008] transition-all hover:-translate-y-0.5 hover:border-[#7a0008] hover:bg-[#7a0008]/[0.04] ${FOCUS_RING} ${HOVER_LIFT}`}
+                >
+                  <Eye size={13} strokeWidth={2.2} />
+                  Aperçu
+                </button>
 
-              <div className="rounded-[24px] border border-[#0f172a]/20 bg-white p-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-[#0f172a]/[0.08] text-[#0f172a]">
-                    <FileText size={15} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="examai-serif text-[15px] font-semibold text-[#0f172a]">Format de sortie</p>
-                    <p className="text-[10.5px] font-bold italic text-[#0f172a]/45">Type de fichier</p>
-                  </div>
-                </div>
-                <div className="mt-3 space-y-1.5">
-                  {FORMATS.map((opt) => {
-                    const Icon = opt.icon
-                    const active = format === opt.id
-                    return (
-                      <label
-                        key={opt.id}
-                        className={`flex cursor-pointer items-start justify-between gap-2 rounded-[12px] border px-3 py-2.5 transition-colors ${
-                          active ? 'border-[#7a0008]/40 bg-[#7a0008]/[0.04]' : 'border-[#0f172a]/15 hover:border-[#0f172a]/30'
-                        }`}
-                      >
-                        <span className="flex min-w-0 items-start gap-2.5">
-                          <input
-                            type="radio" name="format" checked={active}
-                            onChange={() => setFormat(opt.id)}
-                            className="mt-0.5 h-4 w-4 shrink-0 border-[#0f172a]/30 text-[#7a0008] focus:ring-[#7a0008]/30"
-                          />
-                          <span className="mt-0.5 shrink-0"><Icon size={18} /></span>
-                          <span className="min-w-0">
-                            <span className="block text-[13px] font-medium text-[#0f172a]">{opt.label}</span>
-                            <span className="mt-0.5 block text-[10.5px] italic text-[#0f172a]/50">{opt.description}</span>
-                          </span>
-                        </span>
-                        {opt.tag && (
-                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wider ${TAG_TONES[opt.tagTone] || TAG_TONES.navy}`}>
-                            {opt.tag}
-                          </span>
-                        )}
-                      </label>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="rounded-[24px] border border-[#0f172a]/20 bg-white p-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-[#0f172a]/[0.08] text-[#0f172a]">
-                    <Settings2 size={15} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="examai-serif text-[15px] font-semibold text-[#0f172a]">Options avancées</p>
-                    <p className="text-[10.5px] font-bold italic text-[#0f172a]/45">Personnalisation</p>
-                  </div>
-                </div>
-                <div className="mt-4 space-y-3">
-                  <Toggle
-                    label="En-tête de l'établissement"
-                    description="Ajoute le bloc officiel en haut du document"
-                    on={enTete} onChange={setEnTete}
-                  />
-                  <div className="h-px bg-[#0f172a]/10" />
-                  <Toggle
-                    label="Pagination automatique"
-                    description="Numérote les pages du document"
-                    on={pagination} onChange={setPagination}
-                  />
-                </div>
-                <div className="mt-4 flex items-start gap-2 rounded-[12px] border border-[#0f172a]/15 bg-[#0f172a]/[0.02] p-3">
-                  <Sparkles size={12} className="mt-0.5 shrink-0 text-[#0f172a]/50" strokeWidth={2.2} />
-                  <p className="text-[11px] font-medium leading-snug text-[#0f172a]/55">
-                    {format === 'impression'
-                      ? 'Le PDF s\'ouvrira dans un nouvel onglet et la boîte d\'impression s\'affichera.'
-                      : formatSelectionne.nature === 'texte'
-                        ? 'Le fichier texte sera généré puis téléchargé automatiquement.'
-                        : 'Le fichier sera téléchargé automatiquement une fois la génération terminée.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ===== BARRE FLOTTANTE ===== */}
-        {!generation && (
-          <div className="sticky bottom-4 z-20 mt-5 w-full">
-            <div className="w-full overflow-hidden rounded-[20px] border border-[#0f172a]/20 bg-white shadow-[0_14px_32px_-14px_rgba(15,23,42,0.25)]">
-              <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap items-center gap-2 text-[12px] text-[#0f172a]/60">
-                  <span className="flex items-center gap-1.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0f172a]/[0.08] text-[10px] font-bold text-[#0f172a]">
-                      {nbExercices}
-                    </span>
-                    exercice{nbExercices > 1 ? 's' : ''}
-                  </span>
-                  <span className="h-3 w-px bg-[#0f172a]/15" />
-                  <span className="flex items-center gap-1.5">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7a0008]/[0.08] text-[10px] font-bold text-[#7a0008]">
-                      {totalPoints}
-                    </span>
-                    point{totalPoints > 1 ? 's' : ''}
-                  </span>
-                  <span className="h-3 w-px bg-[#0f172a]/15" />
-                  <span className="flex items-center gap-1.5 rounded-full bg-[#0f172a]/[0.05] px-2 py-0.5 font-semibold text-[#0f172a]/70">
-                    <Clock size={12} /> {dureeLabel}
-                  </span>
-                  <span className="h-3 w-px bg-[#0f172a]/15" />
-                  <span className="flex items-center gap-1.5 rounded-full bg-[#0f172a]/[0.05] px-2 py-0.5 font-semibold text-[#0f172a]/70">
-                    <formatSelectionne.icon size={12} /> {formatSelectionne.label}
-                  </span>
-                  <span className="h-3 w-px bg-[#0f172a]/15" />
-                  <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10.5px] font-bold text-emerald-700">
-                    🇹🇳 Tunisien
-                  </span>
-                  {pret && (
+                <button
+                  onClick={handleVerifier}
+                  disabled={loading || questions.length === 0}
+                  className={`group relative flex shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full bg-[#7a0008] px-5 py-2.5 text-[12.5px] font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.2),0_10px_22px_-10px_rgba(122,0,8,0.55),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#961014] active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${FOCUS_RING}`}
+                >
+                  {loading ? (
                     <>
-                      <span className="h-3 w-px bg-[#0f172a]/15" />
-                      <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10.5px] font-bold text-emerald-700">
-                        <Check size={10} strokeWidth={3} /> Prêt
-                      </span>
+                      <Loader2 size={14} className="animate-spin" />
+                      <span>Enregistrement…</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Vérifier l'examen</span>
+                      <ArrowRight size={14} strokeWidth={2.4} className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:group-hover:translate-x-0" />
                     </>
                   )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => navigate('/wizard/validation')}
-                    className={`group flex shrink-0 items-center justify-center gap-1.5 rounded-full border-2 border-[#0f172a]/25 bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#0f172a] transition-all hover:-translate-y-0.5 hover:border-[#0f172a]/60 hover:bg-[#0f172a]/[0.04] active:scale-[0.985] ${FOCUS_RING} ${HOVER_LIFT}`}
-                  >
-                    <ArrowLeft size={14} strokeWidth={2.4} />
-                    Retour à la validation
-                  </button>
-                  <button
-                    onClick={handleGenerer}
-                    disabled={loading}
-                    className={`group relative flex shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full bg-[#7a0008] px-5 py-2.5 text-[12.5px] font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.2),0_10px_22px_-10px_rgba(122,0,8,0.55),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#961014] active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${FOCUS_RING}`}
-                  >
-                    <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-                    {loading ? (
-                      <Loader2 size={14} className="relative animate-spin" />
-                    ) : format === 'impression' ? (
-                      <Printer size={14} strokeWidth={2.4} className="relative" />
-                    ) : (
-                      <formatSelectionne.icon size={14} className="relative" />
-                    )}
-                    <span className="relative">
-                      {loading ? 'Génération…' : format === 'impression' ? 'Imprimer' : `Générer le ${formatSelectionne.label}`}
-                    </span>
-                  </button>
-                </div>
+                </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
+
+      {showShortcuts && <ShortcutsModal onClose={() => setShowShortcuts(false)} />}
+
+      {showApercu && (
+        <ApercuModal questions={questions} totalPoints={totalPoints} onClose={() => setShowApercu(false)} />
+      )}
+
+      {questionASupprimer && (
+        <DeleteConfirmModal
+          question={questionASupprimer.question}
+          index={questionASupprimer.index}
+          onCancel={() => setQuestionASupprimer(null)}
+          onConfirm={confirmerSuppression}
+        />
+      )}
     </WizardShell>
   )
 }
 
-/* ===== TOGGLE ===== */
-function Toggle({ label, description, on, onChange }) {
+
+function QuestionCard({ index, question, onChange, onDuplicate, onDelete, onUp, onDown, canUp, canDown, onFocus }) {
+  const complete = questionComplete(question)
   return (
-    <button
-      type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)}
-      className={`group flex w-full items-center justify-between gap-3 text-left ${FOCUS_RING}`}
+    <div
+      id={`question-${question.id}`}
+      onFocusCapture={onFocus}
+      className={`group rounded-[20px] border-2 bg-white p-5 transition-colors ${
+        complete ? 'border-[#0f172a]/20' : 'border-amber-300'
+      }`}
     >
-      <span className="min-w-0">
-        <span className="block text-[13px] font-semibold text-[#0f172a]">{label}</span>
-        {description && (
-          <span className="mt-0.5 block text-[11px] italic text-[#0f172a]/50">{description}</span>
-        )}
-      </span>
-      <span className={`relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
-        on ? 'bg-[#7a0008]' : 'bg-[#0f172a]/[0.15]'
-      }`}>
-        <span className={`absolute h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(15,23,42,0.25)] transition-transform duration-200 ${
-          on ? 'translate-x-[22px]' : 'translate-x-0.5'
-        }`} />
-      </span>
-    </button>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2 text-[12px] font-medium text-[#0f172a]/55">
+          <span className="flex items-center gap-1.5 rounded-full bg-[#7a0008]/[0.08] px-2.5 py-1 font-semibold text-[#7a0008]">
+            <GripVertical size={11} className="opacity-40" />
+            Q{index + 1}
+          </span>
+          <span className="rounded-full border border-[#0f172a]/15 px-2.5 py-1 text-[#0f172a]/70">
+            {labelType(question.type)}
+          </span>
+          <label className="flex items-center gap-1.5 rounded-full border border-[#0f172a]/15 px-2.5 py-1">
+            <input
+              type="number"
+              min={0}
+              step={0.5}
+              value={question.points ?? 0}
+              onChange={(e) => onChange({ points: Math.max(0, Number(e.target.value) || 0) })}
+              aria-label={`Points pour la question ${index + 1}`}
+              className="w-9 border-none bg-transparent text-center text-[12px] font-semibold text-[#0f172a] outline-none"
+            />
+            <span className="text-[#0f172a]/50">pts</span>
+          </label>
+          {!complete && (
+            <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-800">
+              <AlertCircle size={10} />
+              Incomplète
+            </span>
+          )}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1 opacity-60 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+          <button type="button" onClick={onUp} disabled={!canUp} aria-label="Monter la question" title="Monter" className={`${ACTION_BTN} ${FOCUS_RING}`}>
+            <ArrowUp size={14} strokeWidth={2.2} />
+          </button>
+          <button type="button" onClick={onDown} disabled={!canDown} aria-label="Descendre la question" title="Descendre" className={`${ACTION_BTN} ${FOCUS_RING}`}>
+            <ArrowDown size={14} strokeWidth={2.2} />
+          </button>
+          <button type="button" onClick={onDuplicate} aria-label="Dupliquer" title="Dupliquer" className={`${ACTION_BTN} ${FOCUS_RING}`}>
+            <Copy size={14} strokeWidth={2.2} />
+          </button>
+          <button type="button" onClick={onDelete} aria-label="Supprimer" title="Supprimer" className={`${ACTION_BTN_DANGER} ${FOCUS_RING}`}>
+            <Trash2 size={14} strokeWidth={2.2} />
+          </button>
+        </div>
+      </div>
+
+      <div className="relative mt-3.5">
+        <Pencil size={12} className="pointer-events-none absolute left-3.5 top-3.5 text-[#0f172a]/40" aria-hidden="true" />
+        <textarea
+          rows={2}
+          value={question.question || ''}
+          onChange={(e) => onChange({ question: e.target.value })}
+          placeholder="Énoncé de la question"
+          aria-label={`Énoncé de la question ${index + 1}`}
+          className={`w-full resize-y rounded-[12px] border border-[#0f172a]/20 bg-white py-2.5 pl-9 pr-3.5 text-[14px] font-medium text-[#0f172a] outline-none transition-all placeholder:font-normal placeholder:text-[#0f172a]/35 focus:border-[#0f172a]/50 focus:shadow-[0_0_0_4px_rgba(15,23,42,0.10)] ${FOCUS_RING}`}
+        />
+      </div>
+
+      {question.support != null && (
+        <textarea
+          rows={3}
+          value={question.support || ''}
+          onChange={(e) => onChange({ support: e.target.value })}
+          placeholder="Texte support (optionnel)"
+          aria-label="Texte support"
+          className={`mt-2 w-full resize-y rounded-[12px] border border-[#0f172a]/15 bg-[#0f172a]/[0.02] px-3.5 py-2.5 text-[13px] italic text-[#0f172a]/80 outline-none focus:border-[#0f172a]/40 ${FOCUS_RING}`}
+        />
+      )}
+
+      <div className="mt-3.5">
+        <EditeurReponse question={question} onChange={onChange} index={index} />
+      </div>
+    </div>
   )
 }
 
-/* ===== LOADER ===== */
-function GenerationLoader({ formatLabel = 'PDF' }) {
-  return (
-    <div className="relative flex min-h-[420px] flex-col items-center justify-center gap-8 overflow-hidden rounded-[24px] border border-[#0f172a]/20 bg-white p-10">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="examai-scan absolute left-0 right-0 h-32 bg-gradient-to-b from-transparent via-[#7a0008]/[0.06] to-transparent" />
-      </div>
-      <div className="relative flex h-40 w-40 items-center justify-center">
-        <div className="examai-orbit-slow absolute inset-0 rounded-full border-2 border-dashed border-[#0f172a]/20">
-          <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#0f172a]/40" />
-          <span className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#0f172a]/40" />
-        </div>
-        <div className="examai-orbit absolute inset-4 rounded-full border-2 border-[#7a0008]/20">
-          <span className="absolute -top-1.5 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#7a0008] shadow-[0_0_10px_rgba(122,0,8,0.5)]" />
-        </div>
-        <div className="examai-orbit-pulse absolute inset-10 rounded-full border border-[#7a0008]/30 bg-[#7a0008]/[0.04]" />
-        <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[#7a0008] shadow-[0_8px_24px_-6px_rgba(122,0,8,0.6)]">
-          <FileText size={24} className="text-white" strokeWidth={2} />
-        </div>
-      </div>
-      <div className="relative flex flex-col items-center gap-2 text-center">
-        <h3 className="examai-serif text-[18px] font-semibold text-[#0f172a]">Génération en cours</h3>
-        <p className="flex items-center gap-1 text-[13px] font-medium italic text-[#0f172a]/55">
-          Préparation du {formatLabel}
-          <span className="examai-dot-1 inline-block h-1 w-1 rounded-full bg-[#0f172a]/60" />
-          <span className="examai-dot-2 inline-block h-1 w-1 rounded-full bg-[#0f172a]/60" />
-          <span className="examai-dot-3 inline-block h-1 w-1 rounded-full bg-[#0f172a]/60" />
-        </p>
-      </div>
-      <ul className="relative w-full max-w-sm space-y-1.5">
-        {ETAPES_GENERATION.map((etape, idx) => {
-          const Icon = etape.icon
-          return (
-            <li
-              key={etape.label}
-              className="examai-fade-in-up flex items-center gap-2.5 rounded-[10px] border border-[#0f172a]/10 bg-[#0f172a]/[0.02] px-3 py-2"
-              style={{ animationDelay: `${idx * 0.12}s` }}
+
+function EditeurReponse({ question: q, onChange, index }) {
+  switch (q.type) {
+    case 'qcm': {
+      const options = Array.isArray(q.options) ? q.options : []
+      return (
+        <div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {options.map((opt, i) => {
+              const correct = q.reponseCorrecteIndex === i
+              return (
+                <div
+                  key={i}
+                  className={`flex items-center gap-2.5 rounded-[12px] border px-3 py-2 text-[13px] transition-colors ${
+                    correct ? 'border-[#2f855a]/40 bg-[#2f855a]/[0.05]' : 'border-[#0f172a]/15 hover:border-[#0f172a]/30'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`${q.id}-correct`}
+                    checked={correct}
+                    onChange={() => onChange({ reponseCorrecteIndex: i })}
+                    aria-label={`Marquer l'option ${i + 1} comme bonne réponse`}
+                    className="h-4 w-4 shrink-0 border-[#0f172a]/30 text-[#2f855a] focus:ring-[#2f855a]/30"
+                  />
+                  <input
+                    value={opt || ''}
+                    onChange={(e) => {
+                      const next = [...options]
+                      next[i] = e.target.value
+                      onChange({ options: next })
+                    }}
+                    placeholder={`Option ${i + 1}`}
+                    aria-label={`Option ${i + 1}`}
+                    className="min-w-0 flex-1 border-none bg-transparent text-[13px] text-[#0f172a] outline-none placeholder:text-[#0f172a]/35"
+                  />
+                  {options.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = options.filter((_, j) => j !== i)
+                        let idx = q.reponseCorrecteIndex
+                        if (idx === i) idx = 0
+                        else if (idx > i) idx -= 1
+                        onChange({ options: next, reponseCorrecteIndex: idx })
+                      }}
+                      aria-label={`Retirer l'option ${i + 1}`}
+                      className="shrink-0 rounded-full p-1 text-[#0f172a]/35 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                  {correct && <Check size={13} strokeWidth={3} className="shrink-0 text-[#2f855a]" />}
+                </div>
+              )
+            })}
+          </div>
+          {options.length < 6 && (
+            <button
+              type="button"
+              onClick={() => onChange({ options: [...options, ''] })}
+              className="mt-2 flex items-center gap-1 text-[12px] font-semibold text-[#0f172a]/55 hover:text-[#0f172a]"
             >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white ring-1 ring-[#0f172a]/15">
-                <Icon size={12} className="text-[#0f172a]/70" strokeWidth={2.2} />
+              <Plus size={12} /> Ajouter une option
+            </button>
+          )}
+        </div>
+      )
+    }
+
+    case 'vrai_faux':
+      return (
+        <div className="flex gap-2">
+          {[{ v: true, label: 'Vrai' }, { v: false, label: 'Faux' }].map(({ v, label }) => {
+            const active = q.reponseCorrecte === v
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => onChange({ reponseCorrecte: v })}
+                className={`flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-[13px] font-semibold transition-all ${FOCUS_RING} ${
+                  active
+                    ? 'border-transparent bg-[#2f855a] text-white'
+                    : 'border-[#0f172a]/20 text-[#0f172a]/60 hover:border-[#0f172a]/40'
+                }`}
+              >
+                {active && <Check size={12} strokeWidth={3} />}
+                {label}
+              </button>
+            )
+          })}
+        </div>
+      )
+
+    case 'ouverte':
+      return (
+        <input
+          placeholder="Réponse attendue (pour la correction)"
+          value={q.reponseAttendue || ''}
+          onChange={(e) => onChange({ reponseAttendue: e.target.value })}
+          aria-label={`Réponse attendue pour la question ${index + 1}`}
+          className={INPUT_REPONSE}
+        />
+      )
+
+    case 'texte_trous':
+      return (
+        <input
+          placeholder="Réponse(s) attendue(s) — séparez par des virgules si plusieurs blancs"
+          value={q.reponseAttendue || ''}
+          onChange={(e) => onChange({ reponseAttendue: e.target.value })}
+          aria-label={`Réponse attendue pour la question ${index + 1}`}
+          className={INPUT_REPONSE}
+        />
+      )
+
+    case 'calcul':
+      return (
+        <div className="flex gap-2">
+          <input
+            placeholder="Résultat attendu"
+            value={q.reponseAttendue ?? ''}
+            onChange={(e) => onChange({ reponseAttendue: e.target.value })}
+            aria-label="Résultat attendu"
+            className={INPUT_REPONSE}
+          />
+          <input
+            placeholder="Unité"
+            value={q.unite || ''}
+            onChange={(e) => onChange({ unite: e.target.value })}
+            aria-label="Unité"
+            className={`w-28 shrink-0 ${INPUT_REPONSE}`}
+          />
+        </div>
+      )
+
+    case 'legende':
+      return (
+        <div className="space-y-3">
+          {q.image?.url && (
+            <img
+              src={q.image.url}
+              alt={q.image.alt_text || ''}
+              className="max-h-56 w-auto rounded-[10px] border border-[#0f172a]/15 object-contain"
+            />
+          )}
+          <ListeEditable
+            titre="Légendes attendues (dans l'ordre des numéros)"
+            items={Array.isArray(q.reponseCorrecte) ? q.reponseCorrecte : []}
+            onChange={(items) => onChange({ reponseCorrecte: items })}
+            numerote
+          />
+        </div>
+      )
+
+    case 'dictee':
+      return (
+        <textarea
+          rows={4}
+          placeholder="Texte de la dictée"
+          value={q.texte_dictee || ''}
+          onChange={(e) => onChange({ texte_dictee: e.target.value })}
+          aria-label="Texte de la dictée"
+          className={`resize-y ${INPUT_REPONSE}`}
+        />
+      )
+
+    case 'redaction':
+      return (
+        <div className="space-y-3">
+          <ListeEditable
+            titre="Critères d'évaluation"
+            items={Array.isArray(q.criteres_evaluation) ? q.criteres_evaluation : []}
+            onChange={(items) => onChange({ criteres_evaluation: items })}
+          />
+          <label className="flex items-center gap-2 text-[12px] font-semibold text-[#0f172a]/60">
+            Longueur minimale
+            <input
+              type="number"
+              min={0}
+              value={q.longueur_min_mots ?? ''}
+              onChange={(e) => onChange({ longueur_min_mots: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) })}
+              className="w-20 rounded-[8px] border border-[#0f172a]/15 px-2 py-1 text-center text-[12.5px] text-[#0f172a] outline-none focus:border-[#7a0008]/40"
+            />
+            mots
+          </label>
+        </div>
+      )
+
+    case 'association': {
+      const gauche = Array.isArray(q.colonne_gauche) ? q.colonne_gauche : []
+      const droite = Array.isArray(q.colonne_droite) ? q.colonne_droite : []
+      const rep = Array.isArray(q.reponseCorrecte) ? q.reponseCorrecte : []
+      return (
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ListeEditable titre="Colonne de gauche" items={gauche} onChange={(items) => onChange({ colonne_gauche: items, reponseCorrecte: rep.slice(0, items.length) })} numerote />
+            <ListeEditable titre="Colonne de droite" items={droite} onChange={(items) => onChange({ colonne_droite: items })} lettres />
+          </div>
+          {gauche.length > 0 && droite.length > 0 && (
+            <div className="rounded-[12px] border border-[#2f855a]/25 bg-[#2f855a]/[0.04] p-3">
+              <p className="mb-2 text-[11.5px] font-bold text-emerald-800">Bonnes associations</p>
+              <div className="space-y-1.5">
+                {gauche.map((g, i) => (
+                  <div key={i} className="flex items-center gap-2 text-[12.5px]">
+                    <span className="min-w-0 flex-1 truncate text-[#0f172a]/80">{i + 1}) {g || '—'}</span>
+                    <span className="text-[#0f172a]/40">→</span>
+                    <select
+                      value={rep[i] ?? ''}
+                      onChange={(e) => {
+                        const next = [...rep]
+                        while (next.length < gauche.length) next.push(null)
+                        next[i] = e.target.value === '' ? null : Number(e.target.value)
+                        onChange({ reponseCorrecte: next })
+                      }}
+                      className="w-40 rounded-[8px] border border-[#0f172a]/15 bg-white px-2 py-1 text-[12px] outline-none"
+                    >
+                      <option value="">—</option>
+                      {droite.map((d, j) => (
+                        <option key={j} value={j}>{String.fromCharCode(65 + j)}) {d}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    case 'remise_en_ordre': {
+      const elements = Array.isArray(q.elements) ? q.elements : []
+      const ordre = Array.isArray(q.reponseCorrecte) ? q.reponseCorrecte : []
+      return (
+        <div className="space-y-3">
+          <ListeEditable titre="Éléments (affichés dans le désordre à l'élève)" items={elements} onChange={(items) => onChange({ elements: items, reponseCorrecte: ordre.filter((x) => x < items.length) })} numerote />
+          {elements.length > 0 && (
+            <div className="rounded-[12px] border border-[#2f855a]/25 bg-[#2f855a]/[0.04] p-3">
+              <p className="mb-2 text-[11.5px] font-bold text-emerald-800">Ordre correct</p>
+              <div className="space-y-1.5">
+                {elements.map((_, pos) => (
+                  <div key={pos} className="flex items-center gap-2 text-[12.5px]">
+                    <span className="w-16 shrink-0 font-semibold text-[#0f172a]/60">{pos + 1}ᵉ</span>
+                    <select
+                      value={ordre[pos] ?? ''}
+                      onChange={(e) => {
+                        const next = [...ordre]
+                        while (next.length < elements.length) next.push(null)
+                        next[pos] = e.target.value === '' ? null : Number(e.target.value)
+                        onChange({ reponseCorrecte: next })
+                      }}
+                      className="min-w-0 flex-1 rounded-[8px] border border-[#0f172a]/15 bg-white px-2 py-1 text-[12px] outline-none"
+                    >
+                      <option value="">—</option>
+                      {elements.map((el, j) => (
+                        <option key={j} value={j}>{j + 1}) {el}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    case 'tri': {
+      const categories = Array.isArray(q.categories) ? q.categories : []
+      const elements = Array.isArray(q.elements) ? q.elements : []
+      const rep = Array.isArray(q.reponseCorrecte) ? q.reponseCorrecte : []
+      return (
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ListeEditable titre="Catégories" items={categories} onChange={(items) => onChange({ categories: items })} />
+            <ListeEditable titre="Éléments à classer" items={elements} onChange={(items) => onChange({ elements: items, reponseCorrecte: rep.slice(0, items.length) })} />
+          </div>
+          {elements.length > 0 && categories.length > 0 && (
+            <div className="rounded-[12px] border border-[#2f855a]/25 bg-[#2f855a]/[0.04] p-3">
+              <p className="mb-2 text-[11.5px] font-bold text-emerald-800">Bonne catégorie de chaque élément</p>
+              <div className="space-y-1.5">
+                {elements.map((el, i) => (
+                  <div key={i} className="flex items-center gap-2 text-[12.5px]">
+                    <span className="min-w-0 flex-1 truncate text-[#0f172a]/80">{el || '—'}</span>
+                    <select
+                      value={rep[i] ?? ''}
+                      onChange={(e) => {
+                        const next = [...rep]
+                        while (next.length < elements.length) next.push(null)
+                        next[i] = e.target.value === '' ? null : Number(e.target.value)
+                        onChange({ reponseCorrecte: next })
+                      }}
+                      className="w-40 rounded-[8px] border border-[#0f172a]/15 bg-white px-2 py-1 text-[12px] outline-none"
+                    >
+                      <option value="">—</option>
+                      {categories.map((c, j) => (
+                        <option key={j} value={j}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    default:
+      return (
+        <input
+          placeholder="Réponse attendue (pour la correction)"
+          value={q.reponseAttendue || ''}
+          onChange={(e) => onChange({ reponseAttendue: e.target.value })}
+          className={INPUT_REPONSE}
+        />
+      )
+  }
+}
+
+
+function ListeEditable({ titre, items, onChange, numerote = false, lettres = false }) {
+  return (
+    <div className="rounded-[12px] border border-[#0f172a]/12 bg-[#0f172a]/[0.02] p-3">
+      <p className="mb-2 text-[11.5px] font-bold text-[#0f172a]/65">{titre}</p>
+      <div className="space-y-1.5">
+        {items.map((it, i) => (
+          <div key={i} className="flex items-center gap-2">
+            {(numerote || lettres) && (
+              <span className="w-5 shrink-0 text-center text-[11px] font-bold text-[#7a0008]">
+                {lettres ? String.fromCharCode(65 + i) : i + 1}
               </span>
-              <span className="text-[12px] font-medium text-[#0f172a]/70">{etape.label}</span>
-              <span className="ml-auto flex h-1.5 w-1.5">
-                <span className="examai-dot-1 h-full w-full rounded-full bg-[#7a0008]" />
+            )}
+            <input
+              value={it ?? ''}
+              onChange={(e) => {
+                const next = [...items]
+                next[i] = e.target.value
+                onChange(next)
+              }}
+              className="min-w-0 flex-1 rounded-[8px] border border-[#0f172a]/15 bg-white px-2.5 py-1.5 text-[12.5px] text-[#0f172a] outline-none focus:border-[#7a0008]/40"
+            />
+            <button
+              type="button"
+              onClick={() => onChange(items.filter((_, j) => j !== i))}
+              aria-label="Retirer"
+              className="shrink-0 rounded-full p-1 text-[#0f172a]/35 hover:bg-red-50 hover:text-red-600"
+            >
+              <X size={12} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => onChange([...items, ''])}
+        className="mt-2 flex items-center gap-1 text-[12px] font-semibold text-[#0f172a]/55 hover:text-[#0f172a]"
+      >
+        <Plus size={12} /> Ajouter
+      </button>
+    </div>
+  )
+}
+
+
+function ShortcutsModal({ onClose }) {
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const raccourcis = [
+    { keys: ['Ctrl', 'S'], label: 'Enregistrer les modifications' },
+    { keys: ['Ctrl', 'D'], label: 'Dupliquer la question sélectionnée' },
+    { keys: ['Ctrl', 'Entrée'], label: "Vérifier l'examen" },
+    { keys: ['Ctrl', 'K'], label: 'Rechercher une question' },
+    { keys: ['?'], label: 'Afficher les raccourcis' },
+  ]
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm" onClick={onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Raccourcis clavier"
+        className="relative w-full max-w-md overflow-hidden rounded-[24px] border border-[#0f172a]/20 bg-white"
+        style={{ animation: 'examaiModalSlideUp 240ms cubic-bezier(0.22, 1, 0.36, 1) both' }}
+      >
+        <div className="flex items-center justify-between border-b border-[#0f172a]/10 p-5">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-[#0f172a]/[0.08]">
+              <Sparkles size={15} className="text-[#0f172a]" strokeWidth={2.4} />
+            </span>
+            <p className="examai-serif text-[15px] font-semibold text-[#0f172a]">Raccourcis clavier</p>
+          </div>
+          <button onClick={onClose} aria-label="Fermer" className="flex h-8 w-8 items-center justify-center rounded-full text-[#0f172a]/60 hover:bg-[#0f172a]/[0.05]">
+            <X size={14} />
+          </button>
+        </div>
+        <div className="space-y-2 p-5">
+          {raccourcis.map((s) => (
+            <div key={s.label} className="flex items-center justify-between gap-3 rounded-[10px] bg-[#0f172a]/[0.03] px-3 py-2">
+              <span className="text-[12.5px] font-medium text-[#0f172a]/75">{s.label}</span>
+              <span className="flex shrink-0 items-center gap-1">
+                {s.keys.map((k) => (
+                  <kbd key={k} className="rounded-md border border-[#0f172a]/20 bg-white px-2 py-0.5 font-mono text-[10.5px] font-bold text-[#0f172a]">
+                    {k}
+                  </kbd>
+                ))}
               </span>
-            </li>
-          )
-        })}
-      </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+function ApercuModal({ questions, totalPoints, onClose }) {
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') onClose() }
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = previous
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
+      <div className="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm" onClick={onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Aperçu de l'examen"
+        className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-[24px] border border-[#0f172a]/20 bg-white"
+        style={{ animation: 'examaiModalSlideUp 240ms cubic-bezier(0.22, 1, 0.36, 1) both' }}
+      >
+        <div className="sticky top-0 flex items-center justify-between border-b border-[#0f172a]/10 bg-white/95 px-5 py-4 backdrop-blur">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-[#7a0008]/[0.10]">
+              <Eye size={15} className="text-[#7a0008]" />
+            </span>
+            <div>
+              <p className="examai-serif text-[15px] font-semibold text-[#0f172a]">Aperçu de l'examen</p>
+              <p className="text-[11px] font-bold italic text-[#0f172a]/50">
+                {questions.length} question{questions.length > 1 ? 's' : ''} · {totalPoints} pt{totalPoints > 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} aria-label="Fermer" className="flex h-8 w-8 items-center justify-center rounded-full text-[#0f172a]/60 hover:bg-[#0f172a]/[0.05]">
+            <X size={14} />
+          </button>
+        </div>
+
+        <div className="space-y-4 p-5">
+          {questions.map((q, i) => (
+            <div key={q.id} className="rounded-[16px] border border-[#0f172a]/15 bg-white p-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2 text-[12px] font-bold text-[#0f172a]/70">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#7a0008]/[0.10] text-[11px] font-bold text-[#7a0008]">
+                    {i + 1}
+                  </span>
+                  {labelType(q.type)}
+                </span>
+                <span className="text-[11px] font-bold text-[#0f172a]/50">{q.points} pt{q.points > 1 ? 's' : ''}</span>
+              </div>
+              <p className="examai-serif mt-2.5 text-[14.5px] font-semibold text-[#0f172a]">
+                {q.question || <span className="italic text-[#0f172a]/40">Énoncé vide</span>}
+              </p>
+
+              {q.type === 'qcm' && (
+                <ul className="mt-2.5 space-y-1">
+                  {(q.options || []).map((o, j) => (
+                    <li key={j} className={`flex items-center gap-2 rounded-[10px] px-2.5 py-1.5 text-[12.5px] ${
+                      j === q.reponseCorrecteIndex ? 'bg-[#2f855a]/[0.08] font-semibold text-emerald-800' : 'text-[#0f172a]/70'
+                    }`}>
+                      <span className="text-[10px] font-bold text-[#0f172a]/60">{String.fromCharCode(65 + j)}.</span>
+                      {o}
+                      {j === q.reponseCorrecteIndex && <Check size={12} strokeWidth={3} className="ml-auto text-emerald-600" />}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {q.type === 'vrai_faux' && (
+                <p className="mt-2 text-[12.5px] text-[#0f172a]/70">
+                  Réponse : <span className="font-bold text-emerald-700">{q.reponseCorrecte ? 'Vrai' : 'Faux'}</span>
+                </p>
+              )}
+
+              {['ouverte', 'texte_trous', 'calcul'].includes(q.type) && (
+                <p className="mt-2 rounded-[10px] border border-dashed border-[#0f172a]/20 px-2.5 py-1.5 text-[12px] italic text-[#0f172a]/60">
+                  {texteRempli(q.reponseAttendue) ? `${q.reponseAttendue}${q.unite ? ` ${q.unite}` : ''}` : 'Aucune réponse attendue spécifiée'}
+                </p>
+              )}
+
+              {q.type === 'legende' && (
+                <ol className="mt-2 list-decimal space-y-0.5 pl-5 text-[12px] text-emerald-800">
+                  {(q.reponseCorrecte || []).map((r, j) => <li key={j}>{r || '—'}</li>)}
+                </ol>
+              )}
+
+              {q.type === 'dictee' && (
+                <p className="mt-2 whitespace-pre-line text-[12px] italic text-[#0f172a]/70">{q.texte_dictee}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+function DeleteConfirmModal({ question, index, onCancel, onConfirm }) {
+  const cancelBtnRef = useRef(null)
+
+  useEffect(() => { cancelBtnRef.current?.focus() }, [])
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); onCancel() }
+    }
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = previous
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [onCancel])
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end justify-center p-3 sm:items-center sm:p-4">
+      <div
+        className="absolute inset-0 bg-[#0f172a]/50 backdrop-blur-sm"
+        style={{ animation: 'examaiModalFadeIn 200ms ease-out both' }}
+        onClick={onCancel}
+      />
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="delete-modal-title"
+        className="relative w-full max-w-md overflow-hidden rounded-[24px] border-2 border-[#7a0008]/30 bg-white"
+        style={{ animation: 'examaiModalSlideUp 240ms cubic-bezier(0.22, 1, 0.36, 1) both' }}
+      >
+        <div className="h-1 w-full bg-[#7a0008]" />
+        <div className="flex items-start gap-4 p-6 pb-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#7a0008]/[0.10]">
+            <Trash2 size={20} className="text-[#7a0008]" strokeWidth={2.2} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 id="delete-modal-title" className="examai-serif text-[18px] font-semibold leading-tight text-[#0f172a]">
+              Supprimer cette question ?
+            </h3>
+            <p className="mt-1.5 text-[12.5px] font-bold italic text-[#0f172a]/60">
+              Cette action est irréversible. La question sera retirée de l'examen.
+            </p>
+          </div>
+        </div>
+
+        <div className="mx-6 mb-5 rounded-[14px] border border-[#0f172a]/15 bg-[#0f172a]/[0.03] p-3.5">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="rounded-full bg-[#7a0008]/[0.10] px-2 py-0.5 text-[10.5px] font-bold text-[#7a0008]">Q{index + 1}</span>
+            <span className="rounded-full border border-[#0f172a]/15 px-2 py-0.5 text-[10px] font-semibold text-[#0f172a]/60">
+              {labelType(question.type)}
+            </span>
+          </div>
+          <p className="examai-serif line-clamp-2 text-[13.5px] font-medium text-[#0f172a]">
+            {question.question?.trim() || <span className="italic text-[#0f172a]/40">Énoncé vide</span>}
+          </p>
+        </div>
+
+        <div className="flex flex-col-reverse gap-2 border-t border-[#0f172a]/10 bg-[#0f172a]/[0.02] p-4 sm:flex-row sm:justify-end">
+          <button
+            ref={cancelBtnRef}
+            type="button"
+            onClick={onCancel}
+            className={`rounded-full border border-[#0f172a]/20 bg-white px-5 py-2.5 text-[13px] font-semibold text-[#0f172a] transition-all hover:border-[#0f172a]/40 ${FOCUS_RING}`}
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className={`flex items-center justify-center gap-2 rounded-full bg-[#7a0008] px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:bg-[#961014] ${FOCUS_RING}`}
+          >
+            <Trash2 size={14} strokeWidth={2.4} />
+            Supprimer
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

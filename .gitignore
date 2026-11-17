@@ -41,6 +41,11 @@ embeddings/
 *.faiss
 *.index
 
+# ===== DONNÉES LOCALES =====
+database_tunisienne/
+backend/eval_data/
+backend/eval_resultats/
+
 # ===== FRONTEND REACT =====
 node_modules/
 npm-debug.log*

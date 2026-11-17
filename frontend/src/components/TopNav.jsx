@@ -110,7 +110,7 @@ export default function TopNav() {
         }
       `}</style>
 
-      {/* Grille de fond subtile */}
+      {}
       <div className="pointer-events-none absolute inset-0 opacity-[0.4]"
         style={{
           backgroundImage: 'radial-gradient(circle, rgba(15,23,42,0.06) 1px, transparent 1px)',
@@ -121,7 +121,7 @@ export default function TopNav() {
 
       <div className="relative mx-auto flex h-[64px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
 
-        {/* ===== Logo ===== */}
+        {}
         <Link to="/wizard/selection" className="group flex shrink-0 items-center gap-3">
           <div className="relative shrink-0">
             <div className="examai-logo-shine relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[13px] bg-[#7a0008] shadow-[0_6px_16px_-6px_rgba(122,0,8,0.6),inset_0_1px_0_rgba(255,255,255,0.24)] transition-all duration-300 group-hover:scale-[1.05] group-hover:shadow-[0_8px_20px_-6px_rgba(122,0,8,0.7)]">
@@ -135,7 +135,7 @@ export default function TopNav() {
           </span>
         </Link>
 
-        {/* ===== Nav desktop ===== */}
+        {}
         <nav className="hidden items-center gap-0.5 text-[13.5px] md:flex">
           {LINKS.map(({ to, label }, idx) => {
             const active = isActive(to)
@@ -165,10 +165,10 @@ export default function TopNav() {
           })}
         </nav>
 
-        {/* ===== Actions droite ===== */}
+        {}
         <div className="flex items-center gap-2">
 
-          {/* Sélecteur de langue */}
+          {}
           <div className="relative hidden sm:block">
             <button
               ref={langButtonRef}
@@ -231,11 +231,11 @@ export default function TopNav() {
             )}
           </div>
 
-          {/* Avatar + nom dans un div rouge + bouton logout à droite */}
+          {}
           <div className="relative">
             <div className="group flex items-center gap-2 rounded-full border border-[#0f172a]/10 bg-white py-1 pl-1 pr-1.5 transition-all duration-200 hover:border-[#0f172a]/25 hover:shadow-[0_6px_16px_-8px_rgba(15,23,42,0.3)]">
 
-              {/* Zone cliquable : avatar + nom + chevron → ouvre le menu */}
+              {}
               <button
                 ref={userButtonRef}
                 type="button"
@@ -245,12 +245,12 @@ export default function TopNav() {
                 aria-label="Mon compte"
                 className="flex items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f172a]/30"
               >
-                {/* Avatar rond rouge */}
+                {}
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#7a0008] text-[11px] font-semibold text-white shadow-[0_3px_8px_-3px_rgba(122,0,8,0.4)]">
                   {initials}
                 </div>
 
-                {/* Nom dans un div rouge */}
+                {}
                 <div className="hidden items-center gap-1.5 rounded-full bg-[#7a0008]/[0.08] px-2.5 py-1 sm:flex">
                   <span className="text-[12.5px] font-semibold text-[#7a0008] max-w-[110px] truncate">
                     {user?.nom}
@@ -263,7 +263,7 @@ export default function TopNav() {
                 </div>
               </button>
 
-              {/* Bouton de déconnexion à droite (indépendant) */}
+              {}
               <button
                 type="button"
                 onClick={handleLogout}
@@ -299,7 +299,7 @@ export default function TopNav() {
             )}
           </div>
 
-          {/* Burger mobile */}
+          {}
           <button
             type="button"
             onClick={() => setMenuMobile((v) => !v)}
@@ -312,7 +312,7 @@ export default function TopNav() {
         </div>
       </div>
 
-      {/* ===== Menu mobile ===== */}
+      {}
       {menuMobile && (
         <div className="examai-mobile-menu md:hidden border-t border-[#0f172a]/8 bg-white">
           <nav className="mx-auto max-w-7xl px-4 py-3 space-y-1">

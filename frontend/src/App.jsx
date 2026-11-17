@@ -19,23 +19,15 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Page d'accueil : PUBLIQUE. C'est la premiere chose affichee a
-            l'ouverture de l'appli, avec les liens vers /login et /signup.
-            Un visiteur deja connecte est renvoye direct dans son wizard. */}
+        {}
         <Route path="/" element={<RedirectIfAuthed><Accueil /></RedirectIfAuthed>} />
         <Route path="/login" element={<RedirectIfAuthed><Login /></RedirectIfAuthed>} />
         <Route path="/signup" element={<RedirectIfAuthed><Signup /></RedirectIfAuthed>} />
-        {/* Meme traitement que /login et /signup : un visiteur deja
-            connecte n'a pas besoin de cet ecran (RedirectIfAuthed
-            l'envoie direct dans son wizard, comme les deux routes
-            ci-dessus). */}
+        {}
         <Route path="/forgot-password" element={<RedirectIfAuthed><ForgotPassword /></RedirectIfAuthed>} />
         <Route path="/aide" element={<Navigate to="/assistant" replace />} />
 
-        {/* Tout l'espace connecte partage le WizardProvider : "Mes examens"
-            a besoin de pouvoir recharger un examen existant dans le meme
-            contexte que le wizard (voir chargerExamen), pas seulement les
-            routes sous /wizard. */}
+        {}
         <Route
           element={
             <RequireAuth>

@@ -5,8 +5,6 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  // "loading" couvre uniquement la verification du token au demarrage de
-  // l'appli, pas les appels login/signup individuels (voir plus bas).
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -36,10 +34,6 @@ export function AuthProvider({ children }) {
     return data.user
   }
 
-  // "Continuer avec Google" -- meme forme que login()/signup() ci-dessus :
-  // le backend renvoie {token, user} qu'on stocke pareil, qu'un compte ait
-  // ete cree ou qu'une session existante ait juste ete retrouvee. genre
-  // n'est utile que pour un nouveau compte (voir client.js / backend).
   async function loginWithGoogle({ accessToken, genre }) {
     const data = await api.google({ accessToken, genre })
     setToken(data.token)
@@ -51,7 +45,6 @@ export function AuthProvider({ children }) {
     try {
       await api.logout()
     } catch {
-      // le jeton est peut-etre deja expire cote serveur -- on nettoie quand meme localement
     }
     setToken(null)
     setUser(null)

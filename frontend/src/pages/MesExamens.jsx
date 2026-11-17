@@ -17,13 +17,13 @@ import { useWizard } from '../context/WizardContext.jsx'
 import { api } from '../api/client.js'
 import { MATIERE_LABEL, NIVEAU_LABEL } from '../data/mockData.js'
 
-/* ============ TOKENS DE DESIGN (identiques au wizard) ============ */
+
 const FOCUS_RING = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f172a]/35 focus-visible:ring-offset-2'
 const HOVER_LIFT = 'motion-reduce:transition-none motion-reduce:hover:translate-y-0'
 const BRAND = '#7a0008'
 const INK = '#0f172a'
 
-/* ============ CONFIG ============ */
+
 
 const FILTRES = [
   { id: 'tous',      label: 'Tous',      icon: Sparkles,   accent: BRAND },
@@ -55,12 +55,9 @@ const STATUT_META = {
   exporte:   { color: '#1d4ed8', glow: 'rgba(29,78,216,0.10)', label: 'Exporté' },
 }
 
-/* ============ HELPERS ============ */
 
-/**
- * ✅ CORRIGÉ : normalise le statut (casse, accents, espaces) puis décide
- * de l'étape. Un brouillon (ou tout statut inconnu/vide) ouvre l'ÉDITION.
- */
+
+
 function etapePourStatut(statut) {
   const s = String(statut || '')
     .toLowerCase()
@@ -70,7 +67,6 @@ function etapePourStatut(statut) {
 
   if (s === 'exporte' || s === 'exported' || s === 'published') return '/wizard/export'
   if (s === 'valide' || s === 'validated' || s === 'approved') return '/wizard/validation'
-  // brouillon, draft, vide, inconnu → édition
   return '/wizard/edition'
 }
 
@@ -121,7 +117,7 @@ function texteQuestion(q) {
 
 async function copierTexte(texte) {
   if (navigator.clipboard?.writeText) {
-    try { await navigator.clipboard.writeText(texte); return } catch { /* fallback */ }
+    try { await navigator.clipboard.writeText(texte); return } catch {  }
   }
   const zone = document.createElement('textarea')
   zone.value = texte
@@ -135,7 +131,7 @@ async function copierTexte(texte) {
   } finally { zone.remove() }
 }
 
-/* ============ COMPOSANT PRINCIPAL ============ */
+
 
 export default function MesExamens() {
   const navigate = useNavigate()
@@ -222,7 +218,7 @@ export default function MesExamens() {
     return () => window.removeEventListener('keydown', onKey)
   }, [navigate, drawerItem, menuOuvert, confirmation])
 
-  /* ============ STATS ============ */
+  
   const stats = useMemo(() => {
     const actifs = examens.filter((e) => !archives.has(e.id))
     return {
@@ -246,7 +242,7 @@ export default function MesExamens() {
     return [...set].sort()
   }, [examens])
 
-  /* ============ FILTRAGE + TRI ============ */
+  
   const examensFiltres = useMemo(() => {
     const q = rechercheDebounced.trim().toLowerCase()
     const now = Date.now()
@@ -298,17 +294,9 @@ export default function MesExamens() {
   const filtresActifs = filtreStatut !== 'tous' || recherche.trim() || filtreMatiere.length || filtreNiveau.length || filtrePeriode !== 'tout'
   const selectionArray = [...selection]
 
-  /* ============ ACTIONS ============ */
+  
 
-  /**
-   * ✅ CORRIGÉ : on force la destination.
-   * - brouillon → /wizard/edition (même si on vient de la liste)
-   * - valide    → /wizard/validation
-   * - exporte   → /wizard/export
-   * Le `chargerExamen` peut modifier `examen.statut` dans le contexte ; on
-   * se base donc sur le statut ORIGINAL de l'item de la liste (item.statut),
-   * pas sur celui du contexte après chargement.
-   */
+  
   const handleOuvrir = useCallback(async (item) => {
     setEnCours(item.id); setErreur(null)
     try {
@@ -457,7 +445,7 @@ export default function MesExamens() {
     setSelection(new Set())
   }
 
-  /* ============ RENDER ============ */
+  
   return (
     <div className="relative min-h-screen bg-[#f8fafc] text-[#0f172a]">
       <style>{`
@@ -533,7 +521,7 @@ export default function MesExamens() {
 
       <main className="mx-auto max-w-7xl px-6 py-8">
 
-        {/* ====== EN-TÊTE ====== */}
+        {}
         <div className="relative mb-6 w-full overflow-hidden rounded-[28px] border border-[#0f172a]/20 bg-white p-6 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
@@ -589,7 +577,7 @@ export default function MesExamens() {
           </div>
         </div>
 
-        {/* ====== LAYOUT ====== */}
+        {}
         <div className={`grid gap-5 ${panneauOuvert ? 'lg:grid-cols-[280px_1fr] lg:items-start' : ''}`}>
           {panneauOuvert && (
             <aside className="examai-slide-left hidden lg:block lg:sticky lg:top-6 lg:self-start space-y-4">
@@ -639,7 +627,7 @@ export default function MesExamens() {
           )}
 
           <div className="min-w-0">
-            {/* ====== Barre de contrôle ====== */}
+            {}
             <div className="rounded-[20px] border border-[#0f172a]/20 bg-white px-4 py-3.5">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative min-w-[220px] flex-1">
@@ -957,7 +945,7 @@ export default function MesExamens() {
   )
 }
 
-/* =================== SOUS-COMPOSANTS =================== */
+
 
 function StatTile({ icon: Icon, label, value, accent }) {
   return (

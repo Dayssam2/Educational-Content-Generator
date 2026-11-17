@@ -1,18 +1,3 @@
-"""
-Verification d'un jeton Google OAuth2 ("Continuer avec Google") et
-recuperation du profil associe -- utilise par POST /api/auth/google.
-
-Le frontend obtient un access_token via Google Identity Services (dans le
-navigateur, popup de connexion Google) et nous l'envoie. Cote serveur, on
-ne fait JAMAIS confiance a un email/nom envoye directement par le
-frontend : on redemande le profil a Google avec ce jeton, pour etre sur
-qu'il vient reellement d'un compte Google authentifie.
-
-Volontairement construit avec seulement urllib (bibliotheque standard),
-meme philosophie que email_service.py : pas de nouvelle dependance (pas
-de google-auth, pas de requests) pour deux simples appels HTTP GET.
-"""
-
 import json
 import os
 import urllib.error
@@ -30,9 +15,7 @@ _USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 
 
 class GoogleAuthError(Exception):
-    """Jeton Google absent, invalide, expire, ou destine a une autre
-    application. Le message est sur (pas de detail interne sensible) --
-    il peut etre remonte tel quel dans une reponse HTTP 401/400."""
+    pass
 
 
 def _as_bool(valeur) -> bool:
@@ -53,11 +36,6 @@ def _get_json(url: str, headers: Optional[Dict] = None) -> Dict:
 
 
 def verifier_et_recuperer_profil(access_token: str) -> Dict:
-    """Verifie le jeton auprès de Google puis renvoie le profil associe :
-    {google_id, email, email_verified, nom}. Leve GoogleAuthError si le
-    jeton est invalide/expire, ou n'a pas ete emis pour notre application
-    (protection contre la confusion de jeton : un jeton mineur pour une
-    AUTRE appli ne doit pas etre accepte ici)."""
     if not access_token or not access_token.strip():
         raise GoogleAuthError("Jeton Google manquant")
 

@@ -13,13 +13,13 @@ import { useWizard } from '../context/WizardContext.jsx'
 import { api } from '../api/client.js'
 import { MATIERE_LABEL, NIVEAU_LABEL, NIVEAUX, TYPES_QUESTIONS } from '../data/mockData.js'
 
-/* ============ TOKENS (identiques à Mes Examens) ============ */
+
 const FOCUS_RING = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f172a]/35 focus-visible:ring-offset-2'
 const HOVER_LIFT = 'motion-reduce:transition-none motion-reduce:hover:translate-y-0'
 const BRAND = '#7a0008'
 const INK = '#0f172a'
 
-/* ============ TYPES DE QUESTION ============ */
+
 const TYPE_META = {
   qcm:          { label: 'QCM',           color: '#7a0008', glow: 'rgba(122,0,8,0.10)' },
   vrai_faux:    { label: 'Vrai / Faux',   color: '#1d4ed8', glow: 'rgba(29,78,216,0.10)' },
@@ -61,7 +61,7 @@ function etapePourStatut(statut) {
   return '/wizard/edition'
 }
 
-/* ============ COMPOSANT PRINCIPAL ============ */
+
 export default function BanqueQuestions() {
   const navigate = useNavigate()
   const { chargerExamen } = useWizard()
@@ -74,25 +74,13 @@ export default function BanqueQuestions() {
   const [filtreMatiere, setFiltreMatiere] = useState([])
   const [filtreNiveau, setFiltreNiveau] = useState([])
   const [filtreType, setFiltreType] = useState([])
-  // NOUVEAU -- filtre par chapitre (jusqu'ici seule la recherche texte
-  // libre pouvait matcher un chapitre, pas de liste de pastilles dediee
-  // comme matiere/niveau/type).
   const [filtreChapitre, setFiltreChapitre] = useState([])
-  // NOUVEAU -- tri du resultat, et recherche locale dans la LISTE des
-  // chapitres du filtre (pas la recherche principale : celle-ci ne
-  // touche pas aux questions affichees, juste a la liste des pastilles
-  // "Chapitre" quand il y en a beaucoup).
   const [tri, setTri] = useState('recent')
   const [rechercheChapitreFiltre, setRechercheChapitreFiltre] = useState('')
   const [examenEnCours, setExamenEnCours] = useState(null)
   const [panneauOuvert, setPanneauOuvert] = useState(true)
   const [filtresAvancesOuverts, setFiltresAvancesOuverts] = useState(false)
   const [toast, setToast] = useState(null)
-  // NOUVEAU -- "examen personnalise" : choisir des questions DEJA
-  // generees (pas de regeneration IA) et les assembler dans un nouvel
-  // examen. `selection` est un Set de _cleUnique, independant des filtres
-  // actifs -- changer de filtre ne fait pas perdre ce qui est deja
-  // coche.
   const [modeSelection, setModeSelection] = useState(false)
   const [selection, setSelection] = useState(() => new Set())
   const [creationEnCours, setCreationEnCours] = useState(false)
@@ -141,16 +129,6 @@ export default function BanqueQuestions() {
     return () => window.removeEventListener('keydown', onKey)
   }, [filtresAvancesOuverts])
 
-  // NOUVEAU -- deduplique les questions IDENTIQUES qui apparaissent dans
-  // PLUSIEURS examens. Frequent depuis "Creer un examen personnalise" :
-  // il COPIE des questions existantes dans un nouvel examen plutot que
-  // de les deplacer -- une question deja dans la Banque y reapparaissait
-  // donc une deuxieme fois des qu'elle etait reutilisee, alors qu'aucune
-  // "nouvelle" question n'avait ete creee. `_occurrences` garde la trace
-  // de TOUS les examens ou cette question existe (le premier -- le plus
-  // recent, GET /api/examens etant deja trie par date de MAJ -- reste
-  // celui utilise par "Voir l'examen" ; les autres sont accessibles via
-  // le badge "utilisee dans N examens" sur la carte).
   const questions = useMemo(() => {
     const brutes = examens.flatMap((exam) =>
       (exam.questions || []).map((q, idx) => ({
@@ -205,13 +183,6 @@ export default function BanqueQuestions() {
 
   const rechercheNormalisee = rechercheDebounced.trim().toLowerCase()
 
-  // ===== AJOUT : filtrage a facettes -- chaque pastille (matiere, niveau,
-  // type, chapitre) affiche le compte qu'elle donnerait EN PLUS des
-  // autres filtres deja actifs (pas un compte global fige), et se
-  // desactive automatiquement si elle ne donnerait plus rien -- meme
-  // principe que les filtres d'Amazon/Airbnb. `filtrerSauf` applique
-  // tout SAUF la dimension `exclure`, pour ne pas qu'une categorie se
-  // retrecisse elle-meme quand on change sa propre selection. =====
   function filtrerSauf(exclure) {
     return questions.filter((q) => {
       if (exclure !== 'matiere' && filtreMatiere.length && !filtreMatiere.includes(q._matiere)) return false
@@ -250,7 +221,6 @@ export default function BanqueQuestions() {
     () => compterOccurrences(filtrerSauf('chapitre'), '_chapitre'),
     [questions, filtreMatiere, filtreNiveau, filtreType, rechercheNormalisee]
   )
-  // ===== FIN AJOUT =====
 
   const questionsFiltrees = useMemo(() => {
     const resultat = questions.filter((q) => {
@@ -262,9 +232,6 @@ export default function BanqueQuestions() {
       const cible = [q.question, q._examenTitre, q._chapitre].join(' ').toLowerCase()
       return cible.includes(rechercheNormalisee)
     })
-    // NOUVEAU -- tri. "recent" garde l'ordre naturel : GET /api/examens
-    // trie deja par updated_at DESC cote backend, et flatMap conserve cet
-    // ordre -- donc "recent" n'a rien a re-trier.
     if (tri === 'points_desc') return [...resultat].sort((a, b) => (b.points || 0) - (a.points || 0))
     if (tri === 'points_asc') return [...resultat].sort((a, b) => (a.points || 0) - (b.points || 0))
     if (tri === 'alpha') return [...resultat].sort((a, b) => (a.question || '').localeCompare(b.question || ''))
@@ -287,7 +254,6 @@ export default function BanqueQuestions() {
     setFiltreChapitre([])
   }
 
-  // ===== AJOUT : examen personnalise depuis la selection =====
   const toggleSelection = useCallback((cle) => {
     setSelection((prev) => {
       const next = new Set(prev)
@@ -302,10 +268,6 @@ export default function BanqueQuestions() {
     [questions, selection]
   )
 
-  // Une matiere et un niveau uniques sont necessaires (structure du
-  // backend : langue/gabarit de correction en dependent, voir
-  // pdf_export.py) -- le chapitre, lui, peut librement melanger
-  // plusieurs valeurs (il devient juste "Chapitre A, Chapitre B").
   const selectionCoherente = useMemo(() => {
     if (questionsSelectionnees.length === 0) return true
     const matieres = new Set(questionsSelectionnees.map((q) => q._matiere))
@@ -337,9 +299,6 @@ export default function BanqueQuestions() {
       const niveau = questionsSelectionnees[0]._niveau
       const chapitresUniques = [...new Set(questionsSelectionnees.map((q) => q._chapitre).filter(Boolean))]
       const chapitre = chapitresUniques.join(', ') || 'Sélection personnalisée'
-      // Retire les champs internes (_cleUnique, _examenId...) ajoutes par
-      // le flatMap plus haut -- le backend ne doit recevoir que de
-      // vraies questions, pas ce metadata de tracking cote frontend.
       const questionsPropres = questionsSelectionnees.map(
         ({ _cleUnique, _examenId, _examenTitre, _statut, _matiere, _niveau, _chapitre, _occurrences, ...reste }) => reste
       )
@@ -356,7 +315,6 @@ export default function BanqueQuestions() {
       setCreationEnCours(false)
     }
   }
-  // ===== FIN AJOUT =====
 
   const handleVoirExamen = useCallback(async (examenId, statut) => {
     setExamenEnCours(examenId)
@@ -370,7 +328,7 @@ export default function BanqueQuestions() {
     }
   }, [chargerExamen, navigate])
 
-  /* ============ RENDER ============ */
+  
   return (
     <div className="relative min-h-screen bg-[#f8fafc] text-[#0f172a]">
       <style>{`
@@ -428,7 +386,7 @@ export default function BanqueQuestions() {
 
       <main className="mx-auto max-w-7xl px-6 py-8">
 
-        {/* ====== EN-TÊTE (identique à Mes Examens) ====== */}
+        {}
         <div className="relative mb-6 w-full overflow-hidden rounded-[28px] border border-[#0f172a]/20 bg-white p-6 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
@@ -491,11 +449,11 @@ export default function BanqueQuestions() {
           </div>
         </div>
 
-        {/* ====== LAYOUT (identique à Mes Examens) ====== */}
+        {}
         <div className={`grid gap-5 ${panneauOuvert ? 'lg:grid-cols-[280px_1fr] lg:items-start' : ''}`}>
           {panneauOuvert && (
             <aside className="examai-slide-left hidden lg:block lg:sticky lg:top-6 lg:self-start space-y-4">
-              {/* Aperçu */}
+              {}
               <div className="rounded-[24px] border border-[#0f172a]/20 bg-white p-4">
                 <div className="mb-3 flex items-center gap-2.5">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-[#7a0008]/[0.08] text-[#7a0008]">
@@ -517,7 +475,7 @@ export default function BanqueQuestions() {
                 </div>
               </div>
 
-              {/* Filtres avancés */}
+              {}
               <div className="rounded-[24px] border border-[#0f172a]/20 bg-white p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#0f172a]/55">
@@ -550,7 +508,7 @@ export default function BanqueQuestions() {
           )}
 
           <div className="min-w-0">
-            {/* ====== Barre de contrôle ====== */}
+            {}
             <div className="rounded-[20px] border border-[#0f172a]/20 bg-white px-4 py-3.5">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative min-w-[220px] flex-1">
@@ -581,10 +539,7 @@ export default function BanqueQuestions() {
                   <Filter size={13} /> Filtres
                 </button>
 
-                {/* NOUVEAU -- tri du resultat. Un simple <select> plutot
-                    qu'un menu deroulant custom : plus rapide a construire,
-                    et deja accessible au clavier/lecteur d'ecran par
-                    defaut. */}
+                {}
                 <div className="relative flex items-center">
                   <ArrowUpDown size={13} className="pointer-events-none absolute left-3 text-[#0f172a]/45" />
                   <select
@@ -636,7 +591,7 @@ export default function BanqueQuestions() {
                 </div>
               )}
 
-              {/* Pills de type — comme les pills statut de Mes Examens */}
+              {}
               {typesDispo.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[#0f172a]/10 pt-3">
                   <span className="mr-1 text-[10.5px] font-bold uppercase tracking-wider text-[#0f172a]/50">
@@ -672,7 +627,7 @@ export default function BanqueQuestions() {
               )}
             </div>
 
-            {/* Chips de filtres actifs */}
+            {}
             {filtresActifs && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="flex items-center gap-1 text-[11.5px] font-semibold text-[#0f172a]/60">
@@ -783,10 +738,7 @@ export default function BanqueQuestions() {
         </div>
       </main>
 
-      {/* ===== AJOUT : barre flottante de selection -- resume + creation
-          de l'examen personnalise. N'apparait qu'en mode selection avec
-          au moins une question cochee ; reste visible quels que soient
-          les filtres actifs (la selection elle-meme n'en depend pas). ===== */}
+      {}
       {modeSelection && selection.size > 0 && (
         <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2">
           <div className="examai-toast-in overflow-hidden rounded-[20px] border border-[#0f172a]/20 bg-white shadow-[0_14px_32px_-14px_rgba(15,23,42,0.3)]">
@@ -832,9 +784,9 @@ export default function BanqueQuestions() {
           </div>
         </div>
       )}
-      {/* ===== FIN AJOUT ===== */}
+      {}
 
-      {/* Toast */}
+      {}
       {toast && (
         <div className="examai-toast-in fixed bottom-6 left-1/2 z-50 -translate-x-1/2" role="status" aria-live="polite">
           <div className="flex items-center gap-2 rounded-full border border-[#0f172a]/20 bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#0f172a] shadow-[0_14px_32px_-14px_rgba(15,23,42,0.3)]">
@@ -847,9 +799,9 @@ export default function BanqueQuestions() {
   )
 }
 
-/* =================== SOUS-COMPOSANTS =================== */
 
-/* StatTile — identique à Mes Examens */
+
+
 function StatTile({ icon: Icon, label, value, accent }) {
   return (
     <div className="rounded-[12px] border border-[#0f172a]/10 bg-white p-2.5">
@@ -867,7 +819,7 @@ function StatTile({ icon: Icon, label, value, accent }) {
   )
 }
 
-/* FiltresRapides — pills matière/niveau/type (comme Mes Examens) */
+
 function FiltresRapides({
   matieresDispo, niveauxDispo, typesDispo, chapitresDispo,
   filtreMatiere, filtreNiveau, filtreType, filtreChapitre,
@@ -875,11 +827,6 @@ function FiltresRapides({
   comptesMatiere, comptesNiveau, comptesType, comptesChapitre,
   rechercheChapitreFiltre, onRechercheChapitreFiltre,
 }) {
-  // NOUVEAU -- une pastille a facettes : affiche son compte (calcule en
-  // tenant compte des AUTRES filtres actifs, voir comptesMatiere etc.
-  // dans le composant parent) et se grise/desactive si elle ne
-  // donnerait plus rien -- sauf si elle est deja selectionnee (pour
-  // pouvoir toujours la desactiver).
   function Pastille({ valeur, actif, label, compte, onToggle, rtl }) {
     const indisponible = compte === 0 && !actif
     return (
@@ -934,9 +881,7 @@ function FiltresRapides({
         </div>
       )}
 
-      {/* Chapitre : meme motif que matiere/niveau, + une recherche locale
-          quand la liste est longue (au-dela de 8, une simple liste de
-          pastilles a defiler devient vite peu pratique). */}
+      {}
       {chapitresDispo && chapitresDispo.length > 0 && (
         <div className="mb-3">
           <div className="mb-1.5 flex items-center justify-between">
@@ -1016,16 +961,12 @@ function FilterChip({ label, onClear }) {
   )
 }
 
-/* QuestionCard — style exact des ExamCard de Mes Examens */
+
 const QuestionCard = memo(function QuestionCard({ q, busy, recherche, onVoirExamen, modeSelection, selectionnee, onToggleSelection }) {
   const [ouvert, setOuvert] = useState(false)
   const [occurrencesOuvertes, setOccurrencesOuvertes] = useState(false)
   const rtl = estArabe(q.question)
   const chapitreRtl = estArabe(q._chapitre)
-  // Sanitise : _cleUnique est desormais la SIGNATURE de deduplication
-  // (matiere|niveau|type|enonce, voir plus haut) -- un texte de question
-  // brut ne doit pas finir tel quel dans un attribut HTML id/aria-controls
-  // (caracteres speciaux, longueur arbitraire).
   const idReponse = `reponse-${q._cleUnique.replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 80)}`
   const meta = metaType(q.type)
   const TypeIcon = typeQuestionIcon(q.type)
@@ -1042,8 +983,7 @@ const QuestionCard = memo(function QuestionCard({ q, busy, recherche, onVoirExam
     >
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="flex items-center gap-1.5 flex-wrap">
-          {/* NOUVEAU -- case a cocher du mode selection (voir le bouton
-              "Choisir des questions" dans l'en-tete de page). */}
+          {}
           {modeSelection && (
             <span
               aria-hidden="true"
@@ -1103,10 +1043,7 @@ const QuestionCard = memo(function QuestionCard({ q, busy, recherche, onVoirExam
         )}
       </div>
 
-      {/* NOUVEAU -- cette meme question existe dans d'autres examens
-          (typiquement : reutilisee dans un examen personnalise, voir le
-          mode selection). Repliee par defaut pour ne pas alourdir
-          chaque carte quand ce n'est pas le cas. */}
+      {}
       {autresOccurrences.length > 0 && !modeSelection && (
         <div className="relative z-10 mt-1.5">
           <button
@@ -1162,7 +1099,7 @@ const QuestionCard = memo(function QuestionCard({ q, busy, recherche, onVoirExam
   )
 })
 
-/* QuestionRow — vue liste (alignée sur ExamRow de Mes Examens) */
+
 const QuestionRow = memo(function QuestionRow({ q, isLast, busy, recherche, onVoirExamen, modeSelection, selectionnee, onToggleSelection }) {
   const [ouvert, setOuvert] = useState(false)
   const rtl = estArabe(q.question)
@@ -1202,9 +1139,7 @@ const QuestionRow = memo(function QuestionRow({ q, isLast, busy, recherche, onVo
             <span className="text-[10.5px] text-[#0f172a]/45">
               {MATIERE_LABEL[q._matiere] || q._matiere} · {NIVEAU_LABEL[q._niveau] || q._niveau}
             </span>
-            {/* NOUVEAU -- voir la note dans QuestionCard : cette meme
-                question existe dans plusieurs examens (reutilisation via
-                un examen personnalise, typiquement). */}
+            {}
             {nbOccurrences > 1 && (
               <span className="flex items-center gap-1 text-[10.5px] font-semibold text-[#0f172a]/40">
                 <Copy size={9} /> {nbOccurrences} examens
@@ -1257,7 +1192,7 @@ const QuestionRow = memo(function QuestionRow({ q, isLast, busy, recherche, onVo
   )
 })
 
-/* =================== RÉPONSE (logique conservée) =================== */
+
 function indexReponseCorrecte(q) {
   const candidats = [q.reponseCorrecteIndex, q.reponse_correcte_index, q.indexCorrect, q.correctIndex]
   return candidats.find((v) => typeof v === 'number')

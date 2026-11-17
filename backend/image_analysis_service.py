@@ -1,57 +1,10 @@
-"""
-Analyse d'une image UPLOADEE PAR L'ENSEIGNANT (pas generee par l'IA) pour
-les questions qui ont besoin d'une image reelle pour etre correctes -- au
-depart, le type "legende" (legender les parties d'un schema), qui EXIGE
-une image (voir models.QuestionLegende).
-
-POURQUOI CE MODULE EST SEPARE D'image_service.py :
-- image_service.py GENERE une image a partir d'une description texte, avec
-  un modele d'IMAGE (gemini-2.5-flash-image) qui n'a AUCUN quota gratuit
-  (voir "Quota GRATUIT NUL" dans image_service.py) -- il faut de la
-  facturation activee sur le projet Google Cloud pour que ca marche.
-- Ce module fait l'INVERSE : l'enseignant fournit sa propre image (une
-  photo, un schema deja fait...), et ce module demande a un modele de
-  TEXTE multimodal (capacite "vision", qui sait lire une image en entree)
-  de la regarder et de dire ce qu'elle represente -- pour construire la
-  bonne reponse ("reponse_correcte") et une banque de mots
-  ("propositions") a proposer a l'eleve. Un modele TEXTE a un vrai quota
-  gratuit (10 requetes/minute, 250/jour pour gemini-2.5-flash au moment
-  ou ce module a ete ecrit) -- ce chemin ne depend donc PAS de
-  facturation, contrairement a image_service.py.
-
-Meme philosophie que le reste de l'IA de cette app (voir image_service.py,
-validation.py) : aucune exception ne remonte jusqu'a l'appelant, tout est
-avale et loggue -- `analyser_image_legende()` renvoie simplement None en
-cas d'echec (image illisible, reseau, quota, reponse Gemini invalide, OU
-Gemini lui-meme pas confiant dans ce qu'il voit). Ce dernier cas est
-volontaire : mieux vaut garder la question "Incomplete" cote frontend que
-lui faire deviner/afficher une mauvaise correction a l'eleve.
-
-A ADAPTER cote appelant (non ecrit ici -- je n'ai pas main.py/models.py) :
-1. Un nouvel endpoint (ex. POST /api/examens/{id}/questions/{qid}/image)
-   qui recoit l'image uploadee en base64 (meme convention de data URI que
-   ImageRef.url, deja utilisee pour les images generees -- voir
-   image_service.py) et appelle analyser_image_legende().
-2. Si models.QuestionLegende n'a pas encore de champ pour la banque de
-   mots, l'ajouter :
-       propositions: Optional[List[str]] = None
-3. Mettre a jour la question avec :
-   - image.url = l'image uploadee telle quelle (data URI, aucune
-     regeneration necessaire)
-   - reponse_correcte = resultat["reponse_correcte"]
-   - propositions = resultat["propositions"]
-   et ne repasser la question a "complete" QUE si le resultat n'est pas
-   None (sinon la laisser "Incomplete" avec un message explicite plutot
-   que de deviner).
-"""
-
 import re
 import time
 import os
 import sys
 import json
 from pathlib import Path
-from typing import Optional, Dict, Tuple
+from typing import Optional, Dict, Tuple, List
 
 import requests
 from dotenv import load_dotenv
@@ -61,17 +14,10 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 load_dotenv(_ROOT / ".env")
 
-# Modele TEXTE multimodal (lit une image + du texte, repond en texte/JSON) --
-# PAS le modele de generation d'image. Overridable par env si le reste de
-# l'app utilise deja un autre modele texte dans services/gemini_service.py
-# (a aligner pour la coherence, meme si ce n'est pas obligatoire
-# techniquement -- les deux modeles peuvent cohabiter sans se gener).
-MODELE_ANALYSE = os.environ.get("GEMINI_MODEL_VISION", "gemini-2.5-flash")
+MODELE_ANALYSE = os.environ.get("GEMINI_MODEL_VISION", "gemini-3.8-flash").strip() or "gemini-3.8-flash"
 _ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{MODELE_ANALYSE}:generateContent"
-TIMEOUT_SECONDES = 30
+TIMEOUT_SECONDES = 60
 
-# Le tier gratuit TEXTE est bien plus genereux que celui de l'image (voir
-# image_service.py) -- pas besoin d'autant de reessais.
 MAX_TENTATIVES = 2
 DELAI_DEFAUT_SECONDES = 15
 
@@ -82,10 +28,6 @@ def _cle_api() -> Optional[str]:
 
 
 def _decoder_data_uri(data_uri: str) -> Optional[Tuple[str, str]]:
-    """Decoupe une data URI ("data:image/png;base64,XXXX", meme convention
-    que ImageRef.url) en (mime_type, base64_payload). Renvoie None si le
-    format ne correspond pas -- ex. le frontend a envoye une URL http
-    plutot qu'un vrai upload encode."""
     m = re.match(r"^data:([\w/+.-]+);base64,(.+)$", (data_uri or "").strip(), re.DOTALL)
     if not m:
         return None
@@ -93,8 +35,6 @@ def _decoder_data_uri(data_uri: str) -> Optional[Tuple[str, str]]:
 
 
 def _message_erreur(reponse) -> str:
-    """Meme fonction que dans image_service.py : le VRAI message d'erreur
-    de Google est dans le corps JSON, jamais dans raise_for_status()."""
     try:
         return (reponse.json().get("error", {}) or {}).get("message", "") or ""
     except Exception:
@@ -102,8 +42,6 @@ def _message_erreur(reponse) -> str:
 
 
 def _delai_retry(reponse) -> float:
-    """Idem image_service.py : Retry-After, sinon retryDelay, sinon la
-    valeur par defaut."""
     entete = reponse.headers.get("Retry-After") if reponse is not None else None
     if entete:
         try:
@@ -121,6 +59,41 @@ def _delai_retry(reponse) -> float:
     except Exception:
         pass
     return DELAI_DEFAUT_SECONDES
+
+
+def _texte_reponse(data: Dict) -> Optional[str]:
+    try:
+        parts = data["candidates"][0]["content"]["parts"]
+    except (KeyError, IndexError, TypeError):
+        return None
+    morceaux = [p.get("text", "") for p in parts if isinstance(p, dict) and not p.get("thought")]
+    texte = "".join(morceaux).strip()
+    return texte or None
+
+
+def _extraire_json(texte: str):
+    t = texte.strip()
+    t = re.sub(r"^```(?:json)?", "", t).strip()
+    t = re.sub(r"```$", "", t).strip()
+    try:
+        resultat = json.loads(t)
+    except json.JSONDecodeError:
+        m = re.search(r"\{.*\}", t, re.DOTALL)
+        if not m:
+            return None
+        try:
+            resultat = json.loads(m.group(0))
+        except json.JSONDecodeError:
+            return None
+    if isinstance(resultat, list) and resultat and isinstance(resultat[0], dict):
+        resultat = resultat[0]
+    return resultat if isinstance(resultat, dict) else None
+
+
+def _liste_mots(valeur) -> List[str]:
+    if not isinstance(valeur, list):
+        return []
+    return [str(v).strip() for v in valeur if str(v).strip()]
 
 
 def _construire_prompt(question_texte: str, matiere: str, niveau: str, langue: str, nb_intrus: int) -> str:
@@ -147,7 +120,7 @@ flèches, sujet incompréhensible), ou si tu n'es pas raisonnablement sûr de
 ce que représente un repère, réponds avec "succes": false plutôt que de
 deviner -- une légende fausse est pire qu'aucune légende.
 
-Réponds UNIQUEMENT avec ce JSON, rien d'autre, pas de ```markdown``` :
+Réponds UNIQUEMENT avec UN objet JSON (pas un tableau), rien d'autre :
 {{
   "succes": true,
   "reponse_correcte": ["mot du repère 1", "mot du repère 2", "..."],
@@ -165,12 +138,6 @@ def analyser_image_legende(
     langue: str = "ar",
     nb_intrus: int = 2,
 ) -> Optional[Dict]:
-    """Envoie l'image UPLOADEE (data URI) a un modele Gemini multimodal
-    pour qu'il en deduise la reponse correcte (une par repere, DANS
-    L'ORDRE) et une banque de propositions. Renvoie None si l'image est
-    illisible, si l'IA echoue (reseau/quota/reponse invalide), ou si
-    Gemini lui-meme ne se dit pas confiant. Ne leve jamais d'exception
-    (meme convention que generer_image() dans image_service.py)."""
     decode = _decoder_data_uri(image_data_uri)
     if decode is None:
         print("[image_analysis_service] Image uploadee invalide (pas une data URI base64).")
@@ -190,8 +157,6 @@ def analyser_image_legende(
                 {"inlineData": {"mimeType": mime_type, "data": payload_b64}},
             ]
         }],
-        # Force une sortie JSON pure -- evite en grande partie le probleme
-        # des ```json``` que generer_quiz_avec_gemini doit nettoyer a la main.
         "generationConfig": {"responseMimeType": "application/json"},
     }
 
@@ -205,7 +170,7 @@ def analyser_image_legende(
             )
         except Exception as e:
             print(f"[image_analysis_service] Erreur reseau (tentative {tentative}/{MAX_TENTATIVES}) : {e}")
-            return None  # panne reseau : reessayer immediatement n'aiderait pas
+            return None
 
         if reponse.status_code == 429:
             if tentative == MAX_TENTATIVES:
@@ -218,6 +183,12 @@ def analyser_image_legende(
             time.sleep(delai)
             continue
 
+        if reponse.status_code == 404:
+            print(f"[image_analysis_service] Erreur 404 : le modele '{MODELE_ANALYSE}' n'est pas disponible "
+                  f"pour cette cle API. Changez GEMINI_MODEL_VISION dans le .env. Detail : "
+                  f"{_message_erreur(reponse) or reponse.text[:300]}")
+            return None
+
         if reponse.status_code != 200:
             print(f"[image_analysis_service] Erreur {reponse.status_code} : "
                   f"{_message_erreur(reponse) or reponse.text[:300]}")
@@ -225,24 +196,23 @@ def analyser_image_legende(
 
         try:
             data = reponse.json()
-            texte = data["candidates"][0]["content"]["parts"][0]["text"]
-        except (KeyError, IndexError, TypeError) as e:
-            print(f"[image_analysis_service] Reponse Gemini inattendue : {e}")
+        except ValueError as e:
+            print(f"[image_analysis_service] Reponse illisible : {e}")
             return None
 
-        # Filet de securite si le modele ajoute quand meme des ```json```
-        # malgre responseMimeType (meme nettoyage que generer_quiz_avec_gemini).
-        texte = texte.strip()
-        if texte.startswith("```json"):
-            texte = texte[7:]
-        if texte.endswith("```"):
-            texte = texte[:-3]
-        texte = texte.strip()
+        texte = _texte_reponse(data)
+        if not texte:
+            raison = None
+            try:
+                raison = data["candidates"][0].get("finishReason")
+            except Exception:
+                pass
+            print(f"[image_analysis_service] Reponse Gemini vide (finishReason={raison}).")
+            return None
 
-        try:
-            resultat = json.loads(texte)
-        except json.JSONDecodeError as e:
-            print(f"[image_analysis_service] JSON illisible renvoye par Gemini : {e} -- {texte[:200]}")
+        resultat = _extraire_json(texte)
+        if resultat is None:
+            print(f"[image_analysis_service] JSON illisible renvoye par Gemini : {texte[:200]}")
             return None
 
         if not resultat.get("succes"):
@@ -250,14 +220,14 @@ def analyser_image_legende(
                   f"{resultat.get('raison', '(pas de raison donnee)')}")
             return None
 
-        reponse_correcte = resultat.get("reponse_correcte")
-        if not isinstance(reponse_correcte, list) or not reponse_correcte:
+        reponse_correcte = _liste_mots(resultat.get("reponse_correcte"))
+        if not reponse_correcte:
             print("[image_analysis_service] 'reponse_correcte' manquant ou vide dans la reponse Gemini.")
             return None
 
-        propositions = resultat.get("propositions")
-        if not isinstance(propositions, list) or not propositions:
-            propositions = list(reponse_correcte)  # filet de securite minimal
+        propositions = _liste_mots(resultat.get("propositions"))
+        manquantes = [r for r in reponse_correcte if r not in propositions]
+        propositions = propositions + manquantes if propositions else list(reponse_correcte)
 
         return {"reponse_correcte": reponse_correcte, "propositions": propositions}
 

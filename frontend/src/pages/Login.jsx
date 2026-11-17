@@ -19,8 +19,6 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 let toastSeq = 0
 
-// Vite n'expose au navigateur que les variables prefixees VITE_ (meme
-// valeur que GOOGLE_CLIENT_ID cote backend, voir .env partage).
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
 const STRINGS = {
@@ -121,11 +119,6 @@ export default function Login() {
   const toastTimers = useRef(new Map())
   const mounted = useRef(true)
 
-  // Meme mecanique que sur Signup.jsx : un token client OAuth2 pilote "a
-  // la main" pour garder notre propre bouton stylise plutot que celui de
-  // Google, et une ref pour que le callback (fixe une fois pour toutes
-  // par Google Identity Services) appelle toujours la derniere version
-  // de la fonction (evite les "stale closures" sur tr/pushToast/etc.).
   const googleTokenClientRef = useRef(null)
   const handleGoogleResponseRef = useRef(() => {})
 
@@ -186,8 +179,6 @@ export default function Login() {
     [dismissToast]
   )
 
-  // Reaffecte a chaque rendu pour que le callback Google appelle toujours
-  // la version la plus recente (bonnes valeurs de tr/pushToast/navigate).
   useEffect(() => {
     handleGoogleResponseRef.current = async (response) => {
       if (response.error) {
@@ -198,9 +189,6 @@ export default function Login() {
         return
       }
       try {
-        // Pas de champ "genre" sur cette page (pas d'inscription ici) :
-        // s'il faut en creer un a la premiere connexion Google, le
-        // backend applique son defaut ("femme") tout seul.
         await loginWithGoogle({ accessToken: response.access_token })
         pushToast('success', tr.toastSuccess)
         const from = location.state?.from?.pathname || '/wizard/selection'
@@ -215,9 +203,6 @@ export default function Login() {
     }
   })
 
-  // Chargement du script Google Identity Services + creation du token
-  // client OAuth2, une seule fois au montage (voir Signup.jsx pour le
-  // detail complet de ce mecanisme).
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) {
       console.warn('[Login] VITE_GOOGLE_CLIENT_ID est manquant dans le .env du frontend.')
@@ -384,7 +369,7 @@ export default function Login() {
       </div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full border border-[#0f172a]/[0.05] pointer-events-none" />
 
-      {/* ===== Toasts ===== */}
+      {}
       <div
         className="fixed bottom-6 left-6 z-[100] flex flex-col gap-3 w-[min(360px,90vw)]"
         role="region"
@@ -417,7 +402,7 @@ export default function Login() {
         ))}
       </div>
 
-      {/* ===== Top bar ===== */}
+      {}
       <header
         dir="ltr"
         className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 sm:px-12 py-6"
@@ -533,7 +518,7 @@ export default function Login() {
         </div>
       </header>
 
-      {/* ===== Main centered content ===== */}
+      {}
       <main className="relative z-10 w-full h-full flex items-center justify-center px-6 py-6 sm:py-8 overflow-y-auto">
 
         <div className="hidden xl:block absolute pointer-events-none inset-0" aria-hidden="true">
@@ -617,7 +602,7 @@ export default function Login() {
 
               <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
-                {/* ✅ EMAIL — input style d'origine (bordure rouge, texte sombre) */}
+                {}
                 <div>
                   <label htmlFor="email" className="block text-[12px] font-semibold text-[#4f0005]/70 mb-1.5">
                     {tr.emailLabel}
@@ -649,7 +634,7 @@ export default function Login() {
                   </div>
                 </div>
 
-                {/* ✅ PASSWORD — input style d'origine (bordure rouge, texte sombre) */}
+                {}
                 <div>
                   <label htmlFor="password" className="block text-[12px] font-semibold text-[#4f0005]/70 mb-1.5">
                     {tr.passwordLabel}
@@ -744,7 +729,7 @@ export default function Login() {
                   </div>
                 </div>
 
-                {/* ✅ BOUTON GOOGLE — texte en rouge foncé, maintenant fonctionnel */}
+                {}
                 <button
                   type="button"
                   onClick={handleGoogleClick}

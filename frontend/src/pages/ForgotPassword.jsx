@@ -31,7 +31,6 @@ const STRINGS = {
     closeToast: 'Fermer la notification',
     toastRegionLabel: 'Notifications',
 
-    // Etape 1 : demande de code
     step1Heading1: 'Mot de passe',
     step1Heading2: 'oublié ?',
     step1Subtitle: "Indique ton adresse e-mail : si un compte existe, un code de réinitialisation valable 15 minutes t'est envoyé.",
@@ -43,7 +42,6 @@ const STRINGS = {
     sendCodeLoading: 'Envoi en cours…',
     backToLogin: 'Retour à la connexion',
 
-    // Etape 2 : code + nouveau mot de passe
     step2Heading1: 'Vérifie ton',
     step2Heading2: 'adresse e-mail.',
     step2Subtitle: (email) => `Un code à 6 chiffres a été envoyé à ${email}, valable 15 minutes.`,
@@ -133,15 +131,11 @@ const STRINGS = {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const CODE_RE = /^\d{6}$/
 
-// Indicateur visuel de force du mot de passe (faible -> tres fort). Le
-// backend n'exige que 8 caracteres minimum ; ceci est purement indicatif
-// cote client pour encourager un mot de passe plus solide, ca ne bloque
-// jamais la soumission (seule la regle des 8 caracteres est obligatoire).
 const STRENGTH_COLORS = [
-  '#b91c1c', // faible -- rouge
-  '#d97706', // moyen -- ambre
-  '#2f855a', // fort -- vert (meme vert que les toasts de succes)
-  '#15803d', // tres fort -- vert plus soutenu
+  '#b91c1c',
+  '#d97706',
+  '#2f855a',
+  '#15803d',
 ]
 
 function getPasswordStrength(password) {
@@ -164,7 +158,7 @@ function getPasswordStrength(password) {
 
 export default function ForgotPassword() {
   const navigate = useNavigate()
-  const [step, setStep] = useState(1) // 1 = email, 2 = code + nouveau mot de passe
+  const [step, setStep] = useState(1)
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -246,7 +240,6 @@ export default function ForgotPassword() {
     [dismissToast]
   )
 
-  // --- Etape 1 : demande de code -------------------------------------------
 
   async function handleSendCode(e) {
     e.preventDefault()
@@ -266,9 +259,6 @@ export default function ForgotPassword() {
 
     setLoading(true)
     try {
-      // Le backend renvoie TOUJOURS le meme message generique, que le
-      // compte existe ou non (protection anti-enumeration) -- on ne peut
-      // donc pas, et ne doit pas, distinguer les deux cas ici.
       await api.forgotPassword({ email: trimmed })
       pushToast('success', tr.toastCodeSent)
       setStep(2)
@@ -291,7 +281,6 @@ export default function ForgotPassword() {
     }
   }
 
-  // --- Etape 2 : code + nouveau mot de passe --------------------------------
 
   function validateStep2() {
     const next = { code: '', newPassword: '', confirm: '' }
@@ -336,9 +325,6 @@ export default function ForgotPassword() {
         if (mounted.current) navigate('/login', { replace: true })
       }, 800)
     } catch (err) {
-      // Le backend renvoie le meme message pour "code faux" et "code
-      // expire" (volontairement generique, voir CHANGEMENTS.md du
-      // backend) -- on l'affiche tel quel.
       pushToast('error', err?.message || tr.toastErrorDefault)
       setLoading(false)
     }
@@ -403,7 +389,7 @@ export default function ForgotPassword() {
       </div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full border border-[#0f172a]/[0.05] pointer-events-none" />
 
-      {/* ===== Toasts ===== */}
+      {}
       <div
         className="fixed bottom-6 left-6 z-[100] flex flex-col gap-3 w-[min(360px,90vw)]"
         role="region"
@@ -436,7 +422,7 @@ export default function ForgotPassword() {
         ))}
       </div>
 
-      {/* ===== Top bar ===== */}
+      {}
       <header dir="ltr" className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 sm:px-12 py-6">
         <div className="flex items-center gap-3.5 examai-anim-1">
           <div className="relative shrink-0">
@@ -520,7 +506,7 @@ export default function ForgotPassword() {
         </div>
       </header>
 
-      {/* ===== Main ===== */}
+      {}
       <main className="relative z-10 w-full h-full flex items-center justify-center px-6 py-6 sm:py-8 overflow-y-auto">
         <div className="examai-anim-2 relative w-full max-w-[560px]">
 
@@ -700,8 +686,7 @@ export default function ForgotPassword() {
                         </button>
                       </div>
 
-                      {/* Barre de force -- visible seulement une fois que la
-                          personne a commence a taper, jamais avant. */}
+                      {}
                       {newPassword && (() => {
                         const strength = getPasswordStrength(newPassword)
                         const color = STRENGTH_COLORS[strength.level]
@@ -720,9 +705,7 @@ export default function ForgotPassword() {
                               {tr.strengthLabels[strength.level]}
                             </p>
 
-                            {/* Conseils -- s'allument en vert au fur et a
-                                mesure que chaque critere est rempli. Purement
-                                indicatif, comme la barre ci-dessus. */}
+                            {}
                             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
                               {[
                                 { met: newPassword.length >= 8, label: tr.hintLength },
